@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 PCL 主页生成脚本
-由 GitHub Actions 手动触发或推送时运行，生成 Custom.xaml。
+由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 幸运数字、幸运颜色、彩蛋由 Cloudflare Functions 每次请求动态替换。
 """
 
@@ -24,11 +24,7 @@ IMAGES_DIR_NAME = "images"
 
 VERSION_IMAGE_CACHE_DAYS = 7
 
-KEEP_FILES = [
-    "grass.png", "cobblestone.png", "gold_block.png", "command_block.png",
-    "anvil.png", "redstone_block.png", "egg.png", "diamond_block.png",
-    "version.png",
-]
+KEEP_FILES = ["version.png"]
 
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
@@ -47,17 +43,6 @@ QUOTES = [
     "村民交易可以打折，只要你治好了僵尸村民。",
     "附魔台周围放 15 个书架可以升到 30 级。",
     "信标需要金字塔底座，底座越大效果越强。",
-]
-
-BLOCKS = [
-    {"name": "草方块",   "wiki": "草方块",   "image_title": "File:Grass Block.png",       "file": "grass.png",          "fallback": "Grass.png",          "desc": "Minecraft 的标志性方块，随处可见。"},
-    {"name": "圆石",     "wiki": "圆石",     "image_title": "File:Cobblestone.png",       "file": "cobblestone.png",    "fallback": "Cobblestone.png",    "desc": "挖石头就能得到，建筑党的好帮手。"},
-    {"name": "金块",     "wiki": "金块",     "image_title": "File:Block of Gold.png",     "file": "gold_block.png",     "fallback": "GoldBlock.png",      "desc": "9 个金锭合成，还能做信标底座。"},
-    {"name": "命令方块", "wiki": "命令方块", "image_title": "File:Command Block.png",     "file": "command_block.png",  "fallback": "CommandBlock.png",   "desc": "创造模式的玩具，Minecraft 的魔法方块。"},
-    {"name": "铁砧",     "wiki": "铁砧",     "image_title": "File:Anvil.png",             "file": "anvil.png",          "fallback": "Anvil.png",          "desc": "修复装备、附魔、重命名，掉落会砸脚。"},
-    {"name": "红石块",   "wiki": "红石块",   "image_title": "File:Block of Redstone.png", "file": "redstone_block.png", "fallback": "RedstoneBlock.png",  "desc": "持续输出红石信号，可以永久激活装置。"},
-    {"name": "鸡蛋",     "wiki": "鸡蛋",     "image_title": "File:Egg.png",               "file": "egg.png",            "fallback": "Egg.png",            "desc": "扔出去有几率生成小鸡。"},
-    {"name": "钻石块",   "wiki": "钻石块",   "image_title": "File:Block of Diamond.png",  "file": "diamond_block.png",  "fallback": "GoldBlock.png",      "desc": "9 个钻石合成，是最值钱的装饰方块之一。"},
 ]
 
 
@@ -100,81 +85,7 @@ def fetch_latest_version():
         return default
 
 
-# ============ Wiki 图片获取 ============
-
-def fetch_wiki_image(image_title, filename, width=128):
-    images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
-    images_dir.mkdir(exist_ok=True)
-    local_path = images_dir / filename
-
-    if local_path.exists():
-        print("[Wiki] 图片已存在：" + filename)
-        return True
-
-    try:
-        params = {
-            "action": "query",
-            "titles": image_title,
-            "prop": "imageinfo",
-            "iiprop": "url",
-            "iiurlwidth": str(width),
-            "format": "json",
-        }
-        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
-
-        pages = data.get("query", {}).get("pages", {})
-        thumb_url = None
-        for page_id, page_info in pages.items():
-            if "missing" in page_info:
-                print("[Wiki] 文件不存在：" + image_title)
-                return False
-            info_list = page_info.get("imageinfo", [])
-            if info_list:
-                thumb_url = info_list[0].get("thumburl") or info_list[0].get("url")
-                break
-
-        if not thumb_url:
-            print("[Wiki] 未获取到 " + image_title + " 的 URL")
-            return False
-
-        print("[Wiki] " + image_title + " → " + thumb_url)
-
-        img_headers = {
-            "User-Agent": HEADERS["User-Agent"],
-            "Referer": "https://zh.minecraft.wiki/",
-        }
-
-        for attempt in range(1, MAX_RETRIES + 1):
-            try:
-                img_resp = requests.get(thumb_url, headers=img_headers, timeout=REQUEST_TIMEOUT)
-                if img_resp.status_code != 200:
-                    print("[Wiki] 第 " + str(attempt) + " 次下载失败，状态码：" + str(img_resp.status_code))
-                    if attempt < MAX_RETRIES:
-                        time.sleep(3)
-                        continue
-                    return False
-
-                with open(local_path, "wb") as f:
-                    f.write(img_resp.content)
-
-                print("[Wiki] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
-                return True
-
-            except requests.exceptions.Timeout:
-                print("[Wiki] 第 " + str(attempt) + " 次超时")
-                if attempt < MAX_RETRIES:
-                    time.sleep(3)
-                else:
-                    return False
-
-        return False
-
-    except Exception as e:
-        print("[Wiki] 获取 " + image_title + " 失败：" + str(e))
-        return False
-
+# ============ Wiki 版本封面图获取 ============
 
 def pick_version_image(images, version):
     base_version = version
@@ -438,12 +349,9 @@ def build_xaml():
 
     quote = random.choice(QUOTES)
 
-    # 幸运数字、幸运颜色、彩蛋用占位符，由 Cloudflare Functions 每次请求动态替换
     lucky_number = "__LUCKY_NUMBER__"
     lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
     egg_data = "__EGG_DATA__"
-
-    block = random.choice(BLOCKS)
 
     score = random.randint(1, 100)
     if score >= 95:
@@ -458,12 +366,6 @@ def build_xaml():
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
     clean_old_images()
-
-    wiki_ok = fetch_wiki_image(block["image_title"], block["file"], width=128)
-    if wiki_ok:
-        block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
-    else:
-        block_source = "pack://application:,,,/images/Blocks/" + block["fallback"]
 
     ver = fetch_latest_version()
     release = ver["release"]
@@ -581,24 +483,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：今日幸运方块 ==========
-    lines.append('    <local:MyCard Title="今日幸运方块" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <Grid>')
-    lines.append('                <Grid.ColumnDefinitions>')
-    lines.append('                    <ColumnDefinition Width="Auto" />')
-    lines.append('                    <ColumnDefinition Width="*" />')
-    lines.append('                </Grid.ColumnDefinitions>')
-    lines.append('                <local:MyImage Grid.Column="0" Width="72" Height="72" Margin="0,0,18,0" Source="' + block_source + '" />')
-    lines.append('                <StackPanel Grid.Column="1" VerticalAlignment="Center">')
-    lines.append('                    <TextBlock Text="' + block["name"] + '" FontSize="16" FontWeight="Bold" Margin="0,0,0,6" />')
-    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="17" Foreground="{DynamicResource ColorBrush3}" Text="' + block["desc"] + '" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Grid>')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-
-    # ========== 卡片 4：常用链接 ==========
+    # ========== 卡片 3：常用链接 ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
@@ -608,7 +493,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：游戏指令速查 ==========
+    # ========== 卡片 4：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -632,16 +517,23 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：彩蛋（动态生成） ==========
+    # ========== 卡片 5：彩蛋（弹窗 + 刷新） ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="每次点开都不一样，看看你能抽到什么。" />')
-    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋" EventType="弹出窗口" EventData="' + egg_data + '" />')
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新或重新进入主页都会换一个。" />')
+    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋">')
+    lines.append('                <local:CustomEventService.Events>')
+    lines.append('                    <local:CustomEventCollection>')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
+    lines.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
+    lines.append('                    </local:CustomEventCollection>')
+    lines.append('                </local:CustomEventService.Events>')
+    lines.append('            </local:MyButton>')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 7：人品测试 ==========
+    # ========== 卡片 6：人品测试 ==========
     lines.append('    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
