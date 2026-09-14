@@ -53,6 +53,19 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="IP 由 Cloudflare 从请求头读取，展示的是你自己的公网 IP。" />
         </StackPanel>
     </local:MyCard>
+    <local:MyCard Title="工具箱" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M256 128h512v128H256z M256 384h512v128H256z M256 640h512v128H256z" EventType="内存优化" EventData="-" />
+                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="清理垃圾" LogoScale="0.9" Logo="M320 128h384v64l-64 640H384L320 192V128z M448 256v448h64V256z M640 256v448h64V256z" EventType="清理垃圾" EventData="-" />
+            </Grid>
+            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="最新版本 - 26.3-rc-3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
