@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 PCL 主页生成脚本
-由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
-幸运数字和幸运颜色使用占位符，由 Cloudflare Functions 在每次请求时动态替换。
+由 GitHub Actions 手动触发或推送时运行，生成 Custom.xaml。
+幸运数字、幸运颜色、彩蛋由 Cloudflare Functions 每次请求动态替换。
 """
 
 import random
@@ -58,15 +58,6 @@ BLOCKS = [
     {"name": "红石块",   "wiki": "红石块",   "image_title": "File:Block of Redstone.png", "file": "redstone_block.png", "fallback": "RedstoneBlock.png",  "desc": "持续输出红石信号，可以永久激活装置。"},
     {"name": "鸡蛋",     "wiki": "鸡蛋",     "image_title": "File:Egg.png",               "file": "egg.png",            "fallback": "Egg.png",            "desc": "扔出去有几率生成小鸡。"},
     {"name": "钻石块",   "wiki": "钻石块",   "image_title": "File:Block of Diamond.png",  "file": "diamond_block.png",  "fallback": "GoldBlock.png",      "desc": "9 个钻石合成，是最值钱的装饰方块之一。"},
-]
-
-EGGS = [
-    {"title": "神秘代码",     "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！"},
-    {"title": "开发者留言",   "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」"},
-    {"title": "钻石雨",       "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。"},
-    {"title": "苦力怕的祝福", "content": "一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！"},
-    {"title": "末影人的秘密", "content": "你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」"},
-    {"title": "幸运方块",     "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。"},
 ]
 
 
@@ -447,12 +438,12 @@ def build_xaml():
 
     quote = random.choice(QUOTES)
 
-    # 幸运数字和颜色用占位符，由 Cloudflare Functions 每次请求时替换
+    # 幸运数字、幸运颜色、彩蛋用占位符，由 Cloudflare Functions 每次请求动态替换
     lucky_number = "__LUCKY_NUMBER__"
     lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
+    egg_data = "__EGG_DATA__"
 
     block = random.choice(BLOCKS)
-    egg = random.choice(EGGS)
 
     score = random.randint(1, 100)
     if score >= 95:
@@ -641,12 +632,12 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：彩蛋 ==========
+    # ========== 卡片 6：彩蛋（动态生成） ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />')
-    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋" EventType="弹出窗口" EventData="' + egg["title"] + '|' + egg["content"] + '" />')
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />')
+    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="每次点开都不一样，看看你能抽到什么。" />')
+    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋" EventType="弹出窗口" EventData="' + egg_data + '" />')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新或重新进入主页都会换一个。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
