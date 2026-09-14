@@ -439,7 +439,7 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 幸运数字 + 幸运颜色（取消描边）
+    # 幸运数字 + 幸运颜色
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -453,7 +453,6 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
 
-    # 幸运颜色：圆形无描边
     lines.append('                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
@@ -499,17 +498,16 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：当前最新版本（无修复摘要） ==========
+    # ========== 卡片 3：当前最新版本（图片填满居中） ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
+    # 封面：固定宽度撑满 + 居中裁切
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
-    lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
-    lines.append('                        <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
-    lines.append('                    </Border>')
-    lines.append('                </Grid>')
+    lines.append('                <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="150" Stretch="UniformToFill" />')
+    lines.append('                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
+    lines.append('                    <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
+    lines.append('                </Border>')
     lines.append('            </Border>')
 
     if second_version:
