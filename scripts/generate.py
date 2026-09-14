@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-PCL 主页生成脚本（完整版）
+PCL 主页生成脚本（修复版）
 由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
-功能：
-  1. 从 NewsHomepage API 获取最新 Minecraft 版本信息
-  2. 生成带封面图、版本号、更新摘要的卡片
-  3. 生成今日概览、幸运方块、彩蛋、人品测试等动态卡片
 """
 
 import random
@@ -15,10 +11,7 @@ from pathlib import Path
 
 # ============ 配置 ============
 
-# NewsHomepage API 地址（参考项目文档）
 NEWS_API = "https://news.bugjump.net/News.json"
-
-# 请求超时时间（秒）
 REQUEST_TIMEOUT = 10
 
 # ============ 静态数据源 ============
@@ -68,19 +61,13 @@ LUCKY_COLORS = [
 # ============ 版本信息获取 ============
 
 def fetch_news_homepage() -> dict:
-    """
-    从 NewsHomepage API 获取最新版本信息。
-    返回一个字典，包含 title、version、image、changelog、release_date、launch_url 等字段。
-    如果请求失败，返回一个兜底的默认值。
-    """
+    """从 NewsHomepage API 获取最新版本信息，失败时返回兜底数据。"""
     default = {
         "title": "最新版本",
         "version": "1.21",
-        "image": "",
         "changelog": "暂无更新信息。",
         "release_date": "",
-        "launch_url": "",
-        "server_url": "",
+        "server_url": "https://www.minecraft.net/zh-hans/download/server",
         "wiki_url": "https://zh.minecraft.wiki/",
         "changelog_url": "https://www.minecraft.net/zh-hans/download",
     }
@@ -90,17 +77,12 @@ def fetch_news_homepage() -> dict:
         resp.raise_for_status()
         data = resp.json()
 
-        # 根据 API 实际返回结构调整以下解析逻辑
-        # 参考 NewsHomepage 的 JSON 结构，通常包含 latest 或 cards 字段
         latest = data.get("latest") or data.get("latest_card") or {}
-
         if latest:
             default["title"] = latest.get("title", default["title"])
             default["version"] = latest.get("version", default["version"])
-            default["image"] = latest.get("image", default["image"])
             default["changelog"] = latest.get("changelog", default["changelog"])
             default["release_date"] = latest.get("release_date", default["release_date"])
-            default["launch_url"] = latest.get("launch_url", default["launch_url"])
             default["server_url"] = latest.get("server_url", default["server_url"])
             default["wiki_url"] = latest.get("wiki_url", default["wiki_url"])
             default["changelog_url"] = latest.get("changelog_url", default["changelog_url"])
@@ -108,11 +90,8 @@ def fetch_news_homepage() -> dict:
         print(f"[NewsHomepage] 获取成功：{default['title']} - {default['version']}")
         return default
 
-    except requests.RequestException as e:
+    except Exception as e:
         print(f"[NewsHomepage] 请求失败：{e}，使用默认数据。")
-        return default
-    except (ValueError, KeyError) as e:
-        print(f"[NewsHomepage] 解析失败：{e}，使用默认数据。")
         return default
 
 
@@ -146,22 +125,41 @@ def build_xaml() -> str:
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
+    # ---------- 获取最新版本信息 ----------
+    news = fetch_news_homepage()
+    version = news["version"]
+    news_title = f"最新版本 - {version}"
+
+    changelog_lines = [line.strip() for line in news["changelog"].split("\n") if line.strip()]
+    changelog_first = changelog_lines[0] if changelog_lines else "暂无更新摘要。"
+
+    release_date = news["release_date"] if news["release_date"] else now.strftime("%Y-%m-%d")
+    server_url = news["server_url"]
+    wiki_url = news["wiki_url"]
+    changelog_url = news["changelog_url"]
+
+    # ---------- 拼装 XAML ----------
+    xaml = f'''<StackPanel>
+
     <!-- ========== 卡片 1：最新版本 ========== -->
     <local:MyCard Title="{news_title}" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
-            <!-- 封面大图 + 版本号浮层 -->
-            <Grid Margin="0,0,0,14">
-                <Border CornerRadius="8" ClipToBounds="True" Height="150">
-                    <local:MyImage Source="{cover_image}" FallbackSource="{cover_fallback}" />
-                </Border>
-                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                        Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
-                        Margin="0,0,0,12">
-                    <TextBlock Text="{version}" FontSize="16" FontWeight="Bold"
-                               Foreground="White" />
-                </Border>
-            </Grid>
+            <!-- 封面：纯色背景 + 内置方块图 + 版本号浮层 -->
+            <Border CornerRadius="8" Height="150" Margin="0,0,0,14"
+                    Background="{{DynamicResource ColorBrush7}}">
+                <Grid>
+                    <local:MyImage Width="90" Height="90" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                            Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
+                            Margin="0,0,0,12">
+                        <TextBlock Text="{version}" FontSize="16" FontWeight="Bold"
+                                   Foreground="White" />
+                    </Border>
+                </Grid>
+            </Border>
 
             <!-- 更新摘要 -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
@@ -195,6 +193,7 @@ def build_xaml() -> str:
             </Grid>
         </StackPanel>
     </local:MyCard>
+
     <!-- ========== 卡片 2：今日概览 ========== -->
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
@@ -367,7 +366,7 @@ def build_xaml() -> str:
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 6：彩蛋 ========== -->
+    <!-- ========== 卡片 6：彩蛋（按钮版） ========== -->
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
@@ -383,6 +382,7 @@ def build_xaml() -> str:
                           Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />
         </StackPanel>
     </local:MyCard>
+
     <!-- ========== 卡片 7：人品测试 ========== -->
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
