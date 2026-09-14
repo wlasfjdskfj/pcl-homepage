@@ -14,6 +14,9 @@ from pathlib import Path
 
 # ============ 配置 ============
 
+# 玩家 ID（改成你自己的游戏 ID）
+PLAYER_ID = "Hotaru_kawaii"
+
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
 
@@ -408,7 +411,81 @@ def build_xaml():
     lines = []
     lines.append('<StackPanel>')
 
-    # ========== 卡片 1：最新版本 ==========
+    # ========== 卡片 1：今日概览 ==========
+    lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+
+    lines.append('            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                        <TextBlock Text="' + month + '" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,2,12" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                        <TextBlock Text="' + day + '" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+
+    # 每日一言 + 换一句按钮
+    lines.append('            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="' + quote + '" />')
+    lines.append('                    <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+
+    # 幸运数字 + 幸运颜色
+    lines.append('            <Grid>')
+    lines.append('                <Grid.ColumnDefinitions>')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                </Grid.ColumnDefinitions>')
+
+    lines.append('                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                    <StackPanel>')
+    lines.append('                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
+    lines.append('                        <TextBlock Text="' + str(lucky_number) + '" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </Border>')
+
+    lines.append('                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                    <StackPanel>')
+    lines.append('                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                            <Border Width="16" Height="16" CornerRadius="4" Background="' + lucky_color["hex"] + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
+    lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + lucky_color["hex"] + '" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                    </StackPanel>')
+    lines.append('                </Border>')
+    lines.append('            </Grid>')
+
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 2：你的信息 ==========
+    lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+
+    lines.append('            <Border CornerRadius="8" Padding="20,16" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">')
+    lines.append('                        <TextBlock Text="玩家 ID：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                        <TextBlock Text="' + PLAYER_ID + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                        <TextBlock Text="公网 IP：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                        <TextBlock Text="' + user_ip + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="玩家 ID 是自定义的，修改 generate.py 里的 PLAYER_ID 即可。&#xA;IP 由 Cloudflare 从请求头读取，展示的是你自己的公网 IP。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 3：最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
@@ -452,62 +529,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 2：今日概览 ==========
-    lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-
-    # 日期区块（含 IP）
-    lines.append('            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                        <TextBlock Text="' + month + '" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,2,12" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                        <TextBlock Text="' + day + '" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />')
-    lines.append('                    <TextBlock Text="你的 IP：' + user_ip + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-
-    # 每日一言 + 换一句按钮
-    lines.append('            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
-    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="' + quote + '" />')
-    lines.append('                    <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-
-    # 幸运数字 + 幸运颜色
-    lines.append('            <Grid>')
-    lines.append('                <Grid.ColumnDefinitions>')
-    lines.append('                    <ColumnDefinition Width="1*" />')
-    lines.append('                    <ColumnDefinition Width="1*" />')
-    lines.append('                </Grid.ColumnDefinitions>')
-
-    lines.append('                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                    <StackPanel>')
-    lines.append('                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
-    lines.append('                        <TextBlock Text="' + str(lucky_number) + '" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                </Border>')
-
-    lines.append('                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                    <StackPanel>')
-    lines.append('                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
-    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <Border Width="16" Height="16" CornerRadius="4" Background="' + lucky_color["hex"] + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
-    lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + lucky_color["hex"] + '" />')
-    lines.append('                        </StackPanel>')
-    lines.append('                    </StackPanel>')
-    lines.append('                </Border>')
-    lines.append('            </Grid>')
-
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-
-    # ========== 卡片 3：常用链接 ==========
+    # ========== 卡片 4：常用链接 ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
@@ -519,7 +541,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 4：游戏指令速查 ==========
+    # ========== 卡片 5：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -543,7 +565,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：彩蛋 ==========
+    # ========== 卡片 6：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
@@ -562,7 +584,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：人品测试 ==========
+    # ========== 卡片 7：人品测试 ==========
     lines.append('    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
