@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-PCL 主页生成脚本（修复版）
+PCL 主页生成脚本
 由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
 """
 
@@ -41,12 +41,12 @@ BLOCKS = [
 ]
 
 EGGS = [
-    {"title": "神秘代码", "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！", "image": "CommandBlock.png"},
-    {"title": "开发者留言", "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」", "image": "Anvil.png"},
-    {"title": "钻石雨", "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。", "image": "GoldBlock.png"},
-    {"title": "苦力怕的祝福", "content": "一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！", "image": "Grass.png"},
-    {"title": "末影人的秘密", "content": "你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」", "image": "Egg.png"},
-    {"title": "幸运方块", "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。", "image": "RedstoneBlock.png"},
+    {"title": "神秘代码", "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！"},
+    {"title": "开发者留言", "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」"},
+    {"title": "钻石雨", "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。"},
+    {"title": "苦力怕的祝福", "content": "一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！"},
+    {"title": "末影人的秘密", "content": "你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」"},
+    {"title": "幸运方块", "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。"},
 ]
 
 LUCKY_COLORS = [
@@ -60,7 +60,7 @@ LUCKY_COLORS = [
 
 # ============ 版本信息获取 ============
 
-def fetch_news_homepage() -> dict:
+def fetch_news_homepage():
     """从 NewsHomepage API 获取最新版本信息，失败时返回兜底数据。"""
     default = {
         "title": "最新版本",
@@ -87,20 +87,20 @@ def fetch_news_homepage() -> dict:
             default["wiki_url"] = latest.get("wiki_url", default["wiki_url"])
             default["changelog_url"] = latest.get("changelog_url", default["changelog_url"])
 
-        print(f"[NewsHomepage] 获取成功：{default['title']} - {default['version']}")
+        print("[NewsHomepage] 获取成功：" + default["title"] + " - " + default["version"])
         return default
 
     except Exception as e:
-        print(f"[NewsHomepage] 请求失败：{e}，使用默认数据。")
+        print("[NewsHomepage] 请求失败：" + str(e) + "，使用默认数据。")
         return default
 
 
 # ============ XAML 生成 ============
 
-def build_xaml() -> str:
+def build_xaml():
     """生成完整的 Custom.xaml 内容"""
 
-    # ---------- 动态数据 ----------
+    # 动态数据
     now = datetime.now()
     month = now.strftime("%m").lstrip("0") or "0"
     day = now.strftime("%d").lstrip("0") or "0"
@@ -125,10 +125,10 @@ def build_xaml() -> str:
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # ---------- 获取最新版本信息 ----------
+    # 获取最新版本信息
     news = fetch_news_homepage()
     version = news["version"]
-    news_title = f"最新版本 - {version}"
+    news_title = "最新版本 - " + version
 
     changelog_lines = [line.strip() for line in news["changelog"].split("\n") if line.strip()]
     changelog_first = changelog_lines[0] if changelog_lines else "暂无更新摘要。"
@@ -138,308 +138,180 @@ def build_xaml() -> str:
     wiki_url = news["wiki_url"]
     changelog_url = news["changelog_url"]
 
-    # ---------- 拼装 XAML ----------
-    xaml = f'''<StackPanel>
+    # 拼装 XAML
+    xaml = '<StackPanel>\n'
 
-    <!-- ========== 卡片 1：最新版本 ========== -->
-    <local:MyCard Title="{news_title}" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
+    # 卡片 1：最新版本
+    xaml += '    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">\n'
+    xaml += '                <Grid>\n'
+    xaml += '                    <local:MyImage Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center"\n'
+    xaml += '                                   Source="pack://application:,,,/images/Blocks/CommandBlock.png" />\n'
+    xaml += '                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"\n'
+    xaml += '                            Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">\n'
+    xaml += '                        <TextBlock Text="' + version + '" FontSize="16" FontWeight="Bold" Foreground="White" />\n'
+    xaml += '                    </Border>\n'
+    xaml += '                </Grid>\n'
+    xaml += '            </Border>\n'
+    xaml += '            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">\n'
+    xaml += '                <TextBlock Text="•" FontSize="16" Foreground="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />\n'
+    xaml += '                <TextBlock Text="' + changelog_first + '" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />\n'
+    xaml += '            </StackPanel>\n'
+    xaml += '            <TextBlock Text="最后更新: ' + release_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />\n'
+    xaml += '            <Grid>\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <local:MyTextButton Grid.Column="0" Text="下载" EventType="打开网页" EventData="' + changelog_url + '" />\n'
+    xaml += '                <local:MyTextButton Grid.Column="1" Text="服务端" EventType="打开网页" EventData="' + server_url + '" />\n'
+    xaml += '                <local:MyTextButton Grid.Column="2" Text="WIKI" EventType="打开网页" EventData="' + wiki_url + '" />\n'
+    xaml += '                <local:MyTextButton Grid.Column="3" Text="更新日志" EventType="打开网页" EventData="' + changelog_url + '" />\n'
+    xaml += '            </Grid>\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-            <!-- 封面：纯色背景 + 内置方块图 + 版本号浮层 -->
-            <Border CornerRadius="8" Height="150" Margin="0,0,0,14"
-                    Background="{{DynamicResource ColorBrush7}}">
-                <Grid>
-                    <local:MyImage Width="90" Height="90" HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                            Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
-                            Margin="0,0,0,12">
-                        <TextBlock Text="{version}" FontSize="16" FontWeight="Bold"
-                                   Foreground="White" />
-                    </Border>
-                </Grid>
-            </Border>
+    # 卡片 2：今日概览
+    xaml += '    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">\n'
+    xaml += '                <TextBlock Text="' + month + '" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />\n'
+    xaml += '                <TextBlock Text=" 月 " FontSize="12" VerticalAlignment="Bottom" Margin="0,0,2,10" Foreground="{DynamicResource ColorBrush3}" />\n'
+    xaml += '                <TextBlock Text="' + day + '" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />\n'
+    xaml += '                <TextBlock Text=" 日" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,10" Foreground="{DynamicResource ColorBrush3}" />\n'
+    xaml += '            </StackPanel>\n'
+    xaml += '            <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,16" />\n'
+    xaml += '            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">\n'
+    xaml += '                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush1}" Margin="2,0" />\n'
+    xaml += '                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush3}" Margin="2,0" />\n'
+    xaml += '                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />\n'
+    xaml += '                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />\n'
+    xaml += '            </StackPanel>\n'
+    xaml += '            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：' + quote + '" />\n'
+    xaml += '            <Grid>\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <StackPanel Grid.Column="0" HorizontalAlignment="Center">\n'
+    xaml += '                    <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />\n'
+    xaml += '                    <TextBlock Text="' + str(lucky_number) + '" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />\n'
+    xaml += '                </StackPanel>\n'
+    xaml += '                <StackPanel Grid.Column="1" HorizontalAlignment="Center">\n'
+    xaml += '                    <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />\n'
+    xaml += '                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">\n'
+    xaml += '                        <Border Width="14" Height="14" CornerRadius="3" Background="' + lucky_color["hex"] + '" Margin="0,0,6,0" VerticalAlignment="Center" />\n'
+    xaml += '                        <TextBlock Text="' + lucky_color["name"] + '" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + lucky_color["hex"] + '" />\n'
+    xaml += '                    </StackPanel>\n'
+    xaml += '                </StackPanel>\n'
+    xaml += '            </Grid>\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-            <!-- 更新摘要 -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                <TextBlock Text="•" FontSize="16" Foreground="#FF5555"
-                           VerticalAlignment="Center" Margin="0,0,8,0" />
-                <TextBlock Text="{changelog_first}" FontSize="13" VerticalAlignment="Center"
-                           TextWrapping="Wrap" />
-            </StackPanel>
+    # 卡片 3：今日幸运方块
+    xaml += '    <local:MyCard Title="今日幸运方块" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <Grid>\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="Auto" />\n'
+    xaml += '                    <ColumnDefinition Width="*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <local:MyImage Grid.Column="0" Width="72" Height="72" Margin="0,0,18,0" Source="pack://application:,,,/images/Blocks/' + block["image"] + '" />\n'
+    xaml += '                <StackPanel Grid.Column="1" VerticalAlignment="Center">\n'
+    xaml += '                    <TextBlock Text="' + block["name"] + '" FontSize="16" FontWeight="Bold" Margin="0,0,0,6" />\n'
+    xaml += '                    <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="17" Foreground="{DynamicResource ColorBrush3}" Text="' + block["desc"] + '" />\n'
+    xaml += '                </StackPanel>\n'
+    xaml += '            </Grid>\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-            <!-- 最后更新时间 -->
-            <TextBlock Text="最后更新: {release_date}" FontSize="11"
-                       Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />
+    # 卡片 4：常用链接
+    xaml += '    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />\n'
+    xaml += '            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />\n'
+    xaml += '            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/GoldBlock.png" Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器" EventType="打开网页" EventData="https://hypixel.net/" />\n'
+    xaml += '            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-            <!-- 底部操作栏 -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
+    # 卡片 5：游戏指令速查
+    xaml += '    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <TextBlock Text="基础模式" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />\n'
+    xaml += '            <Grid Margin="0,0,0,14">\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36" Text="创造模式" EventType="复制文本" EventData="/gamemode creative" />\n'
+    xaml += '                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36" Text="生存模式" EventType="复制文本" EventData="/gamemode survival" />\n'
+    xaml += '                <local:MyButton Grid.Column="2" Height="36" Text="冒险模式" EventType="复制文本" EventData="/gamemode adventure" />\n'
+    xaml += '            </Grid>\n'
+    xaml += '            <TextBlock Text="环境控制" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />\n'
+    xaml += '            <Grid Margin="0,0,0,14">\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36" Text="设为白天" EventType="复制文本" EventData="/time set day" />\n'
+    xaml += '                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36" Text="晴天" EventType="复制文本" EventData="/weather clear" />\n'
+    xaml += '                <local:MyButton Grid.Column="2" Height="36" Text="清除效果" EventType="复制文本" EventData="/effect clear @s" />\n'
+    xaml += '            </Grid>\n'
+    xaml += '            <TextBlock Text="实用效果" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />\n'
+    xaml += '            <Grid Margin="0,0,0,14">\n'
+    xaml += '                <Grid.ColumnDefinitions>\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                    <ColumnDefinition Width="1*" />\n'
+    xaml += '                </Grid.ColumnDefinitions>\n'
+    xaml += '                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36" Text="夜视" EventType="复制文本" EventData="/effect give @s night_vision 99999 1 true" />\n'
+    xaml += '                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36" Text="抗性提升" EventType="复制文本" EventData="/effect give @s resistance 99999 4 true" />\n'
+    xaml += '                <local:MyButton Grid.Column="2" Height="36" Text="急迫" EventType="复制文本" EventData="/effect give @s haste 99999 2 true" />\n'
+    xaml += '            </Grid>\n'
+    xaml += '            <local:MyHint Theme="Yellow" Margin="0,0,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;其他版本请自行调整语法。" />\n'
+    xaml += '            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-                <local:MyTextButton Grid.Column="0" Text="下载"
-                                    EventType="打开网页" EventData="{changelog_url}" />
-                <local:MyTextButton Grid.Column="1" Text="服务端"
-                                    EventType="打开网页" EventData="{server_url}" />
-                <local:MyTextButton Grid.Column="2" Text="WIKI"
-                                    EventType="打开网页" EventData="{wiki_url}" />
-                <local:MyTextButton Grid.Column="3" Text="更新日志"
-                                    EventType="打开网页" EventData="{changelog_url}" />
-            </Grid>
-        </StackPanel>
-    </local:MyCard>
+    # 卡片 6：彩蛋（按钮版）
+    xaml += '    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />\n'
+    xaml += '            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋" EventType="弹出窗口" EventData="' + egg["title"] + '|' + egg["content"] + '" />\n'
+    xaml += '            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-    <!-- ========== 卡片 2：今日概览 ========== -->
-    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
+    # 卡片 7：人品测试
+    xaml += '    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">\n'
+    xaml += '        <StackPanel Margin="25,40,23,20">\n'
+    xaml += '            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />\n'
+    xaml += '            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">\n'
+    xaml += '                <TextBlock Text="' + str(score) + '" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />\n'
+    xaml += '                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />\n'
+    xaml += '            </StackPanel>\n'
+    xaml += '            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">\n'
+    xaml += '                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />\n'
+    xaml += '                <TextBlock Text="' + grade + '" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />\n'
+    xaml += '            </StackPanel>\n'
+    xaml += '            <local:MyHint Theme="Blue" Text="' + comment + '" />\n'
+    xaml += '        </StackPanel>\n'
+    xaml += '    </local:MyCard>\n'
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                <TextBlock Text="{month}" FontSize="40" FontWeight="Bold"
-                           Foreground="{{DynamicResource ColorBrush1}}" />
-                <TextBlock Text=" 月 " FontSize="12" VerticalAlignment="Bottom"
-                           Margin="0,0,2,10" Foreground="{{DynamicResource ColorBrush3}}" />
-                <TextBlock Text="{day}" FontSize="40" FontWeight="Bold"
-                           Foreground="{{DynamicResource ColorBrush1}}" />
-                <TextBlock Text=" 日" FontSize="12" VerticalAlignment="Bottom"
-                           Margin="0,0,0,10" Foreground="{{DynamicResource ColorBrush3}}" />
-            </StackPanel>
-            <TextBlock Text="{year} 年 · 星期{weekday}" HorizontalAlignment="Center"
-                       FontSize="12" Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,16" />
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                <Border Width="40" Height="3" CornerRadius="2"
-                        Background="{{DynamicResource ColorBrush1}}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2"
-                        Background="{{DynamicResource ColorBrush3}}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2"
-                        Background="{{DynamicResource ColorBrush5}}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2"
-                        Background="{{DynamicResource ColorBrush7}}" Margin="2,0" />
-            </StackPanel>
-
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：{quote}" />
-
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                    <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center"
-                               Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,4" />
-                    <TextBlock Text="{lucky_number}" FontSize="28" FontWeight="Bold"
-                               HorizontalAlignment="Center"
-                               Foreground="{{DynamicResource ColorBrush1}}" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                    <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center"
-                               Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,4" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Width="14" Height="14" CornerRadius="3"
-                                Background="{lucky_color["hex"]}" Margin="0,0,6,0"
-                                VerticalAlignment="Center" />
-                        <TextBlock Text="{lucky_color["name"]}" FontSize="14" FontWeight="Bold"
-                                   VerticalAlignment="Center"
-                                   Foreground="{lucky_color["hex"]}" />
-                    </StackPanel>
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-    </local:MyCard>
-
-    <!-- ========== 卡片 3：今日幸运方块 ========== -->
-    <local:MyCard Title="今日幸运方块" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <local:MyImage Grid.Column="0" Width="72" Height="72" Margin="0,0,18,0"
-                               Source="pack://application:,,,/images/Blocks/{block["image"]}" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="{block["name"]}" FontSize="16" FontWeight="Bold"
-                               Margin="0,0,0,6" />
-                    <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="17"
-                               Foreground="{{DynamicResource ColorBrush3}}"
-                               Text="{block["desc"]}" />
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-    </local:MyCard>
-
-    <!-- ========== 卡片 4：常用链接 ========== -->
-    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable"
-                              Logo="pack://application:,,,/images/Blocks/Grass.png"
-                              Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制"
-                              EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable"
-                              Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png"
-                              Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区"
-                              EventType="打开网页" EventData="https://klpbbs.com/" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable"
-                              Logo="pack://application:,,,/images/Blocks/GoldBlock.png"
-                              Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器"
-                              EventType="打开网页" EventData="https://hypixel.net/" />
-            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable"
-                              Logo="pack://application:,,,/images/Blocks/Anvil.png"
-                              Title="Modrinth" Info="下载模组、整合包与资源包"
-                              EventType="打开网页" EventData="https://modrinth.com/" />
-        </StackPanel>
-    </local:MyCard>
-
-    <!-- ========== 卡片 5：游戏指令速查 ========== -->
-    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-
-            <TextBlock Text="基础模式" FontSize="11" FontWeight="Bold"
-                       Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,6" />
-            <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36"
-                                Text="创造模式" EventType="复制文本"
-                                EventData="/gamemode creative" />
-                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36"
-                                Text="生存模式" EventType="复制文本"
-                                EventData="/gamemode survival" />
-                <local:MyButton Grid.Column="2" Height="36"
-                                Text="冒险模式" EventType="复制文本"
-                                EventData="/gamemode adventure" />
-            </Grid>
-
-            <TextBlock Text="环境控制" FontSize="11" FontWeight="Bold"
-                       Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,6" />
-            <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36"
-                                Text="设为白天" EventType="复制文本"
-                                EventData="/time set day" />
-                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36"
-                                Text="晴天" EventType="复制文本"
-                                EventData="/weather clear" />
-                <local:MyButton Grid.Column="2" Height="36"
-                                Text="清除效果" EventType="复制文本"
-                                EventData="/effect clear @s" />
-            </Grid>
-
-            <TextBlock Text="实用效果" FontSize="11" FontWeight="Bold"
-                       Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,6" />
-            <Grid Margin="0,0,0,14">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36"
-                                Text="夜视" EventType="复制文本"
-                                EventData="/effect give @s night_vision 99999 1 true" />
-                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36"
-                                Text="抗性提升" EventType="复制文本"
-                                EventData="/effect give @s resistance 99999 4 true" />
-                <local:MyButton Grid.Column="2" Height="36"
-                                Text="急迫" EventType="复制文本"
-                                EventData="/effect give @s haste 99999 2 true" />
-            </Grid>
-
-            <local:MyHint Theme="Yellow" Margin="0,0,0,10"
-                          Text="指令适用于 Java 版 1.13 及以上。&#xA;其他版本请自行调整语法。" />
-
-            <local:MyHint Theme="Blue"
-                          Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
-        </StackPanel>
-    </local:MyCard>
-
-    <!-- ========== 卡片 6：彩蛋（按钮版） ========== -->
-    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                       Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />
-
-            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0"
-                            Text="打开彩蛋"
-                            EventType="弹出窗口"
-                            EventData="{egg["title"]}|{egg["content"]}" />
-
-            <local:MyHint Theme="Yellow" Margin="0,12,0,0"
-                          Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />
-        </StackPanel>
-    </local:MyCard>
-
-    <!-- ========== 卡片 7：人品测试 ========== -->
-    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-
-            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center"
-                       Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,4" />
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="{score}" FontSize="52" FontWeight="Bold"
-                           Foreground="{{DynamicResource ColorBrush1}}" />
-                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom"
-                           Foreground="{{DynamicResource ColorBrush3}}" Margin="4,0,0,12" />
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush1}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush1}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush1}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush1}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush1}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush5}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush5}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush7}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush7}}" />
-                <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
-                        Background="{{DynamicResource ColorBrush7}}" />
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="评级 " FontSize="13"
-                           Foreground="{{DynamicResource ColorBrush3}}" />
-                <TextBlock Text="{grade}" FontSize="16" FontWeight="Bold"
-                           Foreground="{{DynamicResource ColorBrush1}}" />
-            </StackPanel>
-
-            <local:MyHint Theme="Blue" Text="{comment}" />
-        </StackPanel>
-    </local:MyCard>
-
-</StackPanel>
-'''
+    xaml += '</StackPanel>\n'
     return xaml
 
 
 def main():
     output = Path(__file__).resolve().parent.parent / "Custom.xaml"
     output.write_text(build_xaml(), encoding="utf-8")
-    print(f"已生成：{output}")
+    print("已生成：" + str(output))
 
 
 if __name__ == "__main__":
