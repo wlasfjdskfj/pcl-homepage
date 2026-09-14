@@ -331,12 +331,12 @@ CMD_GROUPS = [
         ("经验瓶", "/give @s experience_bottle 64", "一次给 64 个"),
     ]),
     ("玩家头颅 · 1.20.5+", [
-        ("Notch 头颅", "/give @s player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。把 Notch 换成目标玩家 ID"),
+        ("Notch 头颅", "/give @s player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。Notch 头颅"),
         ("自己的头颅", "/give @s player_head[profile={name:\"@s\"}]", "1.20.5 及以后。获取自己的头颅"),
         ("自定义头颅", "/give @s player_head[profile={name:\"Steve\"}]", "1.20.5 及以后。把 Steve 换成任意玩家 ID"),
     ]),
     ("玩家头颅 · 1.13-1.20.4", [
-        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。把 Notch 换成目标玩家 ID"),
+        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。 Notch 头颅"),
         ("自己的头颅", "/give @s player_head{SkullOwner:\"@s\"}", "1.13-1.20.4。获取自己的头颅"),
         ("自定义头颅", "/give @s player_head{SkullOwner:\"Steve\"}", "1.13-1.20.4。把 Steve 换成任意玩家 ID"),
     ]),
