@@ -71,8 +71,8 @@
                     <StackPanel>
                         <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Border Width="16" Height="16" CornerRadius="4" Background="#17DD62" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="绿宝石绿" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="#17DD62" />
+                            <Border Width="16" Height="16" CornerRadius="4" Background="#2A4DD0" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="青金石蓝" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2A4DD0" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -204,26 +204,15 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <TextBlock Text="15" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="__SCORE__" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-            </StackPanel>
+            __SCORE_BAR__
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="N--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="__GRADE__" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="非酋认证，建议在家种地。" />
+            <local:MyHint Theme="Blue" Text="__COMMENT__" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
