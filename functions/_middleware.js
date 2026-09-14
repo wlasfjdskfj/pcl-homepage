@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数
+ * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
  * 日期 / 幸运数字 / 每日一言 / 彩蛋：每次请求随机
@@ -118,9 +118,6 @@ function noCacheResponse(body, contentType) {
   });
 }
 
-/**
- * 获取北京时间的年月日和星期
- */
 function getBeijingDate() {
   const now = new Date();
   const beijing = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -137,9 +134,6 @@ function getBeijingDate() {
   };
 }
 
-/**
- * 字符串 hash（djb2 变体）
- */
 function hashCode(str) {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
@@ -149,17 +143,11 @@ function hashCode(str) {
   return hash;
 }
 
-/**
- * 用 IP + 日期 + salt 生成确定性数字（0 ~ max-1）
- */
 function deterministicIndex(ip, date, salt, max) {
   const seed = hashCode(ip + '|' + date + '|' + salt);
   return seed % max;
 }
 
-/**
- * 根据分数返回评语和评级
- */
 function getScoreInfo(score) {
   if (score >= 95) return { comment: "欧皇降世！建议立刻去抽卡。", grade: "SSR" };
   if (score >= 80) return { comment: "运气极佳，适合下矿挖钻石。", grade: "SR" };
@@ -168,9 +156,6 @@ function getScoreInfo(score) {
   return { comment: "非酋认证，建议在家种地。", grade: "N--" };
 }
 
-/**
- * 生成人品进度条 XAML 片段
- */
 function buildScoreBar(score) {
   const scoreBlocks = Math.floor(score / 10);
   let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
@@ -220,8 +205,10 @@ export async function onRequest(context) {
     // 当前北京时间
     const date = getBeijingDate();
 
-    // 用户 IP + 今日日期（UTC 用于稳定 hash）
+    // 用户 IP
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    // 今日 UTC 日期（用于稳定 hash）
     const today = new Date().toISOString().slice(0, 10);
 
     // 人品分数
@@ -239,6 +226,7 @@ export async function onRequest(context) {
       .replace(/__DATE_MONTH__/g, date.month)
       .replace(/__DATE_DAY__/g, date.day)
       .replace(/__DATE_WEEKDAY__/g, date.weekday)
+      .replace(/__USER_IP__/g, ip)
       .replace(/__LUCKY_NUMBER__/g, String(num))
       .replace(/__LUCKY_COLOR_NAME__/g, color.name)
       .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
