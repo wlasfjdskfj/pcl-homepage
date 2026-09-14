@@ -1,4 +1,64 @@
 <StackPanel>
+    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="__DATE_MONTH__" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,2,12" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__DATE_DAY__" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />
+                    </StackPanel>
+                    <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="__QUOTE__" />
+                    <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+                </StackPanel>
+            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Width="16" Height="16" CornerRadius="4" Background="__LUCKY_COLOR_HEX__" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="__LUCKY_COLOR_HEX__" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="8" Padding="20,16" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                        <TextBlock Text="玩家 ID：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="Hotaru_kawaii" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="公网 IP：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__USER_IP__" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="玩家 ID 是自定义的，修改 generate.py 里的 PLAYER_ID 即可。&#xA;IP 由 Cloudflare 从请求头读取，展示的是你自己的公网 IP。" />
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="最新版本 - 26.3-rc-3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
@@ -33,50 +93,6 @@
                 <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
                 <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
                 <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
-            </Grid>
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="__DATE_MONTH__" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,2,12" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__DATE_DAY__" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />
-                    </StackPanel>
-                    <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
-                    <TextBlock Text="你的 IP：__USER_IP__" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />
-                </StackPanel>
-            </Border>
-            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
-                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="__QUOTE__" />
-                    <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
-                </StackPanel>
-            </Border>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Border Width="16" Height="16" CornerRadius="4" Background="__LUCKY_COLOR_HEX__" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="__LUCKY_COLOR_HEX__" />
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
             </Grid>
         </StackPanel>
     </local:MyCard>
