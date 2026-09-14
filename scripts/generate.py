@@ -27,8 +27,8 @@ IMAGES_DIR_NAME = "images"
 VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
-# 更新摘要显示的最大条数
-CHANGELOG_MAX_ITEMS = 5
+# 卡片里只显示前 N 条更新摘要（完整内容点「更新日志」查看）
+CHANGELOG_PREVIEW_ITEMS = 3
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 
@@ -300,10 +300,9 @@ def fetch_changelog(version, max_items=None):
     """
     从 Minecraft Wiki 抓取版本更新摘要。
     支持多章节（更改、修复、新增等），支持二级项目缩进。
-    不截断条目，完整显示。
     """
     if max_items is None:
-        max_items = CHANGELOG_MAX_ITEMS
+        max_items = CHANGELOG_PREVIEW_ITEMS
 
     page_title = "Java版" + version
     try:
@@ -333,7 +332,6 @@ def fetch_changelog(version, max_items=None):
         items = []
 
         for line in lines:
-            # 匹配章节标题 == 更改 ==
             m = re.match(r"^(==+)\s*(.+?)\s*==+\s*$", line)
             if m:
                 level = len(m.group(1))
@@ -347,14 +345,12 @@ def fetch_changelog(version, max_items=None):
 
             if in_target_section and line.strip().startswith("*"):
                 stripped = line.strip()
-                # 计算 * 的数量，判断缩进级别
                 star_count = len(stripped) - len(stripped.lstrip("*"))
                 item_text = stripped.lstrip("*").strip()
                 cleaned = clean_wiki_text(item_text)
                 if not cleaned or len(cleaned) <= 5:
                     continue
 
-                # 二级项目加缩进前缀（不截断）
                 if star_count >= 2:
                     cleaned = "　└ " + cleaned
 
@@ -362,7 +358,7 @@ def fetch_changelog(version, max_items=None):
                 if len(items) >= max_items:
                     break
 
-        print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条更新")
+        print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条摘要（仅显示前 " + str(max_items) + " 条）")
         return items
     except Exception as e:
         print("[Changelog] 获取失败：" + str(e))
@@ -618,15 +614,23 @@ def build_xaml():
         version_info = main_label + "：" + main_version
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
 
-    lines.append('            <TextBlock Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+    # 更新摘要标题 + 部分提示
+    lines.append('            <Grid Margin="0,0,0,6">')
+    lines.append('                <Grid.ColumnDefinitions>')
+    lines.append('                    <ColumnDefinition Width="Auto" />')
+    lines.append('                    <ColumnDefinition Width="*" />')
+    lines.append('                </Grid.ColumnDefinitions>')
+    lines.append('                <TextBlock Grid.Column="0" Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                <TextBlock Grid.Column="1" Text="（部分）" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="6,0,0,0" />')
+    lines.append('            </Grid>')
 
     # 更新摘要内容
     lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="' + changelog_text + '" />')
     lines.append('            </Border>')
 
-    # 提示：点击更新日志查看更多
-    lines.append('            <TextBlock Text="📖 点击下方【更新日志】查看完整更新内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
+    # 底部提示：点击更新日志查看完整内容
+    lines.append('            <TextBlock Text="📖 仅显示部分摘要，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -638,7 +642,7 @@ def build_xaml():
     lines.append('                <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="' + changelog_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="' + server_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="' + wiki_url + '" />')
-    lines.append('                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + wiki_version_url + '" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + wiki_version_url + '" />')
     lines.append('            </Grid>')
 
     lines.append('        </StackPanel>')
