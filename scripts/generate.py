@@ -146,43 +146,14 @@ def build_xaml() -> str:
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # ---------- 获取最新版本信息 ----------
-    news = fetch_news_homepage()
-    version = news["version"]
-    news_title = f"最新版本 - {version}" if version != "1.21" else "最新版本"
-
-    # 封面图：如果 API 返回了图片就用，否则用 PCL 内置图片兜底
-    cover_image = news["image"] if news["image"] else "pack://application:,,,/images/Blocks/Grass.png"
-    cover_fallback = "pack://application:,,,/images/Blocks/CommandBlock.png"
-
-    # 更新摘要：取第一条更新内容
-    changelog_lines = [line.strip() for line in news["changelog"].split("\n") if line.strip()]
-    changelog_first = changelog_lines[0] if changelog_lines else "暂无更新摘要。"
-    changelog_extra = "\n".join(changelog_lines[1:]) if len(changelog_lines) > 1 else ""
-
-    release_date = news["release_date"] if news["release_date"] else now.strftime("%Y-%m-%d")
-
-    # 启动按钮的 EventData：如果 API 提供了启动参数就用，否则用版本号
-    launch_data = news["launch_url"] if news["launch_url"] else version
-
-    # 服务端和 Wiki 按钮
-    server_url = news["server_url"] if news["server_url"] else "https://www.minecraft.net/zh-hans/download/server"
-    wiki_url = news["wiki_url"] if news["wiki_url"] else "https://zh.minecraft.wiki/"
-    changelog_url = news["changelog_url"] if news["changelog_url"] else "https://www.minecraft.net/zh-hans/download"
-
-    # ---------- 拼装 XAML ----------
-    xaml = f'''<StackPanel>
-
     <!-- ========== 卡片 1：最新版本 ========== -->
     <local:MyCard Title="{news_title}" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
             <!-- 封面大图 + 版本号浮层 -->
             <Grid Margin="0,0,0,14">
-                <Border CornerRadius="8" ClipToBounds="True">
-                    <local:MyImage Height="150" Stretch="UniformToFill"
-                                   Source="{cover_image}"
-                                   FallbackSource="{cover_fallback}" />
+                <Border CornerRadius="8" ClipToBounds="True" Height="150">
+                    <local:MyImage Source="{cover_image}" FallbackSource="{cover_fallback}" />
                 </Border>
                 <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
                         Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
@@ -200,11 +171,6 @@ def build_xaml() -> str:
                            TextWrapping="Wrap" />
             </StackPanel>
 
-            {"" if not changelog_extra else f'''
-            <local:MyHint Theme="Yellow" Margin="0,0,0,10"
-                          Text="{changelog_extra}" />
-            '''}
-
             <!-- 最后更新时间 -->
             <TextBlock Text="最后更新: {release_date}" FontSize="11"
                        Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />
@@ -218,18 +184,17 @@ def build_xaml() -> str:
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <local:MyTextButton Grid.Column="0" Text="启动"
-                                    EventType="启动游戏" EventData="{launch_data}" />
+                <local:MyTextButton Grid.Column="0" Text="下载"
+                                    EventType="打开网页" EventData="{changelog_url}" />
                 <local:MyTextButton Grid.Column="1" Text="服务端"
                                     EventType="打开网页" EventData="{server_url}" />
                 <local:MyTextButton Grid.Column="2" Text="WIKI"
                                     EventType="打开网页" EventData="{wiki_url}" />
-                <local:MyTextButton Grid.Column="3" Text="官网更新日志"
+                <local:MyTextButton Grid.Column="3" Text="更新日志"
                                     EventType="打开网页" EventData="{changelog_url}" />
             </Grid>
         </StackPanel>
     </local:MyCard>
-
     <!-- ========== 卡片 2：今日概览 ========== -->
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
@@ -406,23 +371,18 @@ def build_xaml() -> str:
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
-            <local:MyImage Height="72" HorizontalAlignment="Center" Margin="0,0,0,14"
-                           Source="pack://application:,,,/images/Blocks/{egg["image"]}" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                       Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />
 
-            <TextBlock Text="「{egg["title"]}」" FontSize="15" FontWeight="Bold"
-                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0"
+                            Text="打开彩蛋"
+                            EventType="弹出窗口"
+                            EventData="{egg["title"]}|{egg["content"]}" />
 
-            <Border CornerRadius="6" Padding="14,10"
-                    Background="{{DynamicResource ColorBrush7}}" Margin="0,0,0,14">
-                <TextBlock TextWrapping="Wrap" Text="{egg["content"]}"
-                           FontSize="12" LineHeight="19" />
-            </Border>
-
-            <local:MyHint Theme="Yellow"
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0"
                           Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />
         </StackPanel>
     </local:MyCard>
-
     <!-- ========== 卡片 7：人品测试 ========== -->
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
