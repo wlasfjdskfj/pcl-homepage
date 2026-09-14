@@ -176,7 +176,7 @@ def build_xaml():
 
             <TextBlock Text="实用效果" FontSize="11" FontWeight="Bold"
                        Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,6" />
-            <Grid>
+            <Grid Margin="0,0,0,14">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
@@ -193,11 +193,13 @@ def build_xaml():
                                 EventData="/effect give @s haste 99999 2 true" />
             </Grid>
 
-            <local:MyHint Theme="Blue" Margin="0,14,0,0"
-                          Text="这些指令需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
+            <local:MyHint Theme="Yellow" Margin="0,0,0,10"
+                          Text="指令适用于 Java 版 1.13 及以上。&#xA;其他版本请自行调整语法。" />
+
+            <local:MyHint Theme="Blue"
+                          Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-
     <!-- ========== 卡片 5：彩蛋 ========== -->
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
