@@ -1,15 +1,16 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言
+ * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言、人品分数
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 幸运颜色不在这里处理，由 Python 脚本每天随机生成。
+ * 人品分数使用 KV 存储：
+ *   - key: renpin:日期:用户IP
+ *   - 同一天同一用户分数固定，不同用户不同
  */
 
 // ============ 每日一言 ============
 
 const QUOTES = [
-  // ===== 生存技巧 =====
   "钻石在 Y=-59，别挖太深。",
   "下界合金比钻石更耐用，但更难找。",
   "床在下界会爆炸，别试。",
@@ -30,8 +31,6 @@ const QUOTES = [
   "雪傀儡会在温暖生物群系融化。",
   "铁砧掉下来会砸伤你，小心。",
   "金锭可以做 Powered Rail 的加速轨道。",
-
-  // ===== 冷知识 =====
   "村民交易可以打折，只要你治好了僵尸村民。",
   "末影人不会主动攻击你，除非你盯着它看。",
   "睡觉可以跳过夜晚，但会让你失去刷怪的机会。",
@@ -47,8 +46,6 @@ const QUOTES = [
   "蜜蜂可以用花朵繁殖，小心被蜇。",
   "狐狸会用嘴叼着物品，包括你的剑。",
   "熊猫会打喷嚏，还会吓到附近的熊猫。",
-
-  // ===== 幽默吐槽 =====
   "今天也要好好挖矿。",
   "苦力怕从不敲门，但会给你惊喜。",
   "别在岩浆边挖矿，除非你想重生。",
@@ -107,15 +104,72 @@ function noCacheResponse(body, contentType) {
   });
 }
 
+/**
+ * 根据分数返回评语和评级
+ */
+function getScoreInfo(score) {
+  if (score >= 95) return { comment: "欧皇降世！建议立刻去抽卡。", grade: "SSR" };
+  if (score >= 80) return { comment: "运气极佳，适合下矿挖钻石。", grade: "SR" };
+  if (score >= 60) return { comment: "运气不错，平平淡淡才是真。", grade: "R" };
+  if (score >= 40) return { comment: "一般般，建议扶老奶奶过马路。", grade: "N" };
+  return { comment: "非酋认证，建议在家种地。", grade: "N--" };
+}
+
+/**
+ * 生成人品进度条 XAML 片段
+ */
+function buildScoreBar(score) {
+  const scoreBlocks = Math.floor(score / 10);
+  let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
+  for (let i = 0; i < 10; i++) {
+    const colorRes = i < scoreBlocks ? '{DynamicResource ColorBrush1}' : '{DynamicResource ColorBrush7}';
+    bar += '<Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="' + colorRes + '" />';
+  }
+  bar += '</StackPanel>';
+  return bar;
+}
+
+/**
+ * 获取或生成用户今日的人品分数
+ */
+async function getOrCreateScore(env, ip) {
+  const today = new Date().toISOString().slice(0, 10);
+  const kvKey = 'renpin:' + today + ':' + ip;
+
+  // 先查 KV
+  try {
+    const cached = await env.RENPIN_KV.get(kvKey, 'json');
+    if (cached && cached.score) {
+      return cached;
+    }
+  } catch (e) {
+    console.error('[KV] 读取失败：', e);
+  }
+
+  // 不存在则生成
+  const score = Math.floor(Math.random() * 100) + 1;
+  const info = getScoreInfo(score);
+  const data = { score: score, comment: info.comment, grade: info.grade };
+
+  // 存 KV，2 天后过期
+  try {
+    await env.RENPIN_KV.put(kvKey, JSON.stringify(data), { expirationTtl: 172800 });
+  } catch (e) {
+    console.error('[KV] 写入失败：', e);
+  }
+
+  return data;
+}
+
 // ============ 中间件 ============
 
 export async function onRequest(context) {
-  const url = new URL(context.request.url);
+  const { request, env } = context;
+  const url = new URL(request.url);
 
   // 1. 版本号文件：每次返回当前时间戳，强制 PCL 重新下载主页
   if (url.pathname === '/Custom.xaml.version') {
-    const timestamp = Date.now().toString();
-    return noCacheResponse(timestamp, 'text/plain; charset=utf-8');
+    return noCacheResponse(Date.now().toString(), 'text/plain; charset=utf-8');
   }
 
   // 2. 主页文件：动态替换占位符
@@ -124,7 +178,7 @@ export async function onRequest(context) {
 
     let response;
     try {
-      response = await context.env.ASSETS.fetch(assetUrl);
+      response = await env.ASSETS.fetch(assetUrl);
     } catch (e) {
       console.error('[Middleware] 获取静态资源失败：', e);
       return new Response('Internal Error', { status: 500 });
@@ -136,15 +190,37 @@ export async function onRequest(context) {
 
     let xaml = await response.text();
 
+    // 随机数据
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
+    // 用户 IP
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    // 人品分数（按 IP + 日期）
+    let scoreData;
+    try {
+      scoreData = await getOrCreateScore(env, ip);
+    } catch (e) {
+      console.error('[Score] 获取失败，使用临时分数：', e);
+      const fallback = Math.floor(Math.random() * 100) + 1;
+      const info = getScoreInfo(fallback);
+      scoreData = { score: fallback, comment: info.comment, grade: info.grade };
+    }
+
+    const scoreBar = buildScoreBar(scoreData.score);
+
+    // 替换占位符
     xaml = xaml
       .replace(/__LUCKY_NUMBER__/g, String(num))
       .replace(/__EGG_DATA__/g, eggData)
-      .replace(/__QUOTE__/g, quote);
+      .replace(/__QUOTE__/g, quote)
+      .replace(/__SCORE__/g, String(scoreData.score))
+      .replace(/__COMMENT__/g, scoreData.comment)
+      .replace(/__GRADE__/g, scoreData.grade)
+      .replace(/__SCORE_BAR__/g, scoreBar);
 
     return noCacheResponse(xaml, 'application/xml; charset=utf-8');
   }
