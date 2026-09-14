@@ -338,12 +338,12 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：彩蛋（无边框按钮） ==========
+    # ========== 卡片 5：彩蛋（带图标文字按钮） ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                <local:MyTextButton Margin="0,0,32,0" Text="打开彩蛋">')
+    lines.append('                <local:MyTextButton Margin="0,0,60,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
     lines.append('                    <local:CustomEventService.Events>')
     lines.append('                        <local:CustomEventCollection>')
     lines.append('                            <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
@@ -351,7 +351,7 @@ def build_xaml():
     lines.append('                        </local:CustomEventCollection>')
     lines.append('                    </local:CustomEventService.Events>')
     lines.append('                </local:MyTextButton>')
-    lines.append('                <local:MyTextButton Text="刷新主页" EventType="刷新页面" EventData="-" />')
+    lines.append('                <local:MyTextButton Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
     lines.append('            </StackPanel>')
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
     lines.append('        </StackPanel>')
