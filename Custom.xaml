@@ -1,21 +1,27 @@
 <StackPanel>
-    <local:MyCard Title="最新版本 - 1.21" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="最新版本 - 26.3-rc-2" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                 <Grid>
                     <local:MyImage Source="https://www.mkejga.de5.net/images/version.png" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">
-                        <TextBlock Text="1.21" FontSize="16" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="26.3-rc-2" FontSize="16" FontWeight="Bold" Foreground="White" />
                     </Border>
                 </Grid>
             </Border>
             <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">
                 <StackPanel Orientation="Horizontal">
                     <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
-                    <TextBlock Text="最新正式版：1.21" FontSize="13" VerticalAlignment="Center" />
+                    <TextBlock Text="最新快照：26.3-rc-2" FontSize="13" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
-            <TextBlock Text="最后更新: 2026-09-14" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,4,0,10" />
+            <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">
+                <StackPanel Orientation="Horizontal">
+                    <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
+                    <TextBlock Text="最新正式版：26.2" FontSize="13" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+            <TextBlock Text="最后更新: 2026-09-11" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,4,0,10" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -45,7 +51,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：钻石在 Y=-59，别挖太深。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：别在岩浆边挖矿，除非你想重生。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -171,15 +177,15 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <local:MyTextButton Margin="0,0,60,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
+                <local:MyIconTextButton Margin="0,0,24,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
                     <local:CustomEventService.Events>
                         <local:CustomEventCollection>
                             <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
                             <local:CustomEvent Type="刷新页面" Data="-" />
                         </local:CustomEventCollection>
                     </local:CustomEventService.Events>
-                </local:MyTextButton>
-                <local:MyTextButton Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+                </local:MyIconTextButton>
+                <local:MyIconTextButton Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
             </StackPanel>
             <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
@@ -188,14 +194,14 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="14" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="51" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="N--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="N" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="非酋认证，建议在家种地。" />
+            <local:MyHint Theme="Blue" Text="一般般，建议扶老奶奶过马路。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
