@@ -84,13 +84,13 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="0" Text="修复摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Text="（部分）" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="6,0,0,0" />
             </Grid>
             <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">
-                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="• 暂无更新摘要。" />
+                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="• 暂无修复内容。" />
             </Border>
-            <TextBlock Text="📖 仅显示部分摘要，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
+            <TextBlock Text="📖 仅显示部分修复内容，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
