@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 PCL 主页生成脚本
-由 GitHub Actions 定时运行，生成内容丰富、带动态数据的 Custom.xaml。
+由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
 """
 
 import random
@@ -253,7 +253,7 @@ def build_xaml() -> str:
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
                        Text="%%EGG_CONTENT%%" />
             <local:MyHint Theme="Yellow" Margin="0,0,0,0"
-                          Text="彩蛋由 GitHub Actions 定时随机生成，大约每小时更新一次。" />
+                          Text="彩蛋由 GitHub Actions 定时随机生成，大约每 2 小时更新一次。" />
         </StackPanel>
     </local:MyCard>
 
