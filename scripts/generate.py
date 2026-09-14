@@ -298,71 +298,100 @@ def clean_wiki_text(text):
 
 def fetch_changelog(version, max_items=None):
     """
-    从 Minecraft Wiki 抓取版本更新摘要。
-    支持多章节（更改、修复、新增等），支持二级项目缩进。
+    从 Minecraft Wiki 抓取版本的「修复」章节内容。
     """
     if max_items is None:
         max_items = CHANGELOG_PREVIEW_ITEMS
 
-    page_title = "Java版" + version
-    try:
-        params = {
-            "action": "parse",
-            "page": page_title,
-            "prop": "wikitext",
-            "format": "json",
-            "redirects": "1",
-        }
-        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
+    # 候选页面：先精确版本页，再主版本页
+    base_version = version
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-rc-5",
+                   "-pre1", "-pre2", "-pre3", "-pre4", "-pre5",
+                   "-pre6", "-pre7", "-pre8", "-pre9"]:
+        if base_version.endswith(suffix):
+            base_version = base_version[:-len(suffix)]
+            break
 
-        if "error" in data:
-            print("[Changelog] 页面不存在：" + page_title)
-            return []
+    page_titles = ["Java版" + version]
+    if base_version != version:
+        page_titles.append("Java版" + base_version)
 
-        wikitext = data.get("parse", {}).get("wikitext", {}).get("*", "")
-        if not wikitext:
-            print("[Changelog] wikitext 为空")
-            return []
+    # 只匹配「修复」相关章节
+    section_keywords = ["修复"]
 
-        lines = wikitext.split("\n")
-        in_target_section = False
-        section_level = 0
-        items = []
+    for page_title in page_titles:
+        try:
+            params = {
+                "action": "parse",
+                "page": page_title,
+                "prop": "wikitext",
+                "format": "json",
+                "redirects": "1",
+            }
+            resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            data = resp.json()
 
-        for line in lines:
-            m = re.match(r"^(==+)\s*(.+?)\s*==+\s*$", line)
-            if m:
-                level = len(m.group(1))
-                title = m.group(2).strip()
-                if any(k in title for k in ["更改", "修复", "新增", "改动", "变更", "特性", "常规"]):
-                    in_target_section = True
-                    section_level = level
-                elif in_target_section and level <= section_level:
-                    in_target_section = False
+            if "error" in data:
+                print("[Changelog] 页面不存在：" + page_title)
                 continue
 
-            if in_target_section and line.strip().startswith("*"):
-                stripped = line.strip()
-                star_count = len(stripped) - len(stripped.lstrip("*"))
-                item_text = stripped.lstrip("*").strip()
-                cleaned = clean_wiki_text(item_text)
-                if not cleaned or len(cleaned) <= 5:
+            wikitext = data.get("parse", {}).get("wikitext", {}).get("*", "")
+            if not wikitext:
+                print("[Changelog] wikitext 为空：" + page_title)
+                continue
+
+            print("[Changelog] 页面 " + page_title + " 长度 " + str(len(wikitext)) + " 字符")
+
+            lines = wikitext.split("\n")
+            in_target = False
+            section_level = 0
+            items = []
+
+            for line in lines:
+                m = re.match(r"^(=+)\s*(.+?)\s*=+\s*$", line)
+                if m:
+                    level = len(m.group(1))
+                    title = m.group(2).strip()
+                    is_target = any(k in title for k in section_keywords)
+                    if is_target:
+                        in_target = True
+                        section_level = level
+                        print("[Changelog] 进入章节：" + title)
+                    elif in_target and level <= section_level:
+                        in_target = False
                     continue
 
-                if star_count >= 2:
-                    cleaned = "　└ " + cleaned
+                if in_target and re.match(r"^\*+", line.strip()):
+                    stripped = line.strip()
+                    star_count = len(stripped) - len(stripped.lstrip("*"))
+                    item_text = stripped.lstrip("*").strip()
+                    if not item_text:
+                        continue
+                    cleaned = clean_wiki_text(item_text)
+                    if not cleaned or len(cleaned) <= 4:
+                        continue
 
-                items.append(cleaned)
-                if len(items) >= max_items:
-                    break
+                    if star_count >= 2:
+                        cleaned = "　└ " + cleaned
 
-        print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条摘要（仅显示前 " + str(max_items) + " 条）")
-        return items
-    except Exception as e:
-        print("[Changelog] 获取失败：" + str(e))
-        return []
+                    items.append(cleaned)
+                    if len(items) >= max_items:
+                        break
+
+            if items:
+                print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条「修复」内容")
+                return items
+            else:
+                print("[Changelog] " + page_title + " 未提取到修复内容，尝试下一个页面")
+                continue
+
+        except Exception as e:
+            print("[Changelog] 请求 " + page_title + " 失败：" + str(e))
+            continue
+
+    print("[Changelog] 所有候选页面均未提取到修复内容")
+    return []
 
 
 def clean_old_images():
@@ -504,7 +533,7 @@ def build_xaml():
                 changelog_text += "&#xA;"
             changelog_text += "• " + item
     else:
-        changelog_text = "• 暂无更新摘要。"
+        changelog_text = "• 暂无修复内容。"
 
     server_url = ver["server_url"]
     wiki_url = ver["wiki_url"]
@@ -620,7 +649,7 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="Auto" />')
     lines.append('                    <ColumnDefinition Width="*" />')
     lines.append('                </Grid.ColumnDefinitions>')
-    lines.append('                <TextBlock Grid.Column="0" Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                <TextBlock Grid.Column="0" Text="修复摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('                <TextBlock Grid.Column="1" Text="（部分）" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="6,0,0,0" />')
     lines.append('            </Grid>')
 
@@ -630,7 +659,7 @@ def build_xaml():
     lines.append('            </Border>')
 
     # 底部提示：点击更新日志查看完整内容
-    lines.append('            <TextBlock Text="📖 仅显示部分摘要，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
+    lines.append('            <TextBlock Text="📖 仅显示部分修复内容，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
