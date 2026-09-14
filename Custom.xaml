@@ -21,18 +21,26 @@
                     <TextBlock Text="最新正式版：26.2" FontSize="13" VerticalAlignment="Center" />
                 </StackPanel>
             </Border>
+            <TextBlock Text="更新总结" FontSize="11" FontWeight="Bold" Margin="0,10,0,6" Foreground="{DynamicResource ColorBrush3}" />
+            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Text="🔧" FontSize="13" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="错误修复 / 内容变更" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Text="- 暂无更新摘要，点击下方按钮查看 Wiki。" />
+                </StackPanel>
+            </Border>
             <TextBlock Text="最后更新: 2026-09-11" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,4,0,10" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-                <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
-                <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
-                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
+                <local:MyIconTextButton Grid.Column="0" Text="刷新更新" LogoScale="0.9" Logo="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896z M512 128a384 384 0 1 0 0 768 384 384 0 0 0 0-768z M480 320h64v224l160 96-32 56-192-112V320z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3-rc-2" />
+                <local:MyIconTextButton Grid.Column="1" Text="查看 Wiki" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3-rc-2" />
+                <local:MyIconTextButton Grid.Column="2" Text="启动游戏" LogoScale="0.9" Logo="M256 192l512 320-512 320V192z" EventType="启动游戏" EventData="26.3-rc-2" />
             </Grid>
         </StackPanel>
     </local:MyCard>
@@ -51,7 +59,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：末影人不会主动攻击你，除非你盯着它看。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：村民交易可以打折，只要你治好了僵尸村民。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -192,7 +200,7 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="60" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="65" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
