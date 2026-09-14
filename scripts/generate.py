@@ -2,6 +2,7 @@
 """
 PCL 主页生成脚本
 由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
+幸运数字和幸运颜色使用占位符，由 Cloudflare Functions 在每次请求时动态替换。
 """
 
 import random
@@ -21,10 +22,8 @@ MAX_RETRIES = 3
 BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
-# 版本图片缓存天数，超过这个天数强制重新下载
 VERSION_IMAGE_CACHE_DAYS = 7
 
-# 清理时保留的文件名白名单
 KEEP_FILES = [
     "grass.png", "cobblestone.png", "gold_block.png", "command_block.png",
     "anvil.png", "redstone_block.png", "egg.png", "diamond_block.png",
@@ -70,14 +69,6 @@ EGGS = [
     {"title": "幸运方块",     "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。"},
 ]
 
-LUCKY_COLORS = [
-    {"name": "钻石蓝",   "hex": "#4AEDD9"},
-    {"name": "红石红",   "hex": "#FF5555"},
-    {"name": "金锭黄",   "hex": "#FFAA00"},
-    {"name": "绿宝石绿", "hex": "#17DD62"},
-    {"name": "青金石蓝", "hex": "#2A4DD0"},
-]
-
 
 # ============ 版本信息获取 ============
 
@@ -121,7 +112,6 @@ def fetch_latest_version():
 # ============ Wiki 图片获取 ============
 
 def fetch_wiki_image(image_title, filename, width=128):
-    """从 Minecraft Wiki 获取指定文件名的图片，保存到 images/ 文件夹。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -196,10 +186,6 @@ def fetch_wiki_image(image_title, filename, width=128):
 
 
 def pick_version_image(images, version):
-    """
-    从版本页面图片列表里筛选封面图。
-    优先级：标题画面 > 含完整版本号 > 含主版本号 > 其他
-    """
     base_version = version
     for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
         if base_version.endswith(suffix):
@@ -238,7 +224,6 @@ def pick_version_image(images, version):
 
 
 def fetch_version_image(version, filename="version.png"):
-    """从 Minecraft Wiki 抓取版本封面图，带缓存天数检查。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -373,7 +358,6 @@ def fetch_version_image(version, filename="version.png"):
 
 
 def clean_old_images():
-    """清理 images/ 目录里不在白名单内的图片，以及所有版本标记文件。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     if not images_dir.exists():
         return
@@ -384,7 +368,6 @@ def clean_old_images():
     for f in images_dir.iterdir():
         if not f.is_file():
             continue
-        # 删除所有 .version 结尾的标记文件，强制下次重新判断
         if f.name.endswith(".version"):
             try:
                 f.unlink()
@@ -393,7 +376,6 @@ def clean_old_images():
             except Exception as e:
                 print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
             continue
-        # 不在白名单内的图片删除
         if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
             try:
                 f.unlink()
@@ -464,8 +446,11 @@ def build_xaml():
     weekday = ["一", "二", "三", "四", "五", "六", "日"][now.weekday()]
 
     quote = random.choice(QUOTES)
-    lucky_number = random.randint(1, 99)
-    lucky_color = random.choice(LUCKY_COLORS)
+
+    # 幸运数字和颜色用占位符，由 Cloudflare Functions 每次请求时替换
+    lucky_number = "__LUCKY_NUMBER__"
+    lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
+
     block = random.choice(BLOCKS)
     egg = random.choice(EGGS)
 
@@ -481,17 +466,14 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # 先清理旧图片
     clean_old_images()
 
-    # 方块图片
     wiki_ok = fetch_wiki_image(block["image_title"], block["file"], width=128)
     if wiki_ok:
         block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
     else:
         block_source = "pack://application:,,,/images/Blocks/" + block["fallback"]
 
-    # 版本信息
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -511,7 +493,6 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    # 版本封面图
     version_img_ok = fetch_version_image(main_version, filename="version.png")
     if version_img_ok:
         version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
@@ -605,6 +586,7 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </StackPanel>')
     lines.append('            </Grid>')
+    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Center" Margin="0,14,0,0" Padding="20,0,20,0" Text="刷新主页" EventType="刷新页面" EventData="-" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
