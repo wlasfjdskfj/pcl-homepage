@@ -362,7 +362,8 @@ def build_xaml():
     year = now.strftime("%Y")
     weekday = ["一", "二", "三", "四", "五", "六", "日"][now.weekday()]
 
-    quote = random.choice(QUOTES)
+    # quote 由 Cloudflare Functions 动态替换
+    quote = "__QUOTE__"
 
     lucky_number = "__LUCKY_NUMBER__"
     lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
