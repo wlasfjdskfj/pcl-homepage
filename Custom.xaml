@@ -1,6 +1,6 @@
 <StackPanel>
     <!-- 由 GitHub Actions 自动生成，请勿手动编辑 -->
-    <!-- 生成时间：2026-09-14 04:22:00 -->
+    <!-- 生成时间：2026-09-14 04:28:15 -->
 
     <!-- ========== 卡片 1：今日概览 ========== -->
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
@@ -32,14 +32,14 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="幸运数字" FontSize="11" Foreground="{DynamicResource ColorBrush3}"
                                HorizontalAlignment="Center" Margin="0,0,0,2" />
-                    <TextBlock Text="28" FontSize="22" FontWeight="Bold"
+                    <TextBlock Text="59" FontSize="22" FontWeight="Bold"
                                Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                     <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}"
                                HorizontalAlignment="Center" Margin="0,0,0,2" />
-                    <TextBlock Text="红石红" FontSize="14" FontWeight="Bold"
-                               Foreground="#FF5555" HorizontalAlignment="Center" />
+                    <TextBlock Text="钻石蓝" FontSize="14" FontWeight="Bold"
+                               Foreground="#4AEDD9" HorizontalAlignment="Center" />
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -54,12 +54,12 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <local:MyImage Grid.Column="0" Width="60" Height="60" Margin="0,0,15,0"
-                               Source="pack://application:,,,/images/Blocks/Grass.png" />
+                               Source="pack://application:,,,/images/Blocks/RedstoneLampOn.png" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="草方块" FontSize="14" FontWeight="Bold" Margin="0,0,0,4" />
+                    <TextBlock Text="红石灯（亮）" FontSize="14" FontWeight="Bold" Margin="0,0,0,4" />
                     <TextBlock TextWrapping="Wrap" FontSize="11"
                                Foreground="{DynamicResource ColorBrush3}"
-                               Text="Minecraft 的标志性方块，随处可见，是建造的第一选择。" />
+                               Text="收到红石信号就会亮起来，是红石照明系统的基本组件。" />
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -133,13 +133,13 @@
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,15">
             <local:MyImage Height="60" HorizontalAlignment="Center" Margin="0,0,0,10"
-                           Source="pack://application:,,,/images/Blocks/Grass.png" />
+                           Source="pack://application:,,,/images/Blocks/Anvil.png" />
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" FontSize="14" FontWeight="Bold"
-                       HorizontalAlignment="Center" Text="「苦力怕的祝福」" />
+                       HorizontalAlignment="Center" Text="「开发者留言」" />
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                       Text="一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！&#xA;&#xA;彩蛋被炸没了。" />
+                       Text="PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」&#xA;&#xA;所以放心折腾吧。" />
             <local:MyHint Theme="Yellow" Margin="0,0,0,0"
-                          Text="彩蛋由 GitHub Actions 定时随机生成，大约每小时更新一次。" />
+                          Text="彩蛋由 GitHub Actions 定时随机生成，大约每 2 小时更新一次。" />
         </StackPanel>
     </local:MyCard>
 
@@ -150,21 +150,21 @@
                        Text="每次主页更新都会重新生成结果，完全随机。" />
 
             <StackPanel HorizontalAlignment="Center" Margin="0,0,0,10">
-                <TextBlock Text="33" FontSize="36" FontWeight="Bold"
+                <TextBlock Text="99" FontSize="36" FontWeight="Bold"
                            Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Center" />
                 <TextBlock Text="分" FontSize="12" Foreground="{DynamicResource ColorBrush3}"
                            HorizontalAlignment="Center" Margin="0,-4,0,0" />
             </StackPanel>
 
-            <TextBlock Text="[###-------]" FontFamily="Consolas" FontSize="14"
+            <TextBlock Text="[#########-]" FontFamily="Consolas" FontSize="14"
                        HorizontalAlignment="Center" Margin="0,0,0,6" />
 
-            <TextBlock Text="评级：N-" FontSize="14" FontWeight="Bold"
+            <TextBlock Text="评级：SSR" FontSize="14" FontWeight="Bold"
                        HorizontalAlignment="Center" Margin="0,0,0,10"
                        Foreground="{DynamicResource ColorBrush1}" />
 
             <local:MyHint Theme="Blue" Margin="0,0,0,0"
-                          Text="非酋预警，今天别碰附魔台。" />
+                          Text="欧皇降世！建议立刻去抽卡。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
