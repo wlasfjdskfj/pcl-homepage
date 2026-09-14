@@ -1,6 +1,7 @@
 /**
  * Cloudflare Pages Functions 中间件
- * 每次请求动态替换幸运数字、幸运颜色、彩蛋、每日一言。
+ * - /Custom.xaml：动态替换幸运数字、幸运颜色、彩蛋、每日一言
+ * - /Custom.xaml.version：每次返回不同的时间戳，强制 PCL 重新下载主页
  */
 
 // ============ 数据源 ============
@@ -53,51 +54,61 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function noCacheResponse(body, contentType) {
+  return new Response(body, {
+    headers: {
+      'Content-Type': contentType,
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache',
+    },
+  });
+}
+
 // ============ 中间件 ============
 
 export async function onRequest(context) {
   const url = new URL(context.request.url);
 
-  if (url.pathname !== '/Custom.xaml' && url.pathname !== '/') {
-    return context.next();
+  // 1. 版本号文件：每次返回当前时间戳，强制 PCL 重新下载主页
+  if (url.pathname === '/Custom.xaml.version') {
+    const timestamp = Date.now().toString();
+    return noCacheResponse(timestamp, 'text/plain; charset=utf-8');
   }
 
-  const assetUrl = new URL('/Custom.xaml', url.origin);
+  // 2. 主页文件：动态替换占位符
+  if (url.pathname === '/Custom.xaml' || url.pathname === '/') {
+    const assetUrl = new URL('/Custom.xaml', url.origin);
 
-  let response;
-  try {
-    response = await context.env.ASSETS.fetch(assetUrl);
-  } catch (e) {
-    console.error('[Middleware] 获取静态资源失败：', e);
-    return new Response('Internal Error', { status: 500 });
+    let response;
+    try {
+      response = await context.env.ASSETS.fetch(assetUrl);
+    } catch (e) {
+      console.error('[Middleware] 获取静态资源失败：', e);
+      return new Response('Internal Error', { status: 500 });
+    }
+
+    if (!response.ok) {
+      return response;
+    }
+
+    let xaml = await response.text();
+
+    const num = Math.floor(Math.random() * 99) + 1;
+    const color = pickRandom(COLORS);
+    const egg = pickRandom(EGGS);
+    const quote = pickRandom(QUOTES);
+    const eggData = egg.title + "|" + egg.content;
+
+    xaml = xaml
+      .replace(/__LUCKY_NUMBER__/g, String(num))
+      .replace(/__LUCKY_COLOR_NAME__/g, color.name)
+      .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
+      .replace(/__EGG_DATA__/g, eggData)
+      .replace(/__QUOTE__/g, quote);
+
+    return noCacheResponse(xaml, 'application/xml; charset=utf-8');
   }
 
-  if (!response.ok) {
-    return response;
-  }
-
-  let xaml = await response.text();
-
-  // 随机数据
-  const num = Math.floor(Math.random() * 99) + 1;
-  const color = pickRandom(COLORS);
-  const egg = pickRandom(EGGS);
-  const quote = pickRandom(QUOTES);
-  const eggData = egg.title + "|" + egg.content;
-
-  // 替换占位符
-  xaml = xaml
-    .replace(/__LUCKY_NUMBER__/g, String(num))
-    .replace(/__LUCKY_COLOR_NAME__/g, color.name)
-    .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
-    .replace(/__EGG_DATA__/g, eggData)
-    .replace(/__QUOTE__/g, quote);
-
-  return new Response(xaml, {
-    headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'Pragma': 'no-cache',
-    },
-  });
+  // 3. 其他路径走默认
+  return context.next();
 }
