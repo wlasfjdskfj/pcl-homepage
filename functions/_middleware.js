@@ -1,9 +1,22 @@
 /**
  * Cloudflare Pages Functions 中间件
- * 每次请求动态替换幸运数字、幸运颜色、彩蛋。
+ * 每次请求动态替换幸运数字、幸运颜色、彩蛋、每日一言。
  */
 
 // ============ 数据源 ============
+
+const QUOTES = [
+  "今天也要好好挖矿。",
+  "苦力怕从不敲门，但会给你惊喜。",
+  "钻石在 Y=-59，别挖太深。",
+  "别在岩浆边挖矿，除非你想重生。",
+  "末影人不会主动攻击你，除非你盯着它看。",
+  "下界合金比钻石更耐用，但更难找。",
+  "睡觉可以跳过夜晚，但会让你失去刷怪的机会。",
+  "村民交易可以打折，只要你治好了僵尸村民。",
+  "附魔台周围放 15 个书架可以升到 30 级。",
+  "信标需要金字塔底座，底座越大效果越强。",
+];
 
 const EGGS = [
   { title: "神秘代码",         content: "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！" },
@@ -34,7 +47,7 @@ const COLORS = [
   { name: "岩浆橙",   hex: "#FF7722" },
 ];
 
-// ============ 工具函数 ============
+// ============ 工具 ============
 
 function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -45,12 +58,10 @@ function pickRandom(arr) {
 export async function onRequest(context) {
   const url = new URL(context.request.url);
 
-  // 只处理主页和 Custom.xaml
   if (url.pathname !== '/Custom.xaml' && url.pathname !== '/') {
     return context.next();
   }
 
-  // 从静态资源拉取 Custom.xaml
   const assetUrl = new URL('/Custom.xaml', url.origin);
 
   let response;
@@ -71,6 +82,7 @@ export async function onRequest(context) {
   const num = Math.floor(Math.random() * 99) + 1;
   const color = pickRandom(COLORS);
   const egg = pickRandom(EGGS);
+  const quote = pickRandom(QUOTES);
   const eggData = egg.title + "|" + egg.content;
 
   // 替换占位符
@@ -78,7 +90,8 @@ export async function onRequest(context) {
     .replace(/__LUCKY_NUMBER__/g, String(num))
     .replace(/__LUCKY_COLOR_NAME__/g, color.name)
     .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
-    .replace(/__EGG_DATA__/g, eggData);
+    .replace(/__EGG_DATA__/g, eggData)
+    .replace(/__QUOTE__/g, quote);
 
   return new Response(xaml, {
     headers: {
