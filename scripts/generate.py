@@ -22,7 +22,7 @@ REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
 
 # 你的 Cloudflare Pages 地址（不要带末尾斜杠）
-BASE_URL = "https://www.mkejga.de5.net/"
+BASE_URL = "https://www.mkejga.de5.net"
 
 IMAGES_DIR_NAME = "images"
 
