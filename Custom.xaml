@@ -71,8 +71,8 @@
                     <StackPanel>
                         <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Border Width="16" Height="16" CornerRadius="4" Background="#2A4DD0" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="青金石蓝" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2A4DD0" />
+                            <Border Width="16" Height="16" CornerRadius="4" Background="#FF5555" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="红石红" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="#FF5555" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
