@@ -1,7 +1,9 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换幸运数字、幸运颜色、彩蛋、每日一言
+ * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
+ *
+ * 幸运颜色不在这里处理，由 Python 脚本每天随机生成。
  */
 
 // ============ 每日一言 ============
@@ -89,21 +91,6 @@ const EGGS = [
   { title: "终极装备",         content: "你终于集齐了全套下界合金装备……&#xA;&#xA;然后掉进了虚空。" },
 ];
 
-// ============ 幸运颜色 ============
-
-const COLORS = [
-  { name: "钻石蓝",     hex: "#4AEDD9" },
-  { name: "红石红",     hex: "#FF5555" },
-  { name: "金锭黄",     hex: "#FFAA00" },
-  { name: "绿宝石绿",   hex: "#17DD62" },
-  { name: "青金石蓝",   hex: "#2A4DD0" },
-  { name: "紫水晶紫",   hex: "#A64DFF" },
-  { name: "下界石英白", hex: "#E0E0E0" },
-  { name: "岩浆橙",     hex: "#FF7722" },
-  { name: "凋灵黑",     hex: "#3C3C3C" },
-  { name: "末影紫",     hex: "#8E44FF" },
-];
-
 // ============ 工具函数 ============
 
 function pickRandom(arr) {
@@ -150,15 +137,12 @@ export async function onRequest(context) {
     let xaml = await response.text();
 
     const num = Math.floor(Math.random() * 99) + 1;
-    const color = pickRandom(COLORS);
     const egg = pickRandom(EGGS);
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
     xaml = xaml
       .replace(/__LUCKY_NUMBER__/g, String(num))
-      .replace(/__LUCKY_COLOR_NAME__/g, color.name)
-      .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
       .replace(/__EGG_DATA__/g, eggData)
       .replace(/__QUOTE__/g, quote);
 
