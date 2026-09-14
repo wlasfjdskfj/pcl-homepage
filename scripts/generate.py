@@ -2,8 +2,8 @@
 """
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
-幸运数字、彩蛋、每日一言由 Cloudflare Functions 每次请求动态替换。
-幸运颜色、人品分数由 Python 每天随机一次。
+幸运数字、彩蛋、每日一言、人品分数由 Cloudflare Functions 每次请求动态替换。
+幸运颜色由 Python 每天随机一次。
 版本封面图从 Minecraft Wiki 抓取。
 """
 
@@ -382,22 +382,13 @@ def build_xaml():
     lucky_number = "__LUCKY_NUMBER__"
     egg_data = "__EGG_DATA__"
 
-    # 每天随机一次（Python 端）
+    # 人品分数（Cloudflare Functions 按用户 IP + 日期动态生成）
+    score = "__SCORE__"
+    comment = "__COMMENT__"
+    grade = "__GRADE__"
+
+    # 幸运颜色（Python 每天随机一次）
     lucky_color = random.choice(LUCKY_COLORS)
-
-    score = random.randint(1, 100)
-    if score >= 95:
-        comment, grade = "欧皇降世！建议立刻去抽卡。", "SSR"
-    elif score >= 80:
-        comment, grade = "运气极佳，适合下矿挖钻石。", "SR"
-    elif score >= 60:
-        comment, grade = "运气不错，平平淡淡才是真。", "R"
-    elif score >= 40:
-        comment, grade = "一般般，建议扶老奶奶过马路。", "N"
-    else:
-        comment, grade = "非酋认证，建议在家种地。", "N--"
-
-    score_blocks = score // 10
 
     clean_old_images()
 
@@ -496,7 +487,7 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 每日一言 + 换一句按钮（靠右，带主题色描边）
+    # 每日一言 + 换一句按钮
     lines.append('            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
@@ -505,7 +496,7 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 幸运数字（每次请求随机） + 幸运颜色（每天随机）
+    # 幸运数字 + 幸运颜色
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -597,14 +588,8 @@ def build_xaml():
     lines.append('                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />')
     lines.append('            </StackPanel>')
 
-    lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
-    for i in range(10):
-        if i < score_blocks:
-            color_res = "{DynamicResource ColorBrush1}"
-        else:
-            color_res = "{DynamicResource ColorBrush7}"
-        lines.append('                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="' + color_res + '" />')
-    lines.append('            </StackPanel>')
+    # 进度条由 Cloudflare Functions 动态生成
+    lines.append('            __SCORE_BAR__')
 
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
     lines.append('                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />')
