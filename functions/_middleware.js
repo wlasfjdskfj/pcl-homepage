@@ -3,9 +3,9 @@
  * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言、人品分数
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 人品分数使用 KV 存储：
- *   - key: renpin:日期:用户IP
- *   - 同一天同一用户分数固定，不同用户不同
+ * 人品分数使用 IP + 日期 hash 作为种子，无需 KV：
+ *   - 同一 IP 同一天 → 分数固定
+ *   - 不同 IP / 不同天 → 分数不同
  */
 
 // ============ 每日一言 ============
@@ -105,6 +105,27 @@ function noCacheResponse(body, contentType) {
 }
 
 /**
+ * 字符串 hash（djb2 变体，稳定性好）
+ */
+function hashCode(str) {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & 0x7fffffff; // 保持正整数
+  }
+  return hash;
+}
+
+/**
+ * 根据 IP + 日期生成确定性的分数（1-100）
+ * 同一 IP 同一天永远相同，不同 IP / 不同天不同
+ */
+function getScoreFromIpAndDate(ip, date) {
+  const seed = hashCode(ip + '|' + date);
+  return (seed % 100) + 1;
+}
+
+/**
  * 根据分数返回评语和评级
  */
 function getScoreInfo(score) {
@@ -129,50 +150,18 @@ function buildScoreBar(score) {
   return bar;
 }
 
-/**
- * 获取或生成用户今日的人品分数
- */
-async function getOrCreateScore(env, ip) {
-  const today = new Date().toISOString().slice(0, 10);
-  const kvKey = 'renpin:' + today + ':' + ip;
-
-  // 先查 KV
-  try {
-    const cached = await env.RENPIN_KV.get(kvKey, 'json');
-    if (cached && cached.score) {
-      return cached;
-    }
-  } catch (e) {
-    console.error('[KV] 读取失败：', e);
-  }
-
-  // 不存在则生成
-  const score = Math.floor(Math.random() * 100) + 1;
-  const info = getScoreInfo(score);
-  const data = { score: score, comment: info.comment, grade: info.grade };
-
-  // 存 KV，2 天后过期
-  try {
-    await env.RENPIN_KV.put(kvKey, JSON.stringify(data), { expirationTtl: 172800 });
-  } catch (e) {
-    console.error('[KV] 写入失败：', e);
-  }
-
-  return data;
-}
-
 // ============ 中间件 ============
 
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // 1. 版本号文件：每次返回当前时间戳，强制 PCL 重新下载主页
+  // 1. 版本号文件：每次返回当前时间戳
   if (url.pathname === '/Custom.xaml.version') {
     return noCacheResponse(Date.now().toString(), 'text/plain; charset=utf-8');
   }
 
-  // 2. 主页文件：动态替换占位符
+  // 2. 主页文件
   if (url.pathname === '/Custom.xaml' || url.pathname === '/') {
     const assetUrl = new URL('/Custom.xaml', url.origin);
 
@@ -199,27 +188,22 @@ export async function onRequest(context) {
     // 用户 IP
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
-    // 人品分数（按 IP + 日期）
-    let scoreData;
-    try {
-      scoreData = await getOrCreateScore(env, ip);
-    } catch (e) {
-      console.error('[Score] 获取失败，使用临时分数：', e);
-      const fallback = Math.floor(Math.random() * 100) + 1;
-      const info = getScoreInfo(fallback);
-      scoreData = { score: fallback, comment: info.comment, grade: info.grade };
-    }
+    // 今日日期（UTC）
+    const today = new Date().toISOString().slice(0, 10);
 
-    const scoreBar = buildScoreBar(scoreData.score);
+    // 人品分数：IP + 日期 的 hash
+    const score = getScoreFromIpAndDate(ip, today);
+    const info = getScoreInfo(score);
+    const scoreBar = buildScoreBar(score);
 
     // 替换占位符
     xaml = xaml
       .replace(/__LUCKY_NUMBER__/g, String(num))
       .replace(/__EGG_DATA__/g, eggData)
       .replace(/__QUOTE__/g, quote)
-      .replace(/__SCORE__/g, String(scoreData.score))
-      .replace(/__COMMENT__/g, scoreData.comment)
-      .replace(/__GRADE__/g, scoreData.grade)
+      .replace(/__SCORE__/g, String(score))
+      .replace(/__COMMENT__/g, info.comment)
+      .replace(/__GRADE__/g, info.grade)
       .replace(/__SCORE_BAR__/g, scoreBar);
 
     return noCacheResponse(xaml, 'application/xml; charset=utf-8');
