@@ -529,7 +529,7 @@ def build_xaml():
     lines.append('                    </local:CustomEventCollection>')
     lines.append('                </local:CustomEventService.Events>')
     lines.append('            </local:MyButton>')
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="由于技术原因不建议点太多次，有可能封禁IP。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
