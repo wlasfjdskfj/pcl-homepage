@@ -81,7 +81,7 @@
                         Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
 
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：末影人不会主动攻击你，除非你盯着它看。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：今天也要好好挖矿。" />
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -92,7 +92,7 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center"
                                Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="90" FontSize="28" FontWeight="Bold"
+                    <TextBlock Text="42" FontSize="28" FontWeight="Bold"
                                HorizontalAlignment="Center"
                                Foreground="{DynamicResource ColorBrush1}" />
                 </StackPanel>
@@ -122,13 +122,13 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <local:MyImage Grid.Column="0" Width="72" Height="72" Margin="0,0,18,0"
-                               Source="pack://application:,,,/images/Blocks/Anvil.png" />
+                               Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="铁砧" FontSize="16" FontWeight="Bold"
+                    <TextBlock Text="命令方块" FontSize="16" FontWeight="Bold"
                                Margin="0,0,0,6" />
                     <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="17"
                                Foreground="{DynamicResource ColorBrush3}"
-                               Text="修复装备、附魔、重命名，掉落会砸脚。" />
+                               Text="创造模式的玩具，Minecraft 的魔法方块。" />
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -235,7 +235,7 @@
             <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0"
                             Text="打开彩蛋"
                             EventType="弹出窗口"
-                            EventData="苦力怕的祝福|一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！" />
+                            EventData="末影人的秘密|你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」" />
 
             <local:MyHint Theme="Yellow" Margin="0,12,0,0"
                           Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />
@@ -250,7 +250,7 @@
                        Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="60" FontSize="52" FontWeight="Bold"
+                <TextBlock Text="33" FontSize="52" FontWeight="Bold"
                            Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom"
                            Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
@@ -282,11 +282,11 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13"
                            Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="R" FontSize="16" FontWeight="Bold"
+                <TextBlock Text="N--" FontSize="16" FontWeight="Bold"
                            Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
 
-            <local:MyHint Theme="Blue" Text="运气不错，平平淡淡才是真。" />
+            <local:MyHint Theme="Blue" Text="非酋认证，建议在家种地。" />
         </StackPanel>
     </local:MyCard>
 
