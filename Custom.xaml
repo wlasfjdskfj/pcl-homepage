@@ -51,7 +51,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：村民交易可以打折，只要你治好了僵尸村民。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：别在岩浆边挖矿，除非你想重生。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -70,21 +70,6 @@
                 </StackPanel>
             </Grid>
             <local:MyButton Height="36" HorizontalAlignment="Center" Margin="0,14,0,0" Padding="20,0,20,0" Text="刷新主页" EventType="刷新页面" EventData="-" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="今日幸运方块" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <local:MyImage Grid.Column="0" Width="72" Height="72" Margin="0,0,18,0" Source="https://www.mkejga.de5.net/images/cobblestone.png" />
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                    <TextBlock Text="圆石" FontSize="16" FontWeight="Bold" Margin="0,0,0,6" />
-                    <TextBlock TextWrapping="Wrap" FontSize="11" LineHeight="17" Foreground="{DynamicResource ColorBrush3}" Text="挖石头就能得到，建筑党的好帮手。" />
-                </StackPanel>
-            </Grid>
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
@@ -192,15 +177,22 @@
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="每次点开都不一样，看看你能抽到什么。" />
-            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋" EventType="弹出窗口" EventData="__EGG_DATA__" />
-            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新或重新进入主页都会换一个。" />
+            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                        <local:CustomEvent Type="刷新页面" Data="-" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyButton>
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="24" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="29" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
