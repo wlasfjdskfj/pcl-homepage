@@ -9,13 +9,13 @@
                         <TextBlock Text="__DATE_DAY__" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />
                     </StackPanel>
-                    <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
+                    <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
             <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
-                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="__QUOTE__" />
+                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,10" Text="__QUOTE__" />
                     <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
                 </StackPanel>
             </Border>
@@ -211,7 +211,7 @@
     </local:MyCard>
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Foreground="{DynamicResource ColorBrush1}" Text="每次点开都不一样，看看你能抽到什么。" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <local:MyIconTextButton Margin="0,0,24,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
                     <local:CustomEventService.Events>
@@ -231,14 +231,20 @@
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
                 <TextBlock Text="__SCORE__" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
+                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush1}" Margin="4,0,0,12" />
             </StackPanel>
             __SCORE_BAR__
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
+                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="__GRADE__" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
             <local:MyHint Theme="Blue" Text="__COMMENT__" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub Issues 留言。" />
+            <local:MyIconTextButton Height="40" HorizontalAlignment="Center" Padding="20,0,20,0" Text="打开反馈页面" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage/issues" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
