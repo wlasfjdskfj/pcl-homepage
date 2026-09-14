@@ -26,6 +26,9 @@ IMAGES_DIR_NAME = "images"
 VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
+# 反馈入口地址（改成你自己的）
+FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
+
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
 }
@@ -423,7 +426,7 @@ def build_xaml():
     lines.append('                        <TextBlock Text="' + day + '" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />')
     lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />')
+    lines.append('                    <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="13" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
@@ -431,7 +434,7 @@ def build_xaml():
     lines.append('            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
-    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="' + quote + '" />')
+    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,10" Text="' + quote + '" />')
     lines.append('                    <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
@@ -464,11 +467,10 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 2：你的信息（IP + 工具箱） ==========
+    # ========== 卡片 2：你的信息 ==========
     lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # IP 显示行
     lines.append('            <Border CornerRadius="8" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <Grid>')
     lines.append('                    <Grid.ColumnDefinitions>')
@@ -483,7 +485,6 @@ def build_xaml():
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
-    # 工具按钮（带描边 + 图标）
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -580,7 +581,7 @@ def build_xaml():
     # ========== 卡片 6：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
+    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Foreground="{DynamicResource ColorBrush1}" Text="每次点开都不一样，看看你能抽到什么。" />')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
     lines.append('                <local:MyIconTextButton Margin="0,0,24,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
     lines.append('                    <local:CustomEventService.Events>')
@@ -602,16 +603,24 @@ def build_xaml():
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
     lines.append('                <TextBlock Text="' + str(score) + '" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />')
+    lines.append('                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush1}" Margin="4,0,0,12" />')
     lines.append('            </StackPanel>')
 
     lines.append('            __SCORE_BAR__')
 
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
-    lines.append('                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                <TextBlock Text="' + grade + '" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('            </StackPanel>')
     lines.append('            <local:MyHint Theme="Blue" Text="' + comment + '" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 8：反馈入口 ==========
+    lines.append('    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub Issues 留言。" />')
+    lines.append('            <local:MyIconTextButton Height="40" HorizontalAlignment="Center" Padding="20,0,20,0" Text="打开反馈页面" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + FEEDBACK_URL + '" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
