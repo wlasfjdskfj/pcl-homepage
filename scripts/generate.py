@@ -18,9 +18,7 @@ WIKI_API = "https://zh.minecraft.wiki/api.php"
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
 
-# 你的 Cloudflare Pages 地址（不要带末尾斜杠）
 BASE_URL = "https://www.mkejga.de5.net"
-
 IMAGES_DIR_NAME = "images"
 
 HEADERS = {
@@ -42,7 +40,6 @@ QUOTES = [
     "信标需要金字塔底座，底座越大效果越强。",
 ]
 
-# image_title 精确指定 Wiki 上的文件名，避免自动筛选选错
 BLOCKS = [
     {"name": "草方块",   "wiki": "草方块",   "image_title": "File:Grass Block.png",       "file": "grass.png",          "fallback": "Grass.png",          "desc": "Minecraft 的标志性方块，随处可见。"},
     {"name": "圆石",     "wiki": "圆石",     "image_title": "File:Cobblestone.png",       "file": "cobblestone.png",    "fallback": "Cobblestone.png",    "desc": "挖石头就能得到，建筑党的好帮手。"},
@@ -75,7 +72,6 @@ LUCKY_COLORS = [
 # ============ 版本信息获取 ============
 
 def fetch_latest_version():
-    """从 Mojang 官方 API 获取最新版本号，失败时返回兜底数据。"""
     default = {
         "release": "1.21",
         "snapshot": "",
@@ -113,10 +109,6 @@ def fetch_latest_version():
 # ============ Wiki 图片获取 ============
 
 def fetch_wiki_image(image_title, filename, width=128):
-    """
-    从 Minecraft Wiki 获取指定文件名的图片，保存到 images/ 文件夹。
-    image_title 必须是完整的 File:xxx 格式。
-    """
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -191,7 +183,6 @@ def fetch_wiki_image(image_title, filename, width=128):
 
 
 def pick_version_image(images, version):
-    """从版本页面图片列表里筛选出封面图。"""
     candidates = []
     for img in images:
         t = img.get("title", "")
@@ -213,7 +204,6 @@ def pick_version_image(images, version):
 
 
 def fetch_version_image(version, filename="version.png"):
-    """从 Minecraft Wiki 的版本页面抓取封面图。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -345,20 +335,17 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # 方块图片
     wiki_ok = fetch_wiki_image(block["image_title"], block["file"], width=128)
     if wiki_ok:
         block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
     else:
         block_source = "pack://application:,,,/images/Blocks/" + block["fallback"]
 
-    # 版本信息
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
     release_date = ver["release_date"] if ver["release_date"] else now.strftime("%Y-%m-%d")
 
-    # 版本封面图
     version_img_ok = fetch_version_image(release, filename="version.png")
     if version_img_ok:
         version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
@@ -369,13 +356,6 @@ def build_xaml():
     version_sub = ""
     if snapshot and snapshot != release:
         version_sub = "快照版：" + snapshot
-
-    if version_sub:
-        changelog_first = "最新正式版：" + release
-        changelog_second = version_sub
-    else:
-        changelog_first = "最新正式版：" + release
-        changelog_second = ""
 
     news_title = "最新版本 - " + release
 
@@ -389,7 +369,8 @@ def build_xaml():
     # ========== 卡片 1：最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    # 封面：Border 裁剪 + Image 拉伸填满
+
+    # 封面
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
@@ -398,16 +379,26 @@ def build_xaml():
     lines.append('                    </Border>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
-    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">')
-    lines.append('                <TextBlock Text="•" FontSize="16" Foreground="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
-    lines.append('                <TextBlock Text="' + changelog_first + '" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />')
-    lines.append('            </StackPanel>')
-    if changelog_second:
-        lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">')
-        lines.append('                <TextBlock Text="•" FontSize="16" Foreground="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
-        lines.append('                <TextBlock Text="' + changelog_second + '" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />')
-        lines.append('            </StackPanel>')
-    lines.append('            <TextBlock Text="最后更新: ' + release_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />')
+
+    # 更新摘要：带图标 + 圆角边框
+    lines.append('            <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel Orientation="Horizontal">')
+    lines.append('                    <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />')
+    lines.append('                    <TextBlock Text="最新正式版：' + release + '" FontSize="13" VerticalAlignment="Center" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+    if version_sub:
+        lines.append('            <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
+        lines.append('                <StackPanel Orientation="Horizontal">')
+        lines.append('                    <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />')
+        lines.append('                    <TextBlock Text="' + version_sub + '" FontSize="13" VerticalAlignment="Center" />')
+        lines.append('                </StackPanel>')
+        lines.append('            </Border>')
+
+    # 最后更新时间
+    lines.append('            <TextBlock Text="最后更新: ' + release_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,4,0,10" />')
+
+    # 底部操作栏
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -528,7 +519,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：彩蛋（按钮版） ==========
+    # ========== 卡片 6：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />')
