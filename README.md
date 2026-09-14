@@ -49,47 +49,57 @@
 
 ---
 
-❓ 常见问题
-Q：主页加载失败怎么办？
 
-关闭 PCL2 → 删除 %appdata%\PCL\Cache 文件夹 → 重开 PCL2。
+## ❓ 常见问题
 
-Q：日期不更新？
+### 主页加载失败怎么办？
 
-Cloudflare Functions 可能没生效，跑一次 python check.py 诊断。
+关闭 PCL2 → 删除 `%appdata%\PCL\Cache` 文件夹 → 重开 PCL2。
 
-Q：版本图是旧的？
+### 日期不更新？
+
+Cloudflare Functions 可能没生效，跑一次 `python check.py` 诊断。
+
+### 版本图是旧的？
 
 Cloudflare 缓存没刷新，去控制台清除缓存。
 
-Q：人品分数和别人的一样？
+### 人品分数和别人的一样？
 
 同一 WiFi 下共享 IP，属于正常现象。
 
-🤝 贡献
+---
+
+## 🤝 贡献
+
 欢迎提交 Issue 和 Pull Request。
 
-提交 Bug：描述问题 + 附上截图
+- **提交 Bug**：描述问题 + 附上截图
+- **提交功能**：说明用途 + 附上代码
 
-提交功能：说明用途 + 附上代码
+---
 
-📄 开源协议
-本项目采用 MIT License 开源。
+## 📄 开源协议
 
-⚠️ 主页内容里的版本图来自 Minecraft Wiki，遵循 CC BY-NC-SA 3.0 协议。
+本项目采用 [MIT License](LICENSE) 开源。
 
-🙏 致谢
-PCL2 - 强大的 Minecraft 启动器
+> ⚠️ 主页内容里的版本图来自 Minecraft Wiki，遵循 CC BY-NC-SA 3.0 协议。
 
-Minecraft Wiki - 版本信息与封面图
+---
 
-NewsHomepage - 主页设计灵感
+## 🙏 致谢
 
-Mojang - 版本 API
+- [PCL2](https://github.com/Meloong-Git/PCL) - 强大的 Minecraft 启动器
+- [Minecraft Wiki](https://zh.minecraft.wiki/) - 版本信息与封面图
+- [NewsHomepage](https://github.com/Light-Beacon/PCL2-NewsHomepage) - 主页设计灵感
+- [Mojang](https://www.minecraft.net/) - 版本 API
+
+---
 
 <div align="center">
-如果这个项目对你有帮助，点个 ⭐ Star 支持一下！
 
-Made with ❤️ by wlasfjdskfj
+**如果这个项目对你有帮助，点个 ⭐ Star 支持一下！**
 
-</div> ```
+Made with ❤️ by [wlasfjdskfj](https://github.com/wlasfjdskfj)
+
+</div>
