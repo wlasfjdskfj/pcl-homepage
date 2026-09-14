@@ -5,21 +5,30 @@ PCL 主页生成脚本
 """
 
 import random
+import time
 import requests
 from datetime import datetime
 from pathlib import Path
 
 # ============ 配置 ============
 
-NEWS_API = "https://news.bugjump.net/News.json"
+# Mojang 官方版本清单
+VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+
+# Minecraft Wiki API
 WIKI_API = "https://zh.minecraft.wiki/api.php"
-REQUEST_TIMEOUT = 10
+
+REQUEST_TIMEOUT = 30
+MAX_RETRIES = 3
 
 # 你的 Cloudflare Pages 地址（不要带末尾斜杠）
-BASE_URL = "https://pcl-homepage.pages.dev"
+BASE_URL = "https://www.mkejga.de5.net/"
 
-# 图片保存目录
 IMAGES_DIR_NAME = "images"
+
+HEADERS = {
+    "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
+}
 
 # ============ 静态数据源 ============
 
@@ -48,12 +57,12 @@ BLOCKS = [
 ]
 
 EGGS = [
-    {"title": "神秘代码",   "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！"},
-    {"title": "开发者留言", "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」"},
-    {"title": "钻石雨",     "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。"},
+    {"title": "神秘代码",     "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！"},
+    {"title": "开发者留言",   "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」"},
+    {"title": "钻石雨",       "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。"},
     {"title": "苦力怕的祝福", "content": "一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！"},
     {"title": "末影人的秘密", "content": "你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」"},
-    {"title": "幸运方块",   "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。"},
+    {"title": "幸运方块",     "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。"},
 ]
 
 LUCKY_COLORS = [
@@ -65,13 +74,13 @@ LUCKY_COLORS = [
 ]
 
 
-# ============ 新闻获取 ============
+# ============ 版本信息获取（Mojang 官方 API） ============
 
-def fetch_news_homepage():
-    """从 NewsHomepage API 获取最新版本信息，失败时返回兜底数据。"""
+def fetch_latest_version():
+    """从 Mojang 官方 API 获取最新版本号，失败时返回兜底数据。"""
     default = {
-        "version": "1.21",
-        "changelog": "暂无更新信息。",
+        "release": "1.21",
+        "snapshot": "",
         "release_date": "",
         "server_url": "https://www.minecraft.net/zh-hans/download/server",
         "wiki_url": "https://zh.minecraft.wiki/",
@@ -79,35 +88,61 @@ def fetch_news_homepage():
     }
 
     try:
-        resp = requests.get(NEWS_API, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
         data = resp.json()
 
-        latest = data.get("latest") or data.get("latest_card") or {}
-        if latest:
-            default["version"] = latest.get("version", default["version"])
-            default["changelog"] = latest.get("changelog", default["changelog"])
-            default["release_date"] = latest.get("release_date", default["release_date"])
-            default["server_url"] = latest.get("server_url", default["server_url"])
-            default["wiki_url"] = latest.get("wiki_url", default["wiki_url"])
-            default["changelog_url"] = latest.get("changelog_url", default["changelog_url"])
+        latest = data.get("latest", {})
+        default["release"] = latest.get("release", default["release"])
+        default["snapshot"] = latest.get("snapshot", "")
 
-        print("[News] 获取成功：" + default["version"])
+        versions = data.get("versions", [])
+        for v in versions:
+            if v.get("id") == default["release"]:
+                rt = v.get("releaseTime", "")
+                if rt:
+                    default["release_date"] = rt[:10]
+                break
+
+        print("[Version] 正式版：" + default["release"] + "，快照版：" + default["snapshot"])
         return default
 
     except Exception as e:
-        print("[News] 请求失败：" + str(e) + "，使用默认数据。")
+        print("[Version] 请求失败：" + str(e) + "，使用默认数据。")
         return default
 
 
 # ============ Wiki 图片获取 ============
 
+def pick_best_image(images):
+    """从图片列表里筛选出最适合当方块贴图的。"""
+    for img in images:
+        t = img.get("title", "")
+        if not t.lower().endswith((".png", ".gif", ".jpg")):
+            continue
+        if "BiomeSprite" in t:
+            continue
+        if "Bedrock Edition icon" in t:
+            continue
+        if "Java Edition icon" in t:
+            continue
+        if "Disambig" in t:
+            continue
+        if "Sprite" in t:
+            continue
+        if "Icon" in t and "Block" not in t:
+            continue
+        if "Block" in t:
+            return t
+    for img in images:
+        t = img.get("title", "")
+        if t.lower().endswith((".png", ".gif", ".jpg")) and "Sprite" not in t:
+            return t
+    return None
+
+
 def fetch_wiki_image(page_title, filename, width=128):
-    """
-    从 Minecraft Wiki 获取指定页面的首张图片，保存到 images/ 文件夹。
-    如果图片已存在，跳过下载。
-    返回 True 表示图片可用，False 表示失败。
-    """
+    """从 Minecraft Wiki 获取指定页面的首张图片，保存到 images/ 文件夹。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -123,7 +158,7 @@ def fetch_wiki_image(page_title, filename, width=128):
             "prop": "images",
             "format": "json",
         }
-        resp = requests.get(WIKI_API, params=params, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
 
@@ -132,12 +167,14 @@ def fetch_wiki_image(page_title, filename, width=128):
         for page_id, page_info in pages.items():
             images = page_info.get("images", [])
             if images:
-                image_title = images[0]["title"]
+                image_title = pick_best_image(images)
                 break
 
         if not image_title:
-            print("[Wiki] 未找到 " + page_title + " 的图片")
+            print("[Wiki] 未找到 " + page_title + " 的合适图片")
             return False
+
+        print("[Wiki] " + page_title + " → " + image_title)
 
         params = {
             "action": "query",
@@ -147,7 +184,7 @@ def fetch_wiki_image(page_title, filename, width=128):
             "iiurlwidth": str(width),
             "format": "json",
         }
-        resp = requests.get(WIKI_API, params=params, timeout=REQUEST_TIMEOUT)
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
 
@@ -163,26 +200,177 @@ def fetch_wiki_image(page_title, filename, width=128):
             print("[Wiki] 未获取到 " + image_title + " 的 URL")
             return False
 
-        img_resp = requests.get(thumb_url, timeout=REQUEST_TIMEOUT)
-        img_resp.raise_for_status()
+        img_headers = {
+            "User-Agent": HEADERS["User-Agent"],
+            "Referer": "https://zh.minecraft.wiki/",
+        }
 
-        with open(local_path, "wb") as f:
-            f.write(img_resp.content)
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                img_resp = requests.get(thumb_url, headers=img_headers, timeout=REQUEST_TIMEOUT)
+                if img_resp.status_code != 200:
+                    print("[Wiki] 第 " + str(attempt) + " 次下载失败，状态码：" + str(img_resp.status_code))
+                    if attempt < MAX_RETRIES:
+                        time.sleep(3)
+                        continue
+                    return False
 
-        print("[Wiki] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
-        return True
+                with open(local_path, "wb") as f:
+                    f.write(img_resp.content)
+
+                print("[Wiki] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
+                return True
+
+            except requests.exceptions.Timeout:
+                print("[Wiki] 第 " + str(attempt) + " 次超时")
+                if attempt < MAX_RETRIES:
+                    time.sleep(3)
+                else:
+                    return False
+
+        return False
 
     except Exception as e:
         print("[Wiki] 获取 " + page_title + " 图片失败：" + str(e))
         return False
 
 
+def pick_version_image(images, version):
+    """从版本页面图片列表里筛选出封面图。"""
+    candidates = []
+    for img in images:
+        t = img.get("title", "")
+        if not t.lower().endswith((".png", ".jpg", ".gif")):
+            continue
+        if "Sprite" in t:
+            continue
+        if "Disambig" in t:
+            continue
+        if "Logo" in t:
+            continue
+        if "Icon" in t:
+            continue
+        # 优先选文件名含版本号的
+        if version in t:
+            candidates.insert(0, t)
+        else:
+            candidates.append(t)
+    return candidates[0] if candidates else None
+
+
+def fetch_version_image(version, filename="version.png"):
+    """
+    从 Minecraft Wiki 的版本页面抓取封面图。
+    页面标题形如「Java版1.21」。
+    """
+    images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
+    images_dir.mkdir(exist_ok=True)
+    local_path = images_dir / filename
+    marker = images_dir / (filename + ".version")
+
+    # 版本号没变就跳过
+    if local_path.exists() and marker.exists():
+        try:
+            if marker.read_text(encoding="utf-8").strip() == version:
+                print("[Version-Image] 图片已存在且版本一致：" + filename)
+                return True
+        except Exception:
+            pass
+
+    page_title = "Java版" + version
+
+    try:
+        params = {
+            "action": "query",
+            "titles": page_title,
+            "prop": "images",
+            "format": "json",
+        }
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+
+        pages = data.get("query", {}).get("pages", {})
+        image_title = None
+
+        for page_id, page_info in pages.items():
+            if "missing" in page_info:
+                print("[Version-Image] 页面不存在：" + page_title)
+                return False
+            images = page_info.get("images", [])
+            image_title = pick_version_image(images, version)
+            break
+
+        if not image_title:
+            print("[Version-Image] 未找到 " + page_title + " 的封面图")
+            return False
+
+        print("[Version-Image] " + page_title + " → " + image_title)
+
+        params = {
+            "action": "query",
+            "titles": image_title,
+            "prop": "imageinfo",
+            "iiprop": "url",
+            "iiurlwidth": "400",
+            "format": "json",
+        }
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+
+        pages = data.get("query", {}).get("pages", {})
+        thumb_url = None
+        for page_id, page_info in pages.items():
+            info_list = page_info.get("imageinfo", [])
+            if info_list:
+                thumb_url = info_list[0].get("thumburl") or info_list[0].get("url")
+                break
+
+        if not thumb_url:
+            print("[Version-Image] 未获取到 " + image_title + " 的 URL")
+            return False
+
+        img_headers = {
+            "User-Agent": HEADERS["User-Agent"],
+            "Referer": "https://zh.minecraft.wiki/",
+        }
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                img_resp = requests.get(thumb_url, headers=img_headers, timeout=REQUEST_TIMEOUT)
+                if img_resp.status_code != 200:
+                    print("[Version-Image] 第 " + str(attempt) + " 次下载失败：" + str(img_resp.status_code))
+                    if attempt < MAX_RETRIES:
+                        time.sleep(3)
+                        continue
+                    return False
+
+                with open(local_path, "wb") as f:
+                    f.write(img_resp.content)
+
+                marker.write_text(version, encoding="utf-8")
+
+                print("[Version-Image] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
+                return True
+
+            except requests.exceptions.Timeout:
+                print("[Version-Image] 第 " + str(attempt) + " 次超时")
+                if attempt < MAX_RETRIES:
+                    time.sleep(3)
+                else:
+                    return False
+
+        return False
+
+    except Exception as e:
+        print("[Version-Image] 获取 " + page_title + " 封面图失败：" + str(e))
+        return False
+
+
 # ============ XAML 生成 ============
 
 def build_xaml():
-    """生成完整的 Custom.xaml 内容"""
-
-    # ---------- 动态数据 ----------
     now = datetime.now()
     month = now.strftime("%m").lstrip("0") or "0"
     day = now.strftime("%d").lstrip("0") or "0"
@@ -207,27 +395,44 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # ---------- 尝试从 Wiki 下载方块图片 ----------
+    # 方块图片
     wiki_ok = fetch_wiki_image(block["wiki"], block["file"], width=128)
     if wiki_ok:
         block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
     else:
         block_source = "pack://application:,,,/images/Blocks/" + block["fallback"]
 
-    # ---------- 获取最新版本信息 ----------
-    news = fetch_news_homepage()
-    version = news["version"]
-    news_title = "最新版本 - " + version
+    # 版本信息
+    ver = fetch_latest_version()
+    release = ver["release"]
+    snapshot = ver["snapshot"]
+    release_date = ver["release_date"] if ver["release_date"] else now.strftime("%Y-%m-%d")
 
-    changelog_lines = [line.strip() for line in news["changelog"].split("\n") if line.strip()]
-    changelog_first = changelog_lines[0] if changelog_lines else "暂无更新摘要。"
+    # 版本封面图
+    version_img_ok = fetch_version_image(release, filename="version.png")
+    if version_img_ok:
+        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
+    else:
+        version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
-    release_date = news["release_date"] if news["release_date"] else now.strftime("%Y-%m-%d")
-    server_url = news["server_url"]
-    wiki_url = news["wiki_url"]
-    changelog_url = news["changelog_url"]
+    version_display = release
+    version_sub = ""
+    if snapshot and snapshot != release:
+        version_sub = "快照版：" + snapshot
 
-    # ---------- 拼装 XAML ----------
+    if version_sub:
+        changelog_first = "最新正式版：" + release
+        changelog_second = version_sub
+    else:
+        changelog_first = "最新正式版：" + release
+        changelog_second = ""
+
+    news_title = "最新版本 - " + release
+
+    server_url = ver["server_url"]
+    wiki_url = ver["wiki_url"]
+    changelog_url = ver["changelog_url"]
+
     lines = []
     lines.append('<StackPanel>')
 
@@ -236,9 +441,9 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Width="90" Height="90" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
-    lines.append('                        <TextBlock Text="' + version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
+    lines.append('                        <TextBlock Text="' + version_display + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
@@ -246,6 +451,11 @@ def build_xaml():
     lines.append('                <TextBlock Text="•" FontSize="16" Foreground="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
     lines.append('                <TextBlock Text="' + changelog_first + '" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />')
     lines.append('            </StackPanel>')
+    if changelog_second:
+        lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">')
+        lines.append('                <TextBlock Text="•" FontSize="16" Foreground="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
+        lines.append('                <TextBlock Text="' + changelog_second + '" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" />')
+        lines.append('            </StackPanel>')
     lines.append('            <TextBlock Text="最后更新: ' + release_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />')
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
