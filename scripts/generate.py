@@ -3,7 +3,7 @@
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 幸运数字、幸运颜色、彩蛋由 Cloudflare Functions 每次请求动态替换。
-版本封面图从 Minecraft Wiki 抓取。
+版本封面图从 Minecraft Wiki 抓取，优先匹配完整版本号文件名。
 """
 
 import random
@@ -23,10 +23,7 @@ MAX_RETRIES = 3
 BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
-# 版本图缓存天数，超过后强制重下
 VERSION_IMAGE_CACHE_DAYS = 7
-
-# 白名单：清理时保留的文件
 KEEP_FILES = ["version.png"]
 
 HEADERS = {
@@ -91,17 +88,33 @@ def fetch_latest_version():
 # ============ Wiki 版本封面图获取 ============
 
 def pick_version_image(images, version):
-    """从版本页面图片列表里筛选封面图。优先级：标题画面 > 含完整版本号 > 含主版本号 > 其他。"""
+    """
+    从版本页面图片列表里筛选封面图。
+    优先级：
+      1. 文件名精确匹配完整版本号（如 26.3-rc-2.jpg）
+      2. 文件名包含完整版本号
+      3. 文件名包含主版本号
+      4. 其他
+    """
     base_version = version
     for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
         if base_version.endswith(suffix):
             base_version = base_version[:-len(suffix)]
             break
 
-    priority_title = []
-    priority1 = []
-    priority2 = []
-    priority3 = []
+    # 计算完整版本号的文件名（不带扩展名）
+    exact_names = [
+        version + ".jpg",
+        version + ".png",
+        version + ".gif",
+        version.replace("-", "_") + ".jpg",
+        version.replace("-", "_") + ".png",
+    ]
+
+    priority_exact = []   # 精确匹配完整版本号
+    priority_version = [] # 含完整版本号
+    priority_base = []    # 含主版本号
+    priority_other = []   # 其他
 
     for img in images:
         t = img.get("title", "")
@@ -109,23 +122,28 @@ def pick_version_image(images, version):
             continue
         if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
             continue
-        if "Java Edition" in t or "Title" in t:
-            priority_title.append(t)
-        elif version in t:
-            priority1.append(t)
-        elif base_version in t:
-            priority2.append(t)
-        else:
-            priority3.append(t)
 
-    if priority_title:
-        return priority_title[0]
-    if priority1:
-        return priority1[0]
-    if priority2:
-        return priority2[0]
-    if priority3:
-        return priority3[0]
+        # 提取文件名部分（去掉 File: 前缀）
+        file_name = t.replace("File:", "")
+
+        # 精确匹配
+        if file_name in exact_names:
+            priority_exact.append(t)
+        elif version in t:
+            priority_version.append(t)
+        elif base_version in t:
+            priority_base.append(t)
+        else:
+            priority_other.append(t)
+
+    if priority_exact:
+        return priority_exact[0]
+    if priority_version:
+        return priority_version[0]
+    if priority_base:
+        return priority_base[0]
+    if priority_other:
+        return priority_other[0]
     return None
 
 
@@ -265,7 +283,6 @@ def fetch_version_image(version, filename="version.png"):
 
 
 def clean_old_images():
-    """清理 images/ 目录，只保留白名单内的图片。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     if not images_dir.exists():
         return
@@ -371,10 +388,8 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # 清理旧图片
     clean_old_images()
 
-    # 版本信息
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -394,7 +409,6 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    # 从 Wiki 抓版本封面图
     version_img_ok = fetch_version_image(main_version, filename="version.png")
     if version_img_ok:
         version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
@@ -413,11 +427,9 @@ def build_xaml():
     # ========== 卡片 1：最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-
-    # 封面：Border 裁剪 + Image 拉伸填满
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" Width="600" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
     lines.append('                        <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
@@ -527,7 +539,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：彩蛋（带图标按钮） ==========
+    # ========== 卡片 5：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
