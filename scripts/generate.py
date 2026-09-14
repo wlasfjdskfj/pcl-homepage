@@ -12,10 +12,7 @@ from pathlib import Path
 
 # ============ 配置 ============
 
-# Mojang 官方版本清单
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
-
-# Minecraft Wiki API
 WIKI_API = "https://zh.minecraft.wiki/api.php"
 
 REQUEST_TIMEOUT = 30
@@ -45,15 +42,16 @@ QUOTES = [
     "信标需要金字塔底座，底座越大效果越强。",
 ]
 
+# image_title 精确指定 Wiki 上的文件名，避免自动筛选选错
 BLOCKS = [
-    {"name": "草方块",   "wiki": "草方块",   "file": "grass.png",          "fallback": "Grass.png",          "desc": "Minecraft 的标志性方块，随处可见。"},
-    {"name": "圆石",     "wiki": "圆石",     "file": "cobblestone.png",    "fallback": "Cobblestone.png",    "desc": "挖石头就能得到，建筑党的好帮手。"},
-    {"name": "金块",     "wiki": "金块",     "file": "gold_block.png",     "fallback": "GoldBlock.png",      "desc": "9 个金锭合成，还能做信标底座。"},
-    {"name": "命令方块", "wiki": "命令方块", "file": "command_block.png",  "fallback": "CommandBlock.png",   "desc": "创造模式的玩具，Minecraft 的魔法方块。"},
-    {"name": "铁砧",     "wiki": "铁砧",     "file": "anvil.png",          "fallback": "Anvil.png",          "desc": "修复装备、附魔、重命名，掉落会砸脚。"},
-    {"name": "红石块",   "wiki": "红石块",   "file": "redstone_block.png", "fallback": "RedstoneBlock.png",  "desc": "持续输出红石信号，可以永久激活装置。"},
-    {"name": "鸡蛋",     "wiki": "鸡蛋",     "file": "egg.png",            "fallback": "Egg.png",            "desc": "扔出去有几率生成小鸡。"},
-    {"name": "土径",     "wiki": "土径",     "file": "grass_path.png",     "fallback": "GrassPath.png",      "desc": "用锹右键草方块得到，走路不会踩坏草。"},
+    {"name": "草方块",   "wiki": "草方块",   "image_title": "File:Grass Block.png",       "file": "grass.png",          "fallback": "Grass.png",          "desc": "Minecraft 的标志性方块，随处可见。"},
+    {"name": "圆石",     "wiki": "圆石",     "image_title": "File:Cobblestone.png",       "file": "cobblestone.png",    "fallback": "Cobblestone.png",    "desc": "挖石头就能得到，建筑党的好帮手。"},
+    {"name": "金块",     "wiki": "金块",     "image_title": "File:Block of Gold.png",     "file": "gold_block.png",     "fallback": "GoldBlock.png",      "desc": "9 个金锭合成，还能做信标底座。"},
+    {"name": "命令方块", "wiki": "命令方块", "image_title": "File:Command Block.png",     "file": "command_block.png",  "fallback": "CommandBlock.png",   "desc": "创造模式的玩具，Minecraft 的魔法方块。"},
+    {"name": "铁砧",     "wiki": "铁砧",     "image_title": "File:Anvil.png",             "file": "anvil.png",          "fallback": "Anvil.png",          "desc": "修复装备、附魔、重命名，掉落会砸脚。"},
+    {"name": "红石块",   "wiki": "红石块",   "image_title": "File:Block of Redstone.png", "file": "redstone_block.png", "fallback": "RedstoneBlock.png",  "desc": "持续输出红石信号，可以永久激活装置。"},
+    {"name": "鸡蛋",     "wiki": "鸡蛋",     "image_title": "File:Egg.png",               "file": "egg.png",            "fallback": "Egg.png",            "desc": "扔出去有几率生成小鸡。"},
+    {"name": "钻石块",   "wiki": "钻石块",   "image_title": "File:Block of Diamond.png",  "file": "diamond_block.png",  "fallback": "GoldBlock.png",      "desc": "9 个钻石合成，是最值钱的装饰方块之一。"},
 ]
 
 EGGS = [
@@ -74,7 +72,7 @@ LUCKY_COLORS = [
 ]
 
 
-# ============ 版本信息获取（Mojang 官方 API） ============
+# ============ 版本信息获取 ============
 
 def fetch_latest_version():
     """从 Mojang 官方 API 获取最新版本号，失败时返回兜底数据。"""
@@ -114,35 +112,11 @@ def fetch_latest_version():
 
 # ============ Wiki 图片获取 ============
 
-def pick_best_image(images):
-    """从图片列表里筛选出最适合当方块贴图的。"""
-    for img in images:
-        t = img.get("title", "")
-        if not t.lower().endswith((".png", ".gif", ".jpg")):
-            continue
-        if "BiomeSprite" in t:
-            continue
-        if "Bedrock Edition icon" in t:
-            continue
-        if "Java Edition icon" in t:
-            continue
-        if "Disambig" in t:
-            continue
-        if "Sprite" in t:
-            continue
-        if "Icon" in t and "Block" not in t:
-            continue
-        if "Block" in t:
-            return t
-    for img in images:
-        t = img.get("title", "")
-        if t.lower().endswith((".png", ".gif", ".jpg")) and "Sprite" not in t:
-            return t
-    return None
-
-
-def fetch_wiki_image(page_title, filename, width=128):
-    """从 Minecraft Wiki 获取指定页面的首张图片，保存到 images/ 文件夹。"""
+def fetch_wiki_image(image_title, filename, width=128):
+    """
+    从 Minecraft Wiki 获取指定文件名的图片，保存到 images/ 文件夹。
+    image_title 必须是完整的 File:xxx 格式。
+    """
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -152,30 +126,6 @@ def fetch_wiki_image(page_title, filename, width=128):
         return True
 
     try:
-        params = {
-            "action": "query",
-            "titles": page_title,
-            "prop": "images",
-            "format": "json",
-        }
-        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        data = resp.json()
-
-        pages = data.get("query", {}).get("pages", {})
-        image_title = None
-        for page_id, page_info in pages.items():
-            images = page_info.get("images", [])
-            if images:
-                image_title = pick_best_image(images)
-                break
-
-        if not image_title:
-            print("[Wiki] 未找到 " + page_title + " 的合适图片")
-            return False
-
-        print("[Wiki] " + page_title + " → " + image_title)
-
         params = {
             "action": "query",
             "titles": image_title,
@@ -191,6 +141,9 @@ def fetch_wiki_image(page_title, filename, width=128):
         pages = data.get("query", {}).get("pages", {})
         thumb_url = None
         for page_id, page_info in pages.items():
+            if "missing" in page_info:
+                print("[Wiki] 文件不存在：" + image_title)
+                return False
             info_list = page_info.get("imageinfo", [])
             if info_list:
                 thumb_url = info_list[0].get("thumburl") or info_list[0].get("url")
@@ -199,6 +152,8 @@ def fetch_wiki_image(page_title, filename, width=128):
         if not thumb_url:
             print("[Wiki] 未获取到 " + image_title + " 的 URL")
             return False
+
+        print("[Wiki] " + image_title + " → " + thumb_url)
 
         img_headers = {
             "User-Agent": HEADERS["User-Agent"],
@@ -231,7 +186,7 @@ def fetch_wiki_image(page_title, filename, width=128):
         return False
 
     except Exception as e:
-        print("[Wiki] 获取 " + page_title + " 图片失败：" + str(e))
+        print("[Wiki] 获取 " + image_title + " 失败：" + str(e))
         return False
 
 
@@ -250,7 +205,6 @@ def pick_version_image(images, version):
             continue
         if "Icon" in t:
             continue
-        # 优先选文件名含版本号的
         if version in t:
             candidates.insert(0, t)
         else:
@@ -259,16 +213,12 @@ def pick_version_image(images, version):
 
 
 def fetch_version_image(version, filename="version.png"):
-    """
-    从 Minecraft Wiki 的版本页面抓取封面图。
-    页面标题形如「Java版1.21」。
-    """
+    """从 Minecraft Wiki 的版本页面抓取封面图。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
     marker = images_dir / (filename + ".version")
 
-    # 版本号没变就跳过
     if local_path.exists() and marker.exists():
         try:
             if marker.read_text(encoding="utf-8").strip() == version:
@@ -396,7 +346,7 @@ def build_xaml():
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
     # 方块图片
-    wiki_ok = fetch_wiki_image(block["wiki"], block["file"], width=128)
+    wiki_ok = fetch_wiki_image(block["image_title"], block["file"], width=128)
     if wiki_ok:
         block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
     else:
