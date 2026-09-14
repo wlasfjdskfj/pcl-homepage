@@ -1,9 +1,9 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言、人品分数、幸运颜色
+ * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 幸运数字 / 每日一言 / 彩蛋：每次请求随机
+ * 日期 / 幸运数字 / 每日一言 / 彩蛋：每次请求随机
  * 人品分数 / 幸运颜色：用 IP + 日期 hash，同一 IP 同一天固定
  */
 
@@ -119,6 +119,25 @@ function noCacheResponse(body, contentType) {
 }
 
 /**
+ * 获取北京时间的年月日和星期
+ */
+function getBeijingDate() {
+  const now = new Date();
+  const beijing = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+  const year = beijing.getUTCFullYear();
+  const month = beijing.getUTCMonth() + 1;
+  const day = beijing.getUTCDate();
+  const weekdayIdx = beijing.getUTCDay();
+  const weekdayMap = ["日", "一", "二", "三", "四", "五", "六"];
+  return {
+    year: String(year),
+    month: String(month),
+    day: String(day),
+    weekday: weekdayMap[weekdayIdx],
+  };
+}
+
+/**
  * 字符串 hash（djb2 变体）
  */
 function hashCode(str) {
@@ -198,21 +217,28 @@ export async function onRequest(context) {
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
-    // 用户 IP + 今日日期（UTC）
+    // 当前北京时间
+    const date = getBeijingDate();
+
+    // 用户 IP + 今日日期（UTC 用于稳定 hash）
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const today = new Date().toISOString().slice(0, 10);
 
-    // 人品分数：hash(IP + 日期 + "score")
+    // 人品分数
     const score = deterministicIndex(ip, today, "score", 100) + 1;
     const info = getScoreInfo(score);
     const scoreBar = buildScoreBar(score);
 
-    // 幸运颜色：hash(IP + 日期 + "color")
+    // 幸运颜色
     const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
     const color = COLORS[colorIdx];
 
     // 替换占位符
     xaml = xaml
+      .replace(/__DATE_YEAR__/g, date.year)
+      .replace(/__DATE_MONTH__/g, date.month)
+      .replace(/__DATE_DAY__/g, date.day)
+      .replace(/__DATE_WEEKDAY__/g, date.weekday)
       .replace(/__LUCKY_NUMBER__/g, String(num))
       .replace(/__LUCKY_COLOR_NAME__/g, color.name)
       .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
