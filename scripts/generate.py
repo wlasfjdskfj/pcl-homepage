@@ -2,7 +2,8 @@
 """
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
-幸运数字、幸运颜色、彩蛋、每日一言由 Cloudflare Functions 每次请求动态替换。
+幸运数字、彩蛋、每日一言由 Cloudflare Functions 每次请求动态替换。
+幸运颜色、人品分数由 Python 每天随机一次。
 版本封面图从 Minecraft Wiki 抓取。
 """
 
@@ -43,6 +44,20 @@ QUOTES = [
     "村民交易可以打折，只要你治好了僵尸村民。",
     "附魔台周围放 15 个书架可以升到 30 级。",
     "信标需要金字塔底座，底座越大效果越强。",
+]
+
+# 幸运颜色库（每天从里面随机选一个）
+LUCKY_COLORS = [
+    {"name": "钻石蓝",     "hex": "#4AEDD9"},
+    {"name": "红石红",     "hex": "#FF5555"},
+    {"name": "金锭黄",     "hex": "#FFAA00"},
+    {"name": "绿宝石绿",   "hex": "#17DD62"},
+    {"name": "青金石蓝",   "hex": "#2A4DD0"},
+    {"name": "紫水晶紫",   "hex": "#A64DFF"},
+    {"name": "下界石英白", "hex": "#E0E0E0"},
+    {"name": "岩浆橙",     "hex": "#FF7722"},
+    {"name": "凋灵黑",     "hex": "#3C3C3C"},
+    {"name": "末影紫",     "hex": "#8E44FF"},
 ]
 
 
@@ -362,11 +377,13 @@ def build_xaml():
     year = now.strftime("%Y")
     weekday = ["一", "二", "三", "四", "五", "六", "日"][now.weekday()]
 
-    # 占位符，由 Cloudflare Functions 每次请求动态替换
+    # 动态替换（Cloudflare Functions 每次请求随机）
     quote = "__QUOTE__"
     lucky_number = "__LUCKY_NUMBER__"
-    lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
     egg_data = "__EGG_DATA__"
+
+    # 每天随机一次（Python 端）
+    lucky_color = random.choice(LUCKY_COLORS)
 
     score = random.randint(1, 100)
     if score >= 95:
@@ -488,7 +505,7 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 幸运数字 + 幸运颜色
+    # 幸运数字（每次请求随机） + 幸运颜色（每天随机）
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
