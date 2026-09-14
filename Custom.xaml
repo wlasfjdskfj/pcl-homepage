@@ -38,36 +38,38 @@
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                <TextBlock Text="9" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                <TextBlock Text=" 月 " FontSize="12" VerticalAlignment="Bottom" Margin="0,0,2,10" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="14" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                <TextBlock Text=" 日" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,10" Foreground="{DynamicResource ColorBrush3}" />
-            </StackPanel>
-            <TextBlock Text="2026 年 · 星期一" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,16" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
-                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush1}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush3}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
-                <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
-            </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：睡觉可以跳过夜晚，但会让你失去刷怪的机会。" />
+            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="9" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,2,12" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="14" FontSize="44" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="{DynamicResource ColorBrush3}" />
+                    </StackPanel>
+                    <TextBlock Text="2026 年 · 星期一" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
+                </StackPanel>
+            </Border>
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：末影人不会主动攻击你，除非你盯着它看。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                    <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="__LUCKY_NUMBER__" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
-                </StackPanel>
-                <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                    <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Width="14" Height="14" CornerRadius="3" Background="__LUCKY_COLOR_HEX__" Margin="0,0,6,0" VerticalAlignment="Center" />
-                        <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="__LUCKY_COLOR_HEX__" />
+                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="30" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
                     </StackPanel>
-                </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Border Width="16" Height="16" CornerRadius="4" Background="__LUCKY_COLOR_HEX__" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="__LUCKY_COLOR_HEX__" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
         </StackPanel>
     </local:MyCard>
@@ -193,9 +195,21 @@
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="19" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <TextBlock Text="21" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
