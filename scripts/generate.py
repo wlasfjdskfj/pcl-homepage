@@ -111,6 +111,7 @@ def fetch_latest_version():
 # ============ Wiki 图片获取 ============
 
 def fetch_wiki_image(image_title, filename, width=128):
+    """从 Minecraft Wiki 获取指定文件名的图片，保存到 images/ 文件夹。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -185,16 +186,20 @@ def fetch_wiki_image(image_title, filename, width=128):
 
 
 def pick_version_image(images, version):
-    """从版本页面图片列表里筛选出封面图。"""
+    """
+    从版本页面图片列表里筛选封面图。
+    优先级：标题画面 > 含完整版本号 > 含主版本号 > 其他
+    """
     base_version = version
     for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
         if base_version.endswith(suffix):
             base_version = base_version[:-len(suffix)]
             break
 
-    priority1 = []
-    priority2 = []
-    priority3 = []
+    priority_title = []   # 标题画面
+    priority1 = []        # 含完整版本号
+    priority2 = []        # 含主版本号
+    priority3 = []        # 其他
 
     for img in images:
         t = img.get("title", "")
@@ -202,13 +207,18 @@ def pick_version_image(images, version):
             continue
         if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
             continue
-        if version in t:
+        # 标题画面优先
+        if "Java Edition" in t or "Title" in t:
+            priority_title.append(t)
+        elif version in t:
             priority1.append(t)
         elif base_version in t:
             priority2.append(t)
         else:
             priority3.append(t)
 
+    if priority_title:
+        return priority_title[0]
     if priority1:
         return priority1[0]
     if priority2:
@@ -223,8 +233,8 @@ def fetch_version_image(version, filename="version.png"):
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
-    # 缓存标记改成 v2，让旧缓存失效
-    marker = images_dir / (filename + ".v2.version")
+    # 缓存标记 v3，让旧缓存失效
+    marker = images_dir / (filename + ".v3.version")
 
     if local_path.exists() and marker.exists():
         try:
@@ -347,9 +357,9 @@ def fetch_version_image(version, filename="version.png"):
         print("[Version-Image] 获取封面图失败：" + str(e))
         return False
 
+
 # ============ 指令分组数据 ============
 
-# 每组是 (分组标题, [(按钮文字, 指令, ToolTip)])
 CMD_GROUPS = [
     ("基础模式", [
         ("创造模式", "/gamemode creative", "/gamemode creative"),
@@ -575,7 +585,6 @@ def build_xaml():
 
     for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "14"
-        # 版本区分的分组用高亮颜色
         title_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
         lines.append('            <TextBlock Text="' + group_title + '" FontSize="11" FontWeight="Bold" Foreground="' + title_color + '" Margin="0,0,0,6" />')
         lines.append('            <Grid Margin="0,0,0,' + margin_bottom + '">')
