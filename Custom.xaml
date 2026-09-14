@@ -49,7 +49,7 @@
                     <TextBlock Text="2026 年 · 星期一" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：下界合金比钻石更耐用，但更难找。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：附魔台周围放 15 个书架可以升到 30 级。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
