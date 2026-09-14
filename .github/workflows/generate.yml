@@ -33,12 +33,28 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: 安装依赖
         run: pip install requests
 
       - name: 运行生成脚本
         run: python scripts/generate.py
+        env:
+          PYTHONIOENCODING: utf-8
+
+      - name: 检查生成结果
+        run: |
+          if [ ! -f Custom.xaml ]; then
+            echo "::error::Custom.xaml 未生成"
+            exit 1
+          fi
+          SIZE=$(wc -c < Custom.xaml)
+          echo "Custom.xaml 大小：$SIZE 字节"
+          if [ "$SIZE" -lt 1000 ]; then
+            echo "::error::Custom.xaml 内容过小，可能生成失败"
+            exit 1
+          fi
 
       - name: 提交并推送
         run: |
@@ -46,7 +62,6 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Custom.xaml
           git add images/ || true
-          git add functions/ || true
           if git diff --staged --quiet; then
             echo "内容无变化，跳过提交"
           else
