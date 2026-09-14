@@ -14,9 +14,6 @@ from pathlib import Path
 
 # ============ 配置 ============
 
-# 玩家 ID（改成你自己的游戏 ID）
-PLAYER_ID = "Hotaru_kawaii"
-
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
 
@@ -464,24 +461,18 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 2：你的信息 ==========
+    # ========== 卡片 2：你的信息（只有 IP） ==========
     lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
     lines.append('            <Border CornerRadius="8" Padding="20,16" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">')
-    lines.append('                        <TextBlock Text="玩家 ID：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                        <TextBlock Text="' + PLAYER_ID + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                        <TextBlock Text="公网 IP：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                        <TextBlock Text="' + user_ip + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                    </StackPanel>')
+    lines.append('                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                    <TextBlock Text="公网 IP：" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                    <TextBlock Text="' + user_ip + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="玩家 ID 是自定义的，修改 generate.py 里的 PLAYER_ID 即可。&#xA;IP 由 Cloudflare 从请求头读取，展示的是你自己的公网 IP。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="IP 由 Cloudflare 从请求头读取，展示的是你自己的公网 IP。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
