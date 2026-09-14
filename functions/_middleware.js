@@ -1,11 +1,10 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言、人品分数
+ * - /Custom.xaml：动态替换幸运数字、彩蛋、每日一言、人品分数、幸运颜色
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 人品分数使用 IP + 日期 hash 作为种子，无需 KV：
- *   - 同一 IP 同一天 → 分数固定
- *   - 不同 IP / 不同天 → 分数不同
+ * 幸运数字 / 每日一言 / 彩蛋：每次请求随机
+ * 人品分数 / 幸运颜色：用 IP + 日期 hash，同一 IP 同一天固定
  */
 
 // ============ 每日一言 ============
@@ -88,6 +87,21 @@ const EGGS = [
   { title: "终极装备",         content: "你终于集齐了全套下界合金装备……&#xA;&#xA;然后掉进了虚空。" },
 ];
 
+// ============ 幸运颜色 ============
+
+const COLORS = [
+  { name: "钻石蓝",     hex: "#4AEDD9" },
+  { name: "红石红",     hex: "#FF5555" },
+  { name: "金锭黄",     hex: "#FFAA00" },
+  { name: "绿宝石绿",   hex: "#17DD62" },
+  { name: "青金石蓝",   hex: "#2A4DD0" },
+  { name: "紫水晶紫",   hex: "#A64DFF" },
+  { name: "下界石英白", hex: "#E0E0E0" },
+  { name: "岩浆橙",     hex: "#FF7722" },
+  { name: "凋灵黑",     hex: "#3C3C3C" },
+  { name: "末影紫",     hex: "#8E44FF" },
+];
+
 // ============ 工具函数 ============
 
 function pickRandom(arr) {
@@ -105,24 +119,23 @@ function noCacheResponse(body, contentType) {
 }
 
 /**
- * 字符串 hash（djb2 变体，稳定性好）
+ * 字符串 hash（djb2 变体）
  */
 function hashCode(str) {
   let hash = 5381;
   for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) + hash) + str.charCodeAt(i);
-    hash = hash & 0x7fffffff; // 保持正整数
+    hash = hash & 0x7fffffff;
   }
   return hash;
 }
 
 /**
- * 根据 IP + 日期生成确定性的分数（1-100）
- * 同一 IP 同一天永远相同，不同 IP / 不同天不同
+ * 用 IP + 日期 + salt 生成确定性数字（0 ~ max-1）
  */
-function getScoreFromIpAndDate(ip, date) {
-  const seed = hashCode(ip + '|' + date);
-  return (seed % 100) + 1;
+function deterministicIndex(ip, date, salt, max) {
+  const seed = hashCode(ip + '|' + date + '|' + salt);
+  return seed % max;
 }
 
 /**
@@ -156,7 +169,7 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // 1. 版本号文件：每次返回当前时间戳
+  // 1. 版本号文件
   if (url.pathname === '/Custom.xaml.version') {
     return noCacheResponse(Date.now().toString(), 'text/plain; charset=utf-8');
   }
@@ -179,26 +192,30 @@ export async function onRequest(context) {
 
     let xaml = await response.text();
 
-    // 随机数据
+    // 每次请求随机
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
-    // 用户 IP
+    // 用户 IP + 今日日期（UTC）
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-
-    // 今日日期（UTC）
     const today = new Date().toISOString().slice(0, 10);
 
-    // 人品分数：IP + 日期 的 hash
-    const score = getScoreFromIpAndDate(ip, today);
+    // 人品分数：hash(IP + 日期 + "score")
+    const score = deterministicIndex(ip, today, "score", 100) + 1;
     const info = getScoreInfo(score);
     const scoreBar = buildScoreBar(score);
+
+    // 幸运颜色：hash(IP + 日期 + "color")
+    const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
+    const color = COLORS[colorIdx];
 
     // 替换占位符
     xaml = xaml
       .replace(/__LUCKY_NUMBER__/g, String(num))
+      .replace(/__LUCKY_COLOR_NAME__/g, color.name)
+      .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
       .replace(/__EGG_DATA__/g, eggData)
       .replace(/__QUOTE__/g, quote)
       .replace(/__SCORE__/g, String(score))
@@ -209,6 +226,6 @@ export async function onRequest(context) {
     return noCacheResponse(xaml, 'application/xml; charset=utf-8');
   }
 
-  // 3. 其他路径走默认
+  // 3. 其他路径
   return context.next();
 }
