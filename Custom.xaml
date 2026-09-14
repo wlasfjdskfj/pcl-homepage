@@ -43,7 +43,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：村民交易可以打折，只要你治好了僵尸村民。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：睡觉可以跳过夜晚，但会让你失去刷怪的机会。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -51,13 +51,13 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="4" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                    <TextBlock Text="22" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
                 </StackPanel>
                 <StackPanel Grid.Column="1" HorizontalAlignment="Center">
                     <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <Border Width="14" Height="14" CornerRadius="3" Background="#17DD62" Margin="0,0,6,0" VerticalAlignment="Center" />
-                        <TextBlock Text="绿宝石绿" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#17DD62" />
+                        <Border Width="14" Height="14" CornerRadius="3" Background="#2A4DD0" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="青金石蓝" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2A4DD0" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -136,14 +136,14 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="55" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="76" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="N" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="R" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="一般般，建议扶老奶奶过马路。" />
+            <local:MyHint Theme="Blue" Text="运气不错，平平淡淡才是真。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
