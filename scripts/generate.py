@@ -12,7 +12,7 @@ from pathlib import Path
 
 # ============ 配置 ============
 
-VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+VERSION_API = "https://piston-meta.mongang.com/mc/game/version_manifest_v2.json"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -21,7 +21,6 @@ BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
 VERSION_IMAGE_FILE = "version.png"
-KEEP_FILES = [VERSION_IMAGE_FILE]
 
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
@@ -82,39 +81,23 @@ def fetch_latest_version():
         return default
 
 
-# ============ 图片清理 ============
+# ============ 图片检查 ============
 
-def clean_old_images():
+def get_version_image_source():
+    """
+    检查本地 images/version.png 是否存在。
+    存在：用网络地址引用；
+    不存在：回退到 PCL 内置命令方块图。
+    """
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
-    if not images_dir.exists():
-        return
+    local_path = images_dir / VERSION_IMAGE_FILE
 
-    print("[Clean] 开始清理 images/ 目录")
-
-    removed_count = 0
-    for f in images_dir.iterdir():
-        if not f.is_file():
-            continue
-        if f.name.endswith(".version"):
-            try:
-                f.unlink()
-                print("[Clean] 删除标记文件：" + f.name)
-                removed_count += 1
-            except Exception as e:
-                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
-            continue
-        if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
-            try:
-                f.unlink()
-                print("[Clean] 删除无用图片：" + f.name)
-                removed_count += 1
-            except Exception as e:
-                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
-
-    if removed_count == 0:
-        print("[Clean] 无需清理")
+    if local_path.exists():
+        print("[Image] version.png 存在，使用网络地址")
+        return BASE_URL + "/" + IMAGES_DIR_NAME + "/" + VERSION_IMAGE_FILE
     else:
-        print("[Clean] 共清理 " + str(removed_count) + " 个文件")
+        print("[Image] version.png 不存在，回退到内置图片")
+        return "pack://application:,,,/images/Blocks/CommandBlock.png"
 
 
 # ============ 指令分组数据 ============
@@ -190,8 +173,6 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    clean_old_images()
-
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -211,8 +192,8 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + VERSION_IMAGE_FILE
-    version_image_fallback = "pack://application:,,,/images/Blocks/CommandBlock.png"
+    # 版本封面图：Python 里判断，XAML 里只用一个 Source
+    version_image_source = get_version_image_source()
 
     news_title = "最新版本 - " + main_version
 
@@ -228,7 +209,7 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" FallbackSource="' + version_image_fallback + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
     lines.append('                        <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
@@ -338,7 +319,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：彩蛋（带图标文字按钮） ==========
+    # ========== 卡片 5：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
