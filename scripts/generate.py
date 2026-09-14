@@ -90,7 +90,9 @@ def fetch_latest_version():
 def pick_version_image(images, version):
     """优先级：精确文件名 > 含完整版本号 > 含主版本号 > 其他。"""
     base_version = version
-    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-rc-5",
+                   "-pre1", "-pre2", "-pre3", "-pre4", "-pre5",
+                   "-pre6", "-pre7", "-pre8", "-pre9"]:
         if base_version.endswith(suffix):
             base_version = base_version[:-len(suffix)]
             break
@@ -162,7 +164,9 @@ def fetch_version_image(version, filename="version.png"):
     page_titles.append("Java版" + version)
 
     base_version = version
-    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-rc-5",
+                   "-pre1", "-pre2", "-pre3", "-pre4", "-pre5",
+                   "-pre6", "-pre7", "-pre8", "-pre9"]:
         if base_version.endswith(suffix):
             base_version = base_version[:-len(suffix)]
             break
@@ -285,12 +289,10 @@ def clean_old_images():
         if not f.is_file():
             continue
 
-        # 保护标记文件，不删
         if f.name.endswith(".version"):
             print("[Clean] 保留标记文件：" + f.name)
             continue
 
-        # 清理不在白名单内的图片
         if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
             try:
                 f.unlink()
@@ -452,7 +454,8 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
-    lines.append('                <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="' + changelog_url + '" />')
+    # 第一个按钮：启动当前游戏（EventData 留空）
+    lines.append('                <local:MyIconTextButton Grid.Column="0" Text="启动游戏" LogoScale="0.9" Logo="M320 128l384 256-384 256V128z" EventType="启动游戏" EventData="" />')
     lines.append('                <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="' + server_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="' + wiki_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + changelog_url + '" />')
@@ -476,7 +479,14 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：' + quote + '" />')
+    # 每日一言 + 换一句按钮
+    lines.append('            <Border CornerRadius="6" Padding="12,10" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <TextBlock Text="每日一言" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10" Text="' + quote + '" />')
+    lines.append('                    <local:MyIconTextButton Height="32" HorizontalAlignment="Left" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -505,13 +515,15 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：常用链接 ==========
+    # ========== 卡片 3：常用链接（新增 MC百科 和 NameMC） ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/GoldBlock.png" Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器" EventType="打开网页" EventData="https://hypixel.net/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -597,7 +609,6 @@ def main():
     output.write_text(xaml, encoding="utf-8")
     print("已生成：" + str(output))
 
-    # 写入版本号文件，PCL 通过它判断是否需要重新下载主页
     version_file = base_dir / "Custom.xaml.version"
     version_str = datetime.now().strftime("%Y%m%d%H")
     version_file.write_text(version_str, encoding="utf-8")
