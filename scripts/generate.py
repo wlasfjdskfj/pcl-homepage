@@ -28,9 +28,7 @@ VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
 # 更新摘要显示的最大条数
-CHANGELOG_MAX_ITEMS = 6
-# 每条更新最多显示的字数（超出会截断加省略号）
-CHANGELOG_ITEM_MAX_LEN = 80
+CHANGELOG_MAX_ITEMS = 5
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 
@@ -298,15 +296,14 @@ def clean_wiki_text(text):
     return text
 
 
-def fetch_changelog(version, max_items=None, item_max_len=None):
+def fetch_changelog(version, max_items=None):
     """
     从 Minecraft Wiki 抓取版本更新摘要。
     支持多章节（更改、修复、新增等），支持二级项目缩进。
+    不截断条目，完整显示。
     """
     if max_items is None:
         max_items = CHANGELOG_MAX_ITEMS
-    if item_max_len is None:
-        item_max_len = CHANGELOG_ITEM_MAX_LEN
 
     page_title = "Java版" + version
     try:
@@ -334,7 +331,6 @@ def fetch_changelog(version, max_items=None, item_max_len=None):
         in_target_section = False
         section_level = 0
         items = []
-        current_section_title = ""
 
         for line in lines:
             # 匹配章节标题 == 更改 ==
@@ -345,10 +341,8 @@ def fetch_changelog(version, max_items=None, item_max_len=None):
                 if any(k in title for k in ["更改", "修复", "新增", "改动", "变更", "特性", "常规"]):
                     in_target_section = True
                     section_level = level
-                    current_section_title = title
                 elif in_target_section and level <= section_level:
                     in_target_section = False
-                    current_section_title = ""
                 continue
 
             if in_target_section and line.strip().startswith("*"):
@@ -360,11 +354,7 @@ def fetch_changelog(version, max_items=None, item_max_len=None):
                 if not cleaned or len(cleaned) <= 5:
                     continue
 
-                # 长条目截断
-                if len(cleaned) > item_max_len:
-                    cleaned = cleaned[:item_max_len - 1] + "…"
-
-                # 二级项目加缩进前缀
+                # 二级项目加缩进前缀（不截断）
                 if star_count >= 2:
                     cleaned = "　└ " + cleaned
 
@@ -518,7 +508,7 @@ def build_xaml():
                 changelog_text += "&#xA;"
             changelog_text += "• " + item
     else:
-        changelog_text = "• 暂无更新摘要，点击下方按钮查看 Wiki。"
+        changelog_text = "• 暂无更新摘要。"
 
     server_url = ver["server_url"]
     wiki_url = ver["wiki_url"]
@@ -630,11 +620,13 @@ def build_xaml():
 
     lines.append('            <TextBlock Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
 
-    lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
+    # 更新摘要内容
+    lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="' + changelog_text + '" />')
     lines.append('            </Border>')
 
-    lines.append('            <TextBlock Text="最后更新: ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,12" />')
+    # 提示：点击更新日志查看更多
+    lines.append('            <TextBlock Text="📖 点击下方【更新日志】查看完整更新内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
