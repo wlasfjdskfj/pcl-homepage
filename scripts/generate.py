@@ -27,7 +27,6 @@ IMAGES_DIR_NAME = "images"
 VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
-# 卡片里只显示前 N 条更新摘要（完整内容点「更新日志」查看）
 CHANGELOG_PREVIEW_ITEMS = 3
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
@@ -283,7 +282,6 @@ def fetch_version_image(version, filename="version.png"):
 # ============ Wiki 更新摘要获取 ============
 
 def clean_wiki_text(text):
-    """清理 wiki 语法，并转义 XAML 特殊字符"""
     text = re.sub(r"<ref[^>]*>.*?</ref>", "", text)
     text = re.sub(r"<ref[^>]*/>", "", text)
     text = re.sub(r"<[^>]+>", "", text)
@@ -297,13 +295,9 @@ def clean_wiki_text(text):
 
 
 def fetch_changelog(version, max_items=None):
-    """
-    从 Minecraft Wiki 抓取版本的「修复」章节内容。
-    """
     if max_items is None:
         max_items = CHANGELOG_PREVIEW_ITEMS
 
-    # 候选页面：先精确版本页，再主版本页
     base_version = version
     for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-rc-5",
                    "-pre1", "-pre2", "-pre3", "-pre4", "-pre5",
@@ -316,7 +310,6 @@ def fetch_changelog(version, max_items=None):
     if base_version != version:
         page_titles.append("Java版" + base_version)
 
-    # 只匹配「修复」相关章节
     section_keywords = ["修复"]
 
     for page_title in page_titles:
@@ -471,7 +464,6 @@ CMD_GROUPS = [
 
 
 def escape_xaml_attr(text):
-    """把指令里的双引号转成 XAML 转义符"""
     return text.replace('"', "&quot;")
 
 
@@ -566,12 +558,14 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
+    # 幸运数字 + 幸运颜色
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
 
+    # 幸运数字
     lines.append('                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
@@ -579,12 +573,13 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
 
+    # 幸运颜色（圆形色块 + 白色描边）
     lines.append('                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <Border Width="16" Height="16" CornerRadius="4" Background="' + lucky_color["hex"] + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
-    lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + lucky_color["hex"] + '" />')
+    lines.append('                            <Border Width="22" Height="22" CornerRadius="11" Background="' + lucky_color["hex"] + '" BorderBrush="#99FFFFFF" BorderThickness="2" Margin="0,0,10,0" VerticalAlignment="Center" />')
+    lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
@@ -643,7 +638,6 @@ def build_xaml():
         version_info = main_label + "：" + main_version
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
 
-    # 更新摘要标题 + 部分提示
     lines.append('            <Grid Margin="0,0,0,6">')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="Auto" />')
@@ -653,12 +647,10 @@ def build_xaml():
     lines.append('                <TextBlock Grid.Column="1" Text="（部分）" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="6,0,0,0" />')
     lines.append('            </Grid>')
 
-    # 更新摘要内容
     lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="' + changelog_text + '" />')
     lines.append('            </Border>')
 
-    # 底部提示：点击更新日志查看完整内容
     lines.append('            <TextBlock Text="📖 仅显示部分修复内容，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
     lines.append('            <Grid>')
