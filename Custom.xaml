@@ -1,23 +1,24 @@
 <StackPanel>
 
     <!-- ========== 卡片 1：最新版本 ========== -->
-    <local:MyCard Title="最新版本" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="最新版本 - 1.21" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
-            <!-- 封面大图 + 版本号浮层 -->
-            <Grid Margin="0,0,0,14">
-                <Border CornerRadius="8" ClipToBounds="True">
-                    <local:MyImage Height="150" Stretch="UniformToFill"
-                                   Source="pack://application:,,,/images/Blocks/Grass.png"
-                                   FallbackSource="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                </Border>
-                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                        Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
-                        Margin="0,0,0,12">
-                    <TextBlock Text="1.21" FontSize="16" FontWeight="Bold"
-                               Foreground="White" />
-                </Border>
-            </Grid>
+            <!-- 封面：纯色背景 + 内置方块图 + 版本号浮层 -->
+            <Border CornerRadius="8" Height="150" Margin="0,0,0,14"
+                    Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <local:MyImage Width="90" Height="90" HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                            Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
+                            Margin="0,0,0,12">
+                        <TextBlock Text="1.21" FontSize="16" FontWeight="Bold"
+                                   Foreground="White" />
+                    </Border>
+                </Grid>
+            </Border>
 
             <!-- 更新摘要 -->
             <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
@@ -26,8 +27,6 @@
                 <TextBlock Text="暂无更新信息。" FontSize="13" VerticalAlignment="Center"
                            TextWrapping="Wrap" />
             </StackPanel>
-
-            
 
             <!-- 最后更新时间 -->
             <TextBlock Text="最后更新: 2026-09-14" FontSize="11"
@@ -42,13 +41,13 @@
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
 
-                <local:MyTextButton Grid.Column="0" Text="启动"
-                                    EventType="启动游戏" EventData="1.21" />
+                <local:MyTextButton Grid.Column="0" Text="下载"
+                                    EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
                 <local:MyTextButton Grid.Column="1" Text="服务端"
                                     EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
                 <local:MyTextButton Grid.Column="2" Text="WIKI"
                                     EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-                <local:MyTextButton Grid.Column="3" Text="官网更新日志"
+                <local:MyTextButton Grid.Column="3" Text="更新日志"
                                     EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
             </Grid>
         </StackPanel>
@@ -82,7 +81,7 @@
                         Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
 
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：睡觉可以跳过夜晚，但会让你失去刷怪的机会。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：苦力怕从不敲门，但会给你惊喜。" />
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -93,7 +92,7 @@
                 <StackPanel Grid.Column="0" HorizontalAlignment="Center">
                     <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center"
                                Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="45" FontSize="28" FontWeight="Bold"
+                    <TextBlock Text="3" FontSize="28" FontWeight="Bold"
                                HorizontalAlignment="Center"
                                Foreground="{DynamicResource ColorBrush1}" />
                 </StackPanel>
@@ -103,11 +102,11 @@
                                Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Border Width="14" Height="14" CornerRadius="3"
-                                Background="#FFAA00" Margin="0,0,6,0"
+                                Background="#2A4DD0" Margin="0,0,6,0"
                                 VerticalAlignment="Center" />
-                        <TextBlock Text="金锭黄" FontSize="14" FontWeight="Bold"
+                        <TextBlock Text="青金石蓝" FontSize="14" FontWeight="Bold"
                                    VerticalAlignment="Center"
-                                   Foreground="#FFAA00" />
+                                   Foreground="#2A4DD0" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
@@ -226,23 +225,19 @@
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 6：彩蛋 ========== -->
+    <!-- ========== 卡片 6：彩蛋（按钮版） ========== -->
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
-            <local:MyImage Height="72" HorizontalAlignment="Center" Margin="0,0,0,14"
-                           Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                       Text="点击下面的按钮，看看今天抽到了什么彩蛋。" />
 
-            <TextBlock Text="「钻石雨」" FontSize="15" FontWeight="Bold"
-                       HorizontalAlignment="Center" Margin="0,0,0,10" />
+            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0"
+                            Text="打开彩蛋"
+                            EventType="弹出窗口"
+                            EventData="苦力怕的祝福|一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！" />
 
-            <Border CornerRadius="6" Padding="14,10"
-                    Background="{DynamicResource ColorBrush7}" Margin="0,0,0,14">
-                <TextBlock TextWrapping="Wrap" Text="天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。"
-                           FontSize="12" LineHeight="19" />
-            </Border>
-
-            <local:MyHint Theme="Yellow"
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0"
                           Text="彩蛋由 GitHub Actions 定时随机生成，每 2 小时换一次。" />
         </StackPanel>
     </local:MyCard>
@@ -255,7 +250,7 @@
                        Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="59" FontSize="52" FontWeight="Bold"
+                <TextBlock Text="33" FontSize="52" FontWeight="Bold"
                            Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom"
                            Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
@@ -287,11 +282,11 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13"
                            Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="N" FontSize="16" FontWeight="Bold"
+                <TextBlock Text="N--" FontSize="16" FontWeight="Bold"
                            Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
 
-            <local:MyHint Theme="Blue" Text="一般般，建议扶老奶奶过马路。" />
+            <local:MyHint Theme="Blue" Text="非酋认证，建议在家种地。" />
         </StackPanel>
     </local:MyCard>
 
