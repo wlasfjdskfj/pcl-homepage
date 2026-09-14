@@ -479,7 +479,22 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：最新版本 ==========
+    # ========== 卡片 3：工具箱 ==========
+    lines.append('    <local:MyCard Title="工具箱" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <Grid>')
+    lines.append('                <Grid.ColumnDefinitions>')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                </Grid.ColumnDefinitions>')
+    lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M256 128h512v128H256z M256 384h512v128H256z M256 640h512v128H256z" EventType="内存优化" EventData="-" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="清理垃圾" LogoScale="0.9" Logo="M320 128h384v64l-64 640H384L320 192V128z M448 256v448h64V256z M640 256v448h64V256z" EventType="清理垃圾" EventData="-" />')
+    lines.append('            </Grid>')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 4：最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
@@ -523,7 +538,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 4：常用链接 ==========
+    # ========== 卡片 5：常用链接 ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
@@ -535,7 +550,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：游戏指令速查 ==========
+    # ========== 卡片 6：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -559,7 +574,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：彩蛋 ==========
+    # ========== 卡片 7：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
@@ -578,7 +593,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 7：人品测试 ==========
+    # ========== 卡片 8：人品测试 ==========
     lines.append('    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
