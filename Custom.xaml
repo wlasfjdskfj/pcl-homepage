@@ -1,4 +1,18 @@
 <StackPanel>
+    <!-- 由 GitHub Actions 自动生成，请勿手动编辑 -->
+    <!-- 生成时间：2026-09-14 04:19:09 -->
+
+    <!-- ========== 卡片 1：今日概览 ========== -->
+    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,15">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,8" FontSize="14" FontWeight="Bold"
+                       Text="今天是 2026 年 09 月 14 日 星期一" />
+            <local:MyHint Theme="Blue" Margin="0,4,0,0"
+                          Text="每日一言：今天也要好好挖矿。" />
+        </StackPanel>
+    </local:MyCard>
+
+    <!-- ========== 卡片 2：常用链接 ========== -->
     <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,15">
             <local:MyListItem Margin="-5,0,-5,8" Type="Clickable"
@@ -20,21 +34,69 @@
         </StackPanel>
     </local:MyCard>
 
-    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <!-- ========== 卡片 3：游戏指令速查 ========== -->
+    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,15">
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"
-                       Text="神秘代码" />
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14"
-                       Text="检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                       Text="点击按钮即可复制对应指令，进游戏后粘贴到聊天框使用。" />
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36"
+                                Text="创造模式" ToolTip="/gamemode creative"
+                                EventType="复制文本" EventData="/gamemode creative" />
+                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36"
+                                Text="生存模式" ToolTip="/gamemode survival"
+                                EventType="复制文本" EventData="/gamemode survival" />
+                <local:MyButton Grid.Column="2" Height="36"
+                                Text="设为白天" ToolTip="/time set day"
+                                EventType="复制文本" EventData="/time set day" />
+            </Grid>
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyButton Grid.Column="0" Margin="0,0,10,0" Height="36"
+                                Text="晴天" ToolTip="/weather clear"
+                                EventType="复制文本" EventData="/weather clear" />
+                <local:MyButton Grid.Column="1" Margin="0,0,10,0" Height="36"
+                                Text="清除效果" ToolTip="/effect clear @s"
+                                EventType="复制文本" EventData="/effect clear @s" />
+                <local:MyButton Grid.Column="2" Height="36"
+                                Text="夜视效果" ToolTip="/effect give @s night_vision 99999 1 true"
+                                EventType="复制文本" EventData="/effect give @s night_vision 99999 1 true" />
+            </Grid>
+            <local:MyHint Theme="Blue" Margin="0,6,0,0"
+                          Text="这些指令需要开启作弊或在创造模式下使用。&#xA;复制后进入游戏，按 T 打开聊天框，Ctrl + V 粘贴并回车即可。" />
         </StackPanel>
     </local:MyCard>
 
+    <!-- ========== 卡片 4：彩蛋 ========== -->
+    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,15">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" FontSize="14" FontWeight="Bold"
+                       Text="「苦力怕的祝福」" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14"
+                       Text="一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！&#xA;&#xA;彩蛋被炸没了。" />
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0"
+                          Text="彩蛋由 GitHub Actions 定时随机生成，大约每小时更新一次。" />
+        </StackPanel>
+    </local:MyCard>
+
+    <!-- ========== 卡片 5：人品测试 ========== -->
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,15">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
+                       Text="每次主页更新都会重新生成结果，完全随机。" />
             <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0"
                             Text="查看今日人品"
                             EventType="弹出窗口"
-                            EventData="人品检测报告|正在扫描您的 Minecraft 生涯...&#xA;检测完成！&#xA;&#xA;您今日的人品值为：88 分&#xA;&#xA;（运气不错，适合下矿挖钻石）" />
+                            EventData="人品检测报告|正在扫描您的 Minecraft 生涯...&#xA;检测完成！&#xA;&#xA;您今日的人品值为：42 分&#xA;&#xA;（一般般，建议扶老奶奶过马路。）" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
