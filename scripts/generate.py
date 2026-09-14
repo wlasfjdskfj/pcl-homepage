@@ -3,9 +3,11 @@
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 幸运数字、幸运颜色、彩蛋由 Cloudflare Functions 每次请求动态替换。
+版本封面图从 Minecraft Wiki 抓取。
 """
 
 import random
+import time
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -13,13 +15,19 @@ from pathlib import Path
 # ============ 配置 ============
 
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+WIKI_API = "https://zh.minecraft.wiki/api.php"
 
 REQUEST_TIMEOUT = 30
+MAX_RETRIES = 3
 
 BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
-VERSION_IMAGE_FILE = "version.png"
+# 版本图缓存天数，超过后强制重下
+VERSION_IMAGE_CACHE_DAYS = 7
+
+# 白名单：清理时保留的文件
+KEEP_FILES = ["version.png"]
 
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
@@ -80,19 +88,214 @@ def fetch_latest_version():
         return default
 
 
-# ============ 图片检查 ============
+# ============ Wiki 版本封面图获取 ============
 
-def get_version_image_source():
-    """检查 images/version.png 是否存在，决定用网络地址还是内置图。"""
+def pick_version_image(images, version):
+    """从版本页面图片列表里筛选封面图。优先级：标题画面 > 含完整版本号 > 含主版本号 > 其他。"""
+    base_version = version
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
+        if base_version.endswith(suffix):
+            base_version = base_version[:-len(suffix)]
+            break
+
+    priority_title = []
+    priority1 = []
+    priority2 = []
+    priority3 = []
+
+    for img in images:
+        t = img.get("title", "")
+        if not t.lower().endswith((".png", ".jpg", ".gif")):
+            continue
+        if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
+            continue
+        if "Java Edition" in t or "Title" in t:
+            priority_title.append(t)
+        elif version in t:
+            priority1.append(t)
+        elif base_version in t:
+            priority2.append(t)
+        else:
+            priority3.append(t)
+
+    if priority_title:
+        return priority_title[0]
+    if priority1:
+        return priority1[0]
+    if priority2:
+        return priority2[0]
+    if priority3:
+        return priority3[0]
+    return None
+
+
+def fetch_version_image(version, filename="version.png"):
+    """从 Minecraft Wiki 抓取版本封面图，带缓存天数检查。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
-    local_path = images_dir / VERSION_IMAGE_FILE
+    images_dir.mkdir(exist_ok=True)
+    local_path = images_dir / filename
+    marker = images_dir / (filename + ".version")
 
-    if local_path.exists():
-        print("[Image] version.png 存在，使用网络地址")
-        return BASE_URL + "/" + IMAGES_DIR_NAME + "/" + VERSION_IMAGE_FILE
+    if local_path.exists() and marker.exists():
+        try:
+            file_age_days = (time.time() - local_path.stat().st_mtime) / 86400
+            cached_version = marker.read_text(encoding="utf-8").strip()
+            if cached_version == version and file_age_days < VERSION_IMAGE_CACHE_DAYS:
+                print("[Version-Image] 图片已存在，版本一致，年龄 " + str(round(file_age_days, 1)) + " 天，跳过")
+                return True
+            elif cached_version == version:
+                print("[Version-Image] 图片超过 " + str(VERSION_IMAGE_CACHE_DAYS) + " 天未更新，强制重下")
+            else:
+                print("[Version-Image] 版本号变更：" + cached_version + " → " + version + "，重新下载")
+        except Exception:
+            pass
+
+    page_titles = []
+    page_titles.append("Java版" + version)
+
+    base_version = version
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
+        if base_version.endswith(suffix):
+            base_version = base_version[:-len(suffix)]
+            break
+    if base_version != version:
+        page_titles.append("Java版" + base_version)
+
+    image_title = None
+    used_title = None
+
+    for page_title in page_titles:
+        try:
+            params = {
+                "action": "query",
+                "titles": page_title,
+                "prop": "images",
+                "format": "json",
+            }
+            resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+            resp.raise_for_status()
+            data = resp.json()
+
+            pages = data.get("query", {}).get("pages", {})
+            for page_id, page_info in pages.items():
+                if "missing" in page_info:
+                    print("[Version-Image] 页面不存在，尝试下一个：" + page_title)
+                    continue
+                images = page_info.get("images", [])
+                print("[Version-Image] " + page_title + " 包含 " + str(len(images)) + " 张图片")
+                for i, img in enumerate(images[:10]):
+                    print("  " + str(i + 1) + ". " + img.get("title", ""))
+                image_title = pick_version_image(images, version)
+                if image_title:
+                    used_title = page_title
+                    break
+            if image_title:
+                break
+
+        except Exception as e:
+            print("[Version-Image] 请求 " + page_title + " 失败：" + str(e))
+            continue
+
+    if not image_title:
+        print("[Version-Image] 未找到 " + version + " 的封面图")
+        return False
+
+    print("[Version-Image] 选中：" + used_title + " → " + image_title)
+
+    try:
+        params = {
+            "action": "query",
+            "titles": image_title,
+            "prop": "imageinfo",
+            "iiprop": "url",
+            "iiurlwidth": "400",
+            "format": "json",
+        }
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+
+        pages = data.get("query", {}).get("pages", {})
+        thumb_url = None
+        for page_id, page_info in pages.items():
+            info_list = page_info.get("imageinfo", [])
+            if info_list:
+                thumb_url = info_list[0].get("thumburl") or info_list[0].get("url")
+                break
+
+        if not thumb_url:
+            print("[Version-Image] 未获取到 " + image_title + " 的 URL")
+            return False
+
+        img_headers = {
+            "User-Agent": HEADERS["User-Agent"],
+            "Referer": "https://zh.minecraft.wiki/",
+        }
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                img_resp = requests.get(thumb_url, headers=img_headers, timeout=REQUEST_TIMEOUT)
+                if img_resp.status_code != 200:
+                    print("[Version-Image] 第 " + str(attempt) + " 次下载失败：" + str(img_resp.status_code))
+                    if attempt < MAX_RETRIES:
+                        time.sleep(3)
+                        continue
+                    return False
+
+                with open(local_path, "wb") as f:
+                    f.write(img_resp.content)
+
+                marker.write_text(version, encoding="utf-8")
+
+                print("[Version-Image] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
+                return True
+
+            except requests.exceptions.Timeout:
+                print("[Version-Image] 第 " + str(attempt) + " 次超时")
+                if attempt < MAX_RETRIES:
+                    time.sleep(3)
+                else:
+                    return False
+
+        return False
+
+    except Exception as e:
+        print("[Version-Image] 获取封面图失败：" + str(e))
+        return False
+
+
+def clean_old_images():
+    """清理 images/ 目录，只保留白名单内的图片。"""
+    images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
+    if not images_dir.exists():
+        return
+
+    print("[Clean] 开始清理 images/ 目录")
+
+    removed_count = 0
+    for f in images_dir.iterdir():
+        if not f.is_file():
+            continue
+        if f.name.endswith(".version"):
+            try:
+                f.unlink()
+                print("[Clean] 删除标记文件：" + f.name)
+                removed_count += 1
+            except Exception as e:
+                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+            continue
+        if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
+            try:
+                f.unlink()
+                print("[Clean] 删除无用图片：" + f.name)
+                removed_count += 1
+            except Exception as e:
+                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+
+    if removed_count == 0:
+        print("[Clean] 无需清理")
     else:
-        print("[Image] version.png 不存在，回退到内置图片")
-        return "pack://application:,,,/images/Blocks/CommandBlock.png"
+        print("[Clean] 共清理 " + str(removed_count) + " 个文件")
 
 
 # ============ 指令分组数据 ============
@@ -168,6 +371,10 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
+    # 清理旧图片
+    clean_old_images()
+
+    # 版本信息
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -187,7 +394,12 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    version_image_source = get_version_image_source()
+    # 从 Wiki 抓版本封面图
+    version_img_ok = fetch_version_image(main_version, filename="version.png")
+    if version_img_ok:
+        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
+    else:
+        version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     news_title = "最新版本 - " + main_version
 
@@ -201,9 +413,11 @@ def build_xaml():
     # ========== 卡片 1：最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
+    # 封面：Border 裁剪 + Image 拉伸填满
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
     lines.append('                        <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
