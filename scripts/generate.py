@@ -281,22 +281,14 @@ def fetch_version_image(version, filename="version.png"):
 
 def clean_wiki_text(text):
     """清理 wiki 语法，并转义 XAML 特殊字符"""
-    # 移除 <ref>...</ref>
     text = re.sub(r"<ref[^>]*>.*?</ref>", "", text)
     text = re.sub(r"<ref[^>]*/>", "", text)
-    # 移除 HTML 标签
     text = re.sub(r"<[^>]+>", "", text)
-    # [[链接|显示文字]] → 显示文字
     text = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", text)
-    # [[链接]] → 链接
     text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
-    # {{模板}} → 移除
     text = re.sub(r"\{\{[^{}]*\}\}", "", text)
-    # '''加粗''' 和 ''斜体''
     text = re.sub(r"'{2,}", "", text)
-    # 移除多余空格
     text = re.sub(r"\s+", " ", text).strip()
-    # XAML 转义
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return text
 
@@ -331,7 +323,6 @@ def fetch_changelog(version, max_items=4):
         items = []
 
         for line in lines:
-            # 匹配章节标题 == 更改 ==
             m = re.match(r"^(==+)\s*(.+?)\s*==+\s*$", line)
             if m:
                 level = len(m.group(1))
@@ -412,12 +403,12 @@ CMD_GROUPS = [
         ("经验瓶", "/give @s experience_bottle 64", "一次给 64 个"),
     ]),
     ("玩家头颅 · 1.20.5+", [
-        ("Notch 头颅", "/give @s player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。把 Notch 换成目标玩家 ID"),
-        ("自己的头颅", "/give @s player_head[profile={name:\"@s\"}]", "1.20.5 及以后。获取自己的头颅"),
-        ("自定义头颅", "/give @s player_head[profile={name:\"Steve\"}]", "1.20.5 及以后。把 Steve 换成任意玩家 ID"),
+        ("Notch 头颅", "/give @s minecraft:player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。直接获取 Notch 的头颅"),
+        ("自己的头颅", "/give @s minecraft:player_head[profile={name:\"@s\"}]", "1.20.5 及以后。获取自己的头颅"),
+        ("自定义头颅", "/give @s minecraft:player_head[profile={name:\"Steve\"}]", "1.20.5 及以后。把 Steve 换成任意玩家 ID"),
     ]),
     ("玩家头颅 · 1.13-1.20.4", [
-        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。把 Notch 换成目标玩家 ID"),
+        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。直接获取 Notch 的头颅"),
         ("自己的头颅", "/give @s player_head{SkullOwner:\"@s\"}", "1.13-1.20.4。获取自己的头颅"),
         ("自定义头颅", "/give @s player_head{SkullOwner:\"Steve\"}", "1.13-1.20.4。把 Steve 换成任意玩家 ID"),
     ]),
@@ -434,24 +425,26 @@ CMD_GROUPS = [
 ]
 
 
+def escape_xaml_attr(text):
+    """把指令里的双引号转成 XAML 转义符"""
+    return text.replace('"', "&quot;")
+
+
 # ============ XAML 生成 ============
 
 def build_xaml():
-    # 日期由 Cloudflare Functions 每次请求动态替换
     now = datetime.now()
     month = "__DATE_MONTH__"
     day = "__DATE_DAY__"
     year = "__DATE_YEAR__"
     weekday = "__DATE_WEEKDAY__"
 
-    # 全部由 Cloudflare Functions 动态替换
     quote = "__QUOTE__"
     lucky_number = "__LUCKY_NUMBER__"
     lucky_color = {"name": "__LUCKY_COLOR_NAME__", "hex": "__LUCKY_COLOR_HEX__"}
     egg_data = "__EGG_DATA__"
     user_ip = "__USER_IP__"
 
-    # 人品分数（按 IP + 日期 hash）
     score = "__SCORE__"
     comment = "__COMMENT__"
     grade = "__GRADE__"
@@ -483,12 +476,10 @@ def build_xaml():
     else:
         version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
-    news_title = "最新版本 - " + main_version
+    news_title = "当前最新版本 - " + main_version
 
-    # 对应版本的 Wiki 页面
     wiki_version_url = "https://zh.minecraft.wiki/w/Java版" + main_version
 
-    # 抓取更新摘要
     changelog_items = fetch_changelog(main_version, max_items=4)
     if changelog_items:
         changelog_text = ""
@@ -588,11 +579,10 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：最新版本（参考 NewsHomepage 设计） ==========
+    # ========== 卡片 3：当前最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # 封面大图 + 版本号浮层
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
@@ -602,25 +592,20 @@ def build_xaml():
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
-    # 版本信息小字（合并成一行）
     if second_version:
         version_info = main_label + "：" + main_version + " · " + second_label + "：" + second_version
     else:
         version_info = main_label + "：" + main_version
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
 
-    # 更新摘要标题
     lines.append('            <TextBlock Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
 
-    # 更新摘要内容（带背景的圆角框）
     lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="' + changelog_text + '" />')
     lines.append('            </Border>')
 
-    # 最后更新时间
     lines.append('            <TextBlock Text="最后更新: ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
-    # 底部操作栏
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -665,7 +650,9 @@ def build_xaml():
         lines.append('                </Grid.ColumnDefinitions>')
         for i, (btn_text, cmd, tip) in enumerate(cmds):
             margin = ' Margin="0,0,10,0"' if i < 2 else ''
-            lines.append('                <local:MyButton Grid.Column="' + str(i) + '"' + margin + ' Height="36" Text="' + btn_text + '" ToolTip="' + tip + '" EventType="复制文本" EventData="' + cmd.replace('"', '&quot;') + '" />')
+            escaped_cmd = escape_xaml_attr(cmd)
+            escaped_tip = escape_xaml_attr(tip)
+            lines.append('                <local:MyButton Grid.Column="' + str(i) + '"' + margin + ' Height="36" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" EventType="复制文本" EventData="' + escaped_cmd + '" />')
         lines.append('            </Grid>')
 
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />')
