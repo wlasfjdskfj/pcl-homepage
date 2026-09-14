@@ -185,31 +185,46 @@ def fetch_wiki_image(image_title, filename, width=128):
 
 
 def pick_version_image(images, version):
-    candidates = []
+    """从版本页面图片列表里筛选出封面图。"""
+    base_version = version
+    for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-pre1", "-pre2", "-pre3", "-pre4", "-pre5"]:
+        if base_version.endswith(suffix):
+            base_version = base_version[:-len(suffix)]
+            break
+
+    priority1 = []
+    priority2 = []
+    priority3 = []
+
     for img in images:
         t = img.get("title", "")
         if not t.lower().endswith((".png", ".jpg", ".gif")):
             continue
-        if "Sprite" in t:
-            continue
-        if "Disambig" in t:
-            continue
-        if "Logo" in t:
-            continue
-        if "Icon" in t:
+        if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
             continue
         if version in t:
-            candidates.insert(0, t)
+            priority1.append(t)
+        elif base_version in t:
+            priority2.append(t)
         else:
-            candidates.append(t)
-    return candidates[0] if candidates else None
+            priority3.append(t)
+
+    if priority1:
+        return priority1[0]
+    if priority2:
+        return priority2[0]
+    if priority3:
+        return priority3[0]
+    return None
 
 
 def fetch_version_image(version, filename="version.png"):
+    """从 Minecraft Wiki 抓取版本封面图。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
-    marker = images_dir / (filename + ".version")
+    # 缓存标记改成 v2，让旧缓存失效
+    marker = images_dir / (filename + ".v2.version")
 
     if local_path.exists() and marker.exists():
         try:
@@ -229,12 +244,6 @@ def fetch_version_image(version, filename="version.png"):
             break
     if base_version != version:
         page_titles.append("Java版" + base_version)
-
-    for t in list(page_titles):
-        if "-" in t:
-            stripped = t.split("-")[0]
-            if stripped not in page_titles:
-                page_titles.append(stripped)
 
     image_title = None
     used_title = None
@@ -257,6 +266,9 @@ def fetch_version_image(version, filename="version.png"):
                     print("[Version-Image] 页面不存在，尝试下一个：" + page_title)
                     continue
                 images = page_info.get("images", [])
+                print("[Version-Image] " + page_title + " 包含 " + str(len(images)) + " 张图片")
+                for i, img in enumerate(images[:10]):
+                    print("  " + str(i + 1) + ". " + img.get("title", ""))
                 image_title = pick_version_image(images, version)
                 if image_title:
                     used_title = page_title
@@ -272,7 +284,7 @@ def fetch_version_image(version, filename="version.png"):
         print("[Version-Image] 未找到 " + version + " 的封面图")
         return False
 
-    print("[Version-Image] " + used_title + " → " + image_title)
+    print("[Version-Image] 选中：" + used_title + " → " + image_title)
 
     try:
         params = {
@@ -334,7 +346,6 @@ def fetch_version_image(version, filename="version.png"):
     except Exception as e:
         print("[Version-Image] 获取封面图失败：" + str(e))
         return False
-
 
 # ============ 指令分组数据 ============
 
