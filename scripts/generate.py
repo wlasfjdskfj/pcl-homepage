@@ -1,4 +1,127 @@
-def build_xaml():
+# -*- coding: utf-8 -*-
+"""
+PCL 主页生成脚本（完整版）
+由 GitHub Actions 定时运行，生成带动态数据的 Custom.xaml。
+功能：
+  1. 从 NewsHomepage API 获取最新 Minecraft 版本信息
+  2. 生成带封面图、版本号、更新摘要的卡片
+  3. 生成今日概览、幸运方块、彩蛋、人品测试等动态卡片
+"""
+
+import random
+import requests
+from datetime import datetime
+from pathlib import Path
+
+# ============ 配置 ============
+
+# NewsHomepage API 地址（参考项目文档）
+NEWS_API = "https://news.bugjump.net/News.json"
+
+# 请求超时时间（秒）
+REQUEST_TIMEOUT = 10
+
+# ============ 静态数据源 ============
+
+QUOTES = [
+    "今天也要好好挖矿。",
+    "苦力怕从不敲门，但会给你惊喜。",
+    "钻石在 Y=-59，别挖太深。",
+    "别在岩浆边挖矿，除非你想重生。",
+    "末影人不会主动攻击你，除非你盯着它看。",
+    "下界合金比钻石更耐用，但更难找。",
+    "睡觉可以跳过夜晚，但会让你失去刷怪的机会。",
+    "村民交易可以打折，只要你治好了僵尸村民。",
+    "附魔台周围放 15 个书架可以升到 30 级。",
+    "信标需要金字塔底座，底座越大效果越强。",
+]
+
+BLOCKS = [
+    {"name": "草方块", "image": "Grass.png", "desc": "Minecraft 的标志性方块，随处可见。"},
+    {"name": "圆石", "image": "Cobblestone.png", "desc": "挖石头就能得到，建筑党的好帮手。"},
+    {"name": "金块", "image": "GoldBlock.png", "desc": "9 个金锭合成，还能做信标底座。"},
+    {"name": "命令方块", "image": "CommandBlock.png", "desc": "创造模式的玩具，Minecraft 的魔法方块。"},
+    {"name": "铁砧", "image": "Anvil.png", "desc": "修复装备、附魔、重命名，掉落会砸脚。"},
+    {"name": "红石块", "image": "RedstoneBlock.png", "desc": "持续输出红石信号，可以永久激活装置。"},
+    {"name": "鸡蛋", "image": "Egg.png", "desc": "扔出去有几率生成小鸡。"},
+    {"name": "土径", "image": "GrassPath.png", "desc": "用锹右键草方块得到，走路不会踩坏草。"},
+]
+
+EGGS = [
+    {"title": "神秘代码", "content": "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！", "image": "CommandBlock.png"},
+    {"title": "开发者留言", "content": "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」", "image": "Anvil.png"},
+    {"title": "钻石雨", "content": "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。", "image": "GoldBlock.png"},
+    {"title": "苦力怕的祝福", "content": "一只苦力怕悄悄靠近了你……&#xA;&#xA;sssssss……&#xA;&#xA;BOOM！", "image": "Grass.png"},
+    {"title": "末影人的秘密", "content": "你盯着末影人看了太久……&#xA;&#xA;它留下了一张纸条：&#xA;「别看了，再看把你传送到虚空。」", "image": "Egg.png"},
+    {"title": "幸运方块", "content": "你打开了一个幸运方块……&#xA;&#xA;里面跳出了一只鸡。&#xA;鸡又下了一颗蛋。&#xA;&#xA;恭喜你实现了鸡蛋自由。", "image": "RedstoneBlock.png"},
+]
+
+LUCKY_COLORS = [
+    {"name": "钻石蓝", "hex": "#4AEDD9"},
+    {"name": "红石红", "hex": "#FF5555"},
+    {"name": "金锭黄", "hex": "#FFAA00"},
+    {"name": "绿宝石绿", "hex": "#17DD62"},
+    {"name": "青金石蓝", "hex": "#2A4DD0"},
+]
+
+
+# ============ 版本信息获取 ============
+
+def fetch_news_homepage() -> dict:
+    """
+    从 NewsHomepage API 获取最新版本信息。
+    返回一个字典，包含 title、version、image、changelog、release_date、launch_url 等字段。
+    如果请求失败，返回一个兜底的默认值。
+    """
+    default = {
+        "title": "最新版本",
+        "version": "1.21",
+        "image": "",
+        "changelog": "暂无更新信息。",
+        "release_date": "",
+        "launch_url": "",
+        "server_url": "",
+        "wiki_url": "https://zh.minecraft.wiki/",
+        "changelog_url": "https://www.minecraft.net/zh-hans/download",
+    }
+
+    try:
+        resp = requests.get(NEWS_API, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+
+        # 根据 API 实际返回结构调整以下解析逻辑
+        # 参考 NewsHomepage 的 JSON 结构，通常包含 latest 或 cards 字段
+        latest = data.get("latest") or data.get("latest_card") or {}
+
+        if latest:
+            default["title"] = latest.get("title", default["title"])
+            default["version"] = latest.get("version", default["version"])
+            default["image"] = latest.get("image", default["image"])
+            default["changelog"] = latest.get("changelog", default["changelog"])
+            default["release_date"] = latest.get("release_date", default["release_date"])
+            default["launch_url"] = latest.get("launch_url", default["launch_url"])
+            default["server_url"] = latest.get("server_url", default["server_url"])
+            default["wiki_url"] = latest.get("wiki_url", default["wiki_url"])
+            default["changelog_url"] = latest.get("changelog_url", default["changelog_url"])
+
+        print(f"[NewsHomepage] 获取成功：{default['title']} - {default['version']}")
+        return default
+
+    except requests.RequestException as e:
+        print(f"[NewsHomepage] 请求失败：{e}，使用默认数据。")
+        return default
+    except (ValueError, KeyError) as e:
+        print(f"[NewsHomepage] 解析失败：{e}，使用默认数据。")
+        return default
+
+
+# ============ XAML 生成 ============
+
+def build_xaml() -> str:
+    """生成完整的 Custom.xaml 内容"""
+
+    # ---------- 动态数据 ----------
     now = datetime.now()
     month = now.strftime("%m").lstrip("0") or "0"
     day = now.strftime("%d").lstrip("0") or "0"
@@ -23,13 +146,94 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
+    # ---------- 获取最新版本信息 ----------
+    news = fetch_news_homepage()
+    version = news["version"]
+    news_title = f"最新版本 - {version}" if version != "1.21" else "最新版本"
+
+    # 封面图：如果 API 返回了图片就用，否则用 PCL 内置图片兜底
+    cover_image = news["image"] if news["image"] else "pack://application:,,,/images/Blocks/Grass.png"
+    cover_fallback = "pack://application:,,,/images/Blocks/CommandBlock.png"
+
+    # 更新摘要：取第一条更新内容
+    changelog_lines = [line.strip() for line in news["changelog"].split("\n") if line.strip()]
+    changelog_first = changelog_lines[0] if changelog_lines else "暂无更新摘要。"
+    changelog_extra = "\n".join(changelog_lines[1:]) if len(changelog_lines) > 1 else ""
+
+    release_date = news["release_date"] if news["release_date"] else now.strftime("%Y-%m-%d")
+
+    # 启动按钮的 EventData：如果 API 提供了启动参数就用，否则用版本号
+    launch_data = news["launch_url"] if news["launch_url"] else version
+
+    # 服务端和 Wiki 按钮
+    server_url = news["server_url"] if news["server_url"] else "https://www.minecraft.net/zh-hans/download/server"
+    wiki_url = news["wiki_url"] if news["wiki_url"] else "https://zh.minecraft.wiki/"
+    changelog_url = news["changelog_url"] if news["changelog_url"] else "https://www.minecraft.net/zh-hans/download"
+
+    # ---------- 拼装 XAML ----------
     xaml = f'''<StackPanel>
 
-    <!-- ========== 卡片 1：今日概览（视觉重设计） ========== -->
+    <!-- ========== 卡片 1：最新版本 ========== -->
+    <local:MyCard Title="{news_title}" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+
+            <!-- 封面大图 + 版本号浮层 -->
+            <Grid Margin="0,0,0,14">
+                <Border CornerRadius="8" ClipToBounds="True">
+                    <local:MyImage Height="150" Stretch="UniformToFill"
+                                   Source="{cover_image}"
+                                   FallbackSource="{cover_fallback}" />
+                </Border>
+                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                        Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6"
+                        Margin="0,0,0,12">
+                    <TextBlock Text="{version}" FontSize="16" FontWeight="Bold"
+                               Foreground="White" />
+                </Border>
+            </Grid>
+
+            <!-- 更新摘要 -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <TextBlock Text="•" FontSize="16" Foreground="#FF5555"
+                           VerticalAlignment="Center" Margin="0,0,8,0" />
+                <TextBlock Text="{changelog_first}" FontSize="13" VerticalAlignment="Center"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+            {"" if not changelog_extra else f'''
+            <local:MyHint Theme="Yellow" Margin="0,0,0,10"
+                          Text="{changelog_extra}" />
+            '''}
+
+            <!-- 最后更新时间 -->
+            <TextBlock Text="最后更新: {release_date}" FontSize="11"
+                       Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,10" />
+
+            <!-- 底部操作栏 -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <local:MyTextButton Grid.Column="0" Text="启动"
+                                    EventType="启动游戏" EventData="{launch_data}" />
+                <local:MyTextButton Grid.Column="1" Text="服务端"
+                                    EventType="打开网页" EventData="{server_url}" />
+                <local:MyTextButton Grid.Column="2" Text="WIKI"
+                                    EventType="打开网页" EventData="{wiki_url}" />
+                <local:MyTextButton Grid.Column="3" Text="官网更新日志"
+                                    EventType="打开网页" EventData="{changelog_url}" />
+            </Grid>
+        </StackPanel>
+    </local:MyCard>
+
+    <!-- ========== 卡片 2：今日概览 ========== -->
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
-            <!-- 日期行：月 / 日 / 年 + 星期 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
                 <TextBlock Text="{month}" FontSize="40" FontWeight="Bold"
                            Foreground="{{DynamicResource ColorBrush1}}" />
@@ -43,7 +247,6 @@ def build_xaml():
             <TextBlock Text="{year} 年 · 星期{weekday}" HorizontalAlignment="Center"
                        FontSize="12" Foreground="{{DynamicResource ColorBrush3}}" Margin="0,0,0,16" />
 
-            <!-- 彩色装饰条 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,16">
                 <Border Width="40" Height="3" CornerRadius="2"
                         Background="{{DynamicResource ColorBrush1}}" Margin="2,0" />
@@ -55,10 +258,8 @@ def build_xaml():
                         Background="{{DynamicResource ColorBrush7}}" Margin="2,0" />
             </StackPanel>
 
-            <!-- 每日一言 -->
             <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：{quote}" />
 
-            <!-- 幸运数字 + 幸运颜色 -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -89,7 +290,7 @@ def build_xaml():
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 2：今日幸运方块 ========== -->
+    <!-- ========== 卡片 3：今日幸运方块 ========== -->
     <local:MyCard Title="今日幸运方块" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <Grid>
@@ -110,7 +311,7 @@ def build_xaml():
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 3：常用链接 ========== -->
+    <!-- ========== 卡片 4：常用链接 ========== -->
     <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable"
@@ -132,7 +333,7 @@ def build_xaml():
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 4：游戏指令速查 ========== -->
+    <!-- ========== 卡片 5：游戏指令速查 ========== -->
     <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
@@ -200,7 +401,8 @@ def build_xaml():
                           Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-    <!-- ========== 卡片 5：彩蛋 ========== -->
+
+    <!-- ========== 卡片 6：彩蛋 ========== -->
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
@@ -221,7 +423,7 @@ def build_xaml():
         </StackPanel>
     </local:MyCard>
 
-    <!-- ========== 卡片 6：人品测试 ========== -->
+    <!-- ========== 卡片 7：人品测试 ========== -->
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
 
@@ -235,7 +437,6 @@ def build_xaml():
                            Foreground="{{DynamicResource ColorBrush3}}" Margin="4,0,0,12" />
             </StackPanel>
 
-            <!-- 进度条：用 10 个色块拼成 -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
                 <Border Width="24" Height="8" CornerRadius="2" Margin="1,0"
                         Background="{{DynamicResource ColorBrush1}}" />
@@ -273,3 +474,13 @@ def build_xaml():
 </StackPanel>
 '''
     return xaml
+
+
+def main():
+    output = Path(__file__).resolve().parent.parent / "Custom.xaml"
+    output.write_text(build_xaml(), encoding="utf-8")
+    print(f"已生成：{output}")
+
+
+if __name__ == "__main__":
+    main()
