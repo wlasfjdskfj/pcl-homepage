@@ -30,6 +30,7 @@ KEEP_FILES = ["version.png"]
 CHANGELOG_PREVIEW_ITEMS = 3
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
+SOURCE_URL = "https://github.com/wlasfjdskfj/pcl-homepage"
 
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
@@ -282,19 +283,37 @@ def fetch_version_image(version, filename="version.png"):
 # ============ Wiki 更新摘要获取 ============
 
 def clean_wiki_text(text):
+    """
+    清理 wiki 语法。
+    关键：保留 {{bug|MC-xxx}} 里的 MC 编号。
+    """
+    # 优先处理 {{bug|MC-xxx}} 或 {{bug|MC-xxx|描述}} → MC-xxx
+    text = re.sub(r"\{\{bug\|([^}|]+)(?:\|[^}]*)?\}\}", r"\1", text, flags=re.IGNORECASE)
+    # 移除 <ref>...</ref>
     text = re.sub(r"<ref[^>]*>.*?</ref>", "", text)
     text = re.sub(r"<ref[^>]*/>", "", text)
+    # 移除其他 HTML 标签
     text = re.sub(r"<[^>]+>", "", text)
+    # [[链接|显示文字]] → 显示文字
     text = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", text)
+    # [[链接]] → 链接
     text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
+    # 移除其他模板
     text = re.sub(r"\{\{[^{}]*\}\}", "", text)
+    # '''加粗''' 和 ''斜体''
     text = re.sub(r"'{2,}", "", text)
+    # 移除多余空格
     text = re.sub(r"\s+", " ", text).strip()
+    # XAML 转义
     text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
     return text
 
 
 def fetch_changelog(version, max_items=None):
+    """
+    从 Minecraft Wiki 抓取「修复」章节里的具体条目。
+    只抓含 MC-xxx 编号的具体修复内容。
+    """
     if max_items is None:
         max_items = CHANGELOG_PREVIEW_ITEMS
 
@@ -340,6 +359,7 @@ def fetch_changelog(version, max_items=None):
             in_target = False
             section_level = 0
             items = []
+            fallback_items = []  # 不含 MC- 的条目作为备选
 
             for line in lines:
                 m = re.match(r"^(=+)\s*(.+?)\s*=+\s*$", line)
@@ -365,19 +385,28 @@ def fetch_changelog(version, max_items=None):
                     if not cleaned or len(cleaned) <= 4:
                         continue
 
-                    if star_count >= 2:
-                        cleaned = "　└ " + cleaned
+                    # 优先保留含 MC- 的具体修复条目
+                    if "MC-" in cleaned:
+                        items.append(cleaned)
+                        if len(items) >= max_items:
+                            break
+                    else:
+                        # 不含 MC- 的作为备选
+                        if star_count >= 2 and len(cleaned) > 8:
+                            fallback_items.append(cleaned)
 
-                    items.append(cleaned)
-                    if len(items) >= max_items:
-                        break
-
+            # 优先返回 MC- 条目
             if items:
-                print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条「修复」内容")
+                print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条 MC- 修复条目")
                 return items
-            else:
-                print("[Changelog] " + page_title + " 未提取到修复内容，尝试下一个页面")
-                continue
+
+            # 没有 MC- 条目就返回备选
+            if fallback_items:
+                print("[Changelog] 未找到 MC- 条目，返回 " + str(len(fallback_items)) + " 条备选")
+                return fallback_items[:max_items]
+
+            print("[Changelog] " + page_title + " 未提取到修复内容，尝试下一个页面")
+            continue
 
         except Exception as e:
             print("[Changelog] 请求 " + page_title + " 失败：" + str(e))
@@ -565,7 +594,6 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
 
-    # 幸运数字
     lines.append('                <Border Grid.Column="0" CornerRadius="8" Padding="14,12" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <TextBlock Text="幸运数字" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
@@ -573,12 +601,12 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
 
-    # 幸运颜色（圆形色块 + 白色描边）
+    # 幸运颜色：圆形 + 深色描边 + 加粗
     lines.append('                <Border Grid.Column="1" CornerRadius="8" Padding="14,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <Border Width="22" Height="22" CornerRadius="11" Background="' + lucky_color["hex"] + '" BorderBrush="#99FFFFFF" BorderThickness="2" Margin="0,0,10,0" VerticalAlignment="Center" />')
+    lines.append('                            <Border Width="22" Height="22" CornerRadius="11" Background="' + lucky_color["hex"] + '" BorderBrush="#99000000" BorderThickness="3" Margin="0,0,10,0" VerticalAlignment="Center" />')
     lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </StackPanel>')
@@ -745,11 +773,18 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 8：反馈 ==========
+    # ========== 卡片 8：反馈（双按钮） ==========
     lines.append('    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub Issues 留言。" />')
-    lines.append('            <local:MyIconTextButton Height="40" HorizontalAlignment="Center" Padding="20,0,20,0" Text="打开 GitHub" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="' + FEEDBACK_URL + '" />')
+    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />')
+    lines.append('            <Grid>')
+    lines.append('                <Grid.ColumnDefinitions>')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                </Grid.ColumnDefinitions>')
+    lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="问题反馈" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="' + FEEDBACK_URL + '" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="查看源码" LogoScale="0.9" ColorType="Highlight" Logo="M384 128c-35 0-64 29-64 64v128H192c-35 0-64 29-64 64s29 64 64 64h128v128c0 35 29 64 64 64s64-29 64-64V448h128c35 0 64-29 64-64s-29-64-64-64H448V192c0-35-29-64-64-64z" EventType="打开网页" EventData="' + SOURCE_URL + '" />')
+    lines.append('            </Grid>')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
