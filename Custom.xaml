@@ -51,7 +51,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：信标需要金字塔底座，底座越大效果越强。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：末影人不会主动攻击你，除非你盯着它看。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -69,7 +69,6 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
-            <local:MyButton Height="36" HorizontalAlignment="Center" Margin="0,14,0,0" Padding="20,0,20,0" Text="刷新主页" EventType="刷新页面" EventData="-" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
@@ -176,30 +175,33 @@
     </local:MyCard>
     <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="每次点开都不一样，看看你能抽到什么。" />
-            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
-                        <local:CustomEvent Type="刷新页面" Data="-" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyButton>
-            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <local:MyTextButton Margin="0,0,32,0" Text="打开彩蛋">
+                    <local:CustomEventService.Events>
+                        <local:CustomEventCollection>
+                            <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                            <local:CustomEvent Type="刷新页面" Data="-" />
+                        </local:CustomEventCollection>
+                    </local:CustomEventService.Events>
+                </local:MyTextButton>
+                <local:MyTextButton Text="刷新主页" EventType="刷新页面" EventData="-" />
+            </StackPanel>
+            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="88" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="70" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="SR" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="R" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="运气极佳，适合下矿挖钻石。" />
+            <local:MyHint Theme="Blue" Text="运气不错，平平淡淡才是真。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
