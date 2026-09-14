@@ -377,7 +377,6 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
-    # 人品进度条的格数（每格 10 分）
     score_blocks = score // 10
 
     clean_old_images()
@@ -421,7 +420,7 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" Width="600" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">')
     lines.append('                        <TextBlock Text="' + main_version + '" FontSize="16" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
@@ -460,11 +459,10 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 2：今日概览（日期加背景块） ==========
+    # ========== 卡片 2：今日概览 ==========
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # 日期区块
     lines.append('            <Border CornerRadius="10" Padding="24,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
@@ -477,10 +475,8 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 每日一言
     lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：' + quote + '" />')
 
-    # 幸运数字 + 颜色
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -508,7 +504,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：常用链接（每项加背景） ==========
+    # ========== 卡片 3：常用链接 ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
@@ -561,7 +557,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：人品测试（加进度条） ==========
+    # ========== 卡片 6：人品测试 ==========
     lines.append('    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
@@ -570,7 +566,6 @@ def build_xaml():
     lines.append('                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />')
     lines.append('            </StackPanel>')
 
-    # 进度条：10 格，前 score_blocks 格是深色，后面是浅色
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
     for i in range(10):
         if i < score_blocks:
@@ -594,9 +589,18 @@ def build_xaml():
 
 
 def main():
-    output = Path(__file__).resolve().parent.parent / "Custom.xaml"
-    output.write_text(build_xaml(), encoding="utf-8")
+    base_dir = Path(__file__).resolve().parent.parent
+    output = base_dir / "Custom.xaml"
+
+    xaml = build_xaml()
+    output.write_text(xaml, encoding="utf-8")
     print("已生成：" + str(output))
+
+    # 写入版本号文件，PCL 通过它判断是否需要重新下载主页
+    version_file = base_dir / "Custom.xaml.version"
+    version_str = datetime.now().strftime("%Y%m%d%H")
+    version_file.write_text(version_str, encoding="utf-8")
+    print("已写入版本号：" + version_str)
 
 
 if __name__ == "__main__":
