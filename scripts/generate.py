@@ -21,6 +21,16 @@ MAX_RETRIES = 3
 BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
+# 版本图片缓存天数，超过这个天数强制重新下载
+VERSION_IMAGE_CACHE_DAYS = 7
+
+# 清理时保留的文件名白名单
+KEEP_FILES = [
+    "grass.png", "cobblestone.png", "gold_block.png", "command_block.png",
+    "anvil.png", "redstone_block.png", "egg.png", "diamond_block.png",
+    "version.png",
+]
+
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
 }
@@ -196,10 +206,10 @@ def pick_version_image(images, version):
             base_version = base_version[:-len(suffix)]
             break
 
-    priority_title = []   # 标题画面
-    priority1 = []        # 含完整版本号
-    priority2 = []        # 含主版本号
-    priority3 = []        # 其他
+    priority_title = []
+    priority1 = []
+    priority2 = []
+    priority3 = []
 
     for img in images:
         t = img.get("title", "")
@@ -207,7 +217,6 @@ def pick_version_image(images, version):
             continue
         if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
             continue
-        # 标题画面优先
         if "Java Edition" in t or "Title" in t:
             priority_title.append(t)
         elif version in t:
@@ -229,18 +238,23 @@ def pick_version_image(images, version):
 
 
 def fetch_version_image(version, filename="version.png"):
-    """从 Minecraft Wiki 抓取版本封面图。"""
+    """从 Minecraft Wiki 抓取版本封面图，带缓存天数检查。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
-    # 缓存标记 v3，让旧缓存失效
-    marker = images_dir / (filename + ".v3.version")
+    marker = images_dir / (filename + ".version")
 
     if local_path.exists() and marker.exists():
         try:
-            if marker.read_text(encoding="utf-8").strip() == version:
-                print("[Version-Image] 图片已存在且版本一致：" + filename)
+            file_age_days = (time.time() - local_path.stat().st_mtime) / 86400
+            cached_version = marker.read_text(encoding="utf-8").strip()
+            if cached_version == version and file_age_days < VERSION_IMAGE_CACHE_DAYS:
+                print("[Version-Image] 图片已存在，版本一致，年龄 " + str(round(file_age_days, 1)) + " 天，跳过")
                 return True
+            elif cached_version == version:
+                print("[Version-Image] 图片超过 " + str(VERSION_IMAGE_CACHE_DAYS) + " 天未更新，强制重下")
+            else:
+                print("[Version-Image] 版本号变更：" + cached_version + " → " + version + "，重新下载")
         except Exception:
             pass
 
@@ -358,6 +372,42 @@ def fetch_version_image(version, filename="version.png"):
         return False
 
 
+def clean_old_images():
+    """清理 images/ 目录里不在白名单内的图片，以及所有版本标记文件。"""
+    images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
+    if not images_dir.exists():
+        return
+
+    print("[Clean] 开始清理 images/ 目录")
+
+    removed_count = 0
+    for f in images_dir.iterdir():
+        if not f.is_file():
+            continue
+        # 删除所有 .version 结尾的标记文件，强制下次重新判断
+        if f.name.endswith(".version"):
+            try:
+                f.unlink()
+                print("[Clean] 删除标记文件：" + f.name)
+                removed_count += 1
+            except Exception as e:
+                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+            continue
+        # 不在白名单内的图片删除
+        if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
+            try:
+                f.unlink()
+                print("[Clean] 删除无用图片：" + f.name)
+                removed_count += 1
+            except Exception as e:
+                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+
+    if removed_count == 0:
+        print("[Clean] 无需清理")
+    else:
+        print("[Clean] 共清理 " + str(removed_count) + " 个文件")
+
+
 # ============ 指令分组数据 ============
 
 CMD_GROUPS = [
@@ -431,12 +481,17 @@ def build_xaml():
     else:
         comment, grade = "非酋认证，建议在家种地。", "N--"
 
+    # 先清理旧图片
+    clean_old_images()
+
+    # 方块图片
     wiki_ok = fetch_wiki_image(block["image_title"], block["file"], width=128)
     if wiki_ok:
         block_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + block["file"]
     else:
         block_source = "pack://application:,,,/images/Blocks/" + block["fallback"]
 
+    # 版本信息
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -456,6 +511,7 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
+    # 版本封面图
     version_img_ok = fetch_version_image(main_version, filename="version.png")
     if version_img_ok:
         version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
