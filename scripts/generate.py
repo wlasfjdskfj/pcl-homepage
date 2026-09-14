@@ -3,9 +3,10 @@
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
-版本封面图从 Minecraft Wiki 抓取。
+版本封面图和更新摘要从 Minecraft Wiki 抓取。
 """
 
+import re
 import random
 import time
 import requests
@@ -26,7 +27,6 @@ IMAGES_DIR_NAME = "images"
 VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
-# 反馈入口地址（改成你自己的）
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 
 HEADERS = {
@@ -277,6 +277,87 @@ def fetch_version_image(version, filename="version.png"):
         return False
 
 
+# ============ Wiki 更新摘要获取 ============
+
+def clean_wiki_text(text):
+    """清理 wiki 语法，并转义 XAML 特殊字符"""
+    # 移除 <ref>...</ref>
+    text = re.sub(r"<ref[^>]*>.*?</ref>", "", text)
+    text = re.sub(r"<ref[^>]*/>", "", text)
+    # 移除 HTML 标签
+    text = re.sub(r"<[^>]+>", "", text)
+    # [[链接|显示文字]] → 显示文字
+    text = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", text)
+    # [[链接]] → 链接
+    text = re.sub(r"\[\[([^\]]+)\]\]", r"\1", text)
+    # {{模板}} → 移除
+    text = re.sub(r"\{\{[^{}]*\}\}", "", text)
+    # '''加粗''' 和 ''斜体''
+    text = re.sub(r"'{2,}", "", text)
+    # 移除多余空格
+    text = re.sub(r"\s+", " ", text).strip()
+    # XAML 转义
+    text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    return text
+
+
+def fetch_changelog(version, max_items=4):
+    """从 Minecraft Wiki 抓取版本更新摘要"""
+    page_title = "Java版" + version
+    try:
+        params = {
+            "action": "parse",
+            "page": page_title,
+            "prop": "wikitext",
+            "format": "json",
+            "redirects": "1",
+        }
+        resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+        data = resp.json()
+
+        if "error" in data:
+            print("[Changelog] 页面不存在：" + page_title)
+            return []
+
+        wikitext = data.get("parse", {}).get("wikitext", {}).get("*", "")
+        if not wikitext:
+            print("[Changelog] wikitext 为空")
+            return []
+
+        lines = wikitext.split("\n")
+        in_section = False
+        section_level = 0
+        items = []
+
+        for line in lines:
+            # 匹配章节标题 == 更改 ==
+            m = re.match(r"^(==+)\s*(.+?)\s*==+\s*$", line)
+            if m:
+                level = len(m.group(1))
+                title = m.group(2)
+                if any(k in title for k in ["更改", "修复", "新增", "改动", "变更", "特性"]):
+                    in_section = True
+                    section_level = level
+                elif in_section and level <= section_level:
+                    in_section = False
+                continue
+
+            if in_section and line.strip().startswith("*"):
+                item = line.strip().lstrip("*").strip()
+                cleaned = clean_wiki_text(item)
+                if cleaned and len(cleaned) > 8:
+                    items.append(cleaned)
+                if len(items) >= max_items:
+                    break
+
+        print("[Changelog] 从 " + page_title + " 提取 " + str(len(items)) + " 条更新")
+        return items
+    except Exception as e:
+        print("[Changelog] 获取失败：" + str(e))
+        return []
+
+
 def clean_old_images():
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     if not images_dir.exists():
@@ -407,6 +488,17 @@ def build_xaml():
     # 对应版本的 Wiki 页面
     wiki_version_url = "https://zh.minecraft.wiki/w/Java版" + main_version
 
+    # 抓取更新摘要
+    changelog_items = fetch_changelog(main_version, max_items=4)
+    if changelog_items:
+        changelog_text = ""
+        for i, item in enumerate(changelog_items):
+            if i > 0:
+                changelog_text += "&#xA;"
+            changelog_text += "• " + item
+    else:
+        changelog_text = "• 暂无更新摘要，点击下方按钮查看 Wiki。"
+
     server_url = ver["server_url"]
     wiki_url = ver["wiki_url"]
     changelog_url = ver["changelog_url"]
@@ -496,9 +588,11 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：最新版本 ==========
+    # ========== 卡片 3：最新版本（参考 NewsHomepage 设计） ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
+    # 封面大图 + 版本号浮层
     lines.append('            <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
@@ -508,23 +602,25 @@ def build_xaml():
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
-    lines.append('            <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel Orientation="Horizontal">')
-    lines.append('                    <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />')
-    lines.append('                    <TextBlock Text="' + main_label + '：' + main_version + '" FontSize="13" VerticalAlignment="Center" />')
-    lines.append('                </StackPanel>')
+    # 版本信息小字（合并成一行）
+    if second_version:
+        version_info = main_label + "：" + main_version + " · " + second_label + "：" + second_version
+    else:
+        version_info = main_label + "：" + main_version
+    lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
+
+    # 更新摘要标题
+    lines.append('            <TextBlock Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+
+    # 更新摘要内容（带背景的圆角框）
+    lines.append('            <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="' + changelog_text + '" />')
     lines.append('            </Border>')
 
-    if second_version:
-        lines.append('            <Border CornerRadius="6" Padding="10,7" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">')
-        lines.append('                <StackPanel Orientation="Horizontal">')
-        lines.append('                    <local:MyImage Width="18" Height="18" Margin="0,0,10,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />')
-        lines.append('                    <TextBlock Text="' + second_label + '：' + second_version + '" FontSize="13" VerticalAlignment="Center" />')
-        lines.append('                </StackPanel>')
-        lines.append('            </Border>')
+    # 最后更新时间
+    lines.append('            <TextBlock Text="最后更新: ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,12" />')
 
-    lines.append('            <TextBlock Text="最后更新: ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,4,0,10" />')
-
+    # 底部操作栏
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -537,6 +633,7 @@ def build_xaml():
     lines.append('                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="' + wiki_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + wiki_version_url + '" />')
     lines.append('            </Grid>')
+
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -614,7 +711,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 8：反馈入口（GitHub 猫头图标） ==========
+    # ========== 卡片 8：反馈 ==========
     lines.append('    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub Issues 留言。" />')
