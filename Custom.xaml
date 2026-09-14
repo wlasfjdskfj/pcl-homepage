@@ -49,7 +49,7 @@
                     <TextBlock Text="2026 年 · 星期一" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：村民交易可以打折，只要你治好了僵尸村民。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：睡觉可以跳过夜晚，但会让你失去刷怪的机会。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -196,7 +196,7 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <TextBlock Text="64" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="86" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
@@ -206,16 +206,16 @@
                 <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
                 <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
                 <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
-                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
+                <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush1}" />
                 <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
                 <Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="{DynamicResource ColorBrush7}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="R" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="SR" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="运气不错，平平淡淡才是真。" />
+            <local:MyHint Theme="Blue" Text="运气极佳，适合下矿挖钻石。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
