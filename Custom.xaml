@@ -34,7 +34,7 @@
                     <StackPanel>
                         <TextBlock Text="幸运颜色" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Border Width="22" Height="22" CornerRadius="11" Background="__LUCKY_COLOR_HEX__" BorderBrush="#99FFFFFF" BorderThickness="2" Margin="0,0,10,0" VerticalAlignment="Center" />
+                            <Border Width="22" Height="22" CornerRadius="11" Background="__LUCKY_COLOR_HEX__" BorderBrush="#99000000" BorderThickness="3" Margin="0,0,10,0" VerticalAlignment="Center" />
                             <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
                         </StackPanel>
                     </StackPanel>
@@ -243,8 +243,15 @@
     </local:MyCard>
     <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub Issues 留言。" />
-            <local:MyIconTextButton Height="40" HorizontalAlignment="Center" Padding="20,0,20,0" Text="打开 GitHub" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage/issues" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="问题反馈" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage/issues" />
+                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="查看源码" LogoScale="0.9" ColorType="Highlight" Logo="M384 128c-35 0-64 29-64 64v128H192c-35 0-64 29-64 64s29 64 64 64h128v128c0 35 29 64 64 64s64-29 64-64V448h128c35 0 64-29 64-64s-29-64-64-64H448V192c0-35-29-64-64-64z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage" />
+            </Grid>
         </StackPanel>
     </local:MyCard>
 </StackPanel>
