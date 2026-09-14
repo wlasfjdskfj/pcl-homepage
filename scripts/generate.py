@@ -138,6 +138,7 @@ def pick_version_image(images, version):
 
 
 def fetch_version_image(version, filename="version.png"):
+    """从 Minecraft Wiki 抓取版本封面图，带缓存天数检查。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     images_dir.mkdir(exist_ok=True)
     local_path = images_dir / filename
@@ -272,6 +273,7 @@ def fetch_version_image(version, filename="version.png"):
 
 
 def clean_old_images():
+    """清理 images/ 目录里不在白名单内的图片。保留 version.png 及其 .version 标记。"""
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     if not images_dir.exists():
         return
@@ -282,14 +284,13 @@ def clean_old_images():
     for f in images_dir.iterdir():
         if not f.is_file():
             continue
+
+        # 保护标记文件，不删
         if f.name.endswith(".version"):
-            try:
-                f.unlink()
-                print("[Clean] 删除标记文件：" + f.name)
-                removed_count += 1
-            except Exception as e:
-                print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+            print("[Clean] 保留标记文件：" + f.name)
             continue
+
+        # 清理不在白名单内的图片
         if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
             try:
                 f.unlink()
