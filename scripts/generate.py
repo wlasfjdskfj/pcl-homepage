@@ -27,6 +27,11 @@ IMAGES_DIR_NAME = "images"
 VERSION_IMAGE_CACHE_DAYS = 7
 KEEP_FILES = ["version.png"]
 
+# 更新摘要显示的最大条数
+CHANGELOG_MAX_ITEMS = 6
+# 每条更新最多显示的字数（超出会截断加省略号）
+CHANGELOG_ITEM_MAX_LEN = 80
+
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 
 HEADERS = {
@@ -293,8 +298,16 @@ def clean_wiki_text(text):
     return text
 
 
-def fetch_changelog(version, max_items=4):
-    """从 Minecraft Wiki 抓取版本更新摘要"""
+def fetch_changelog(version, max_items=None, item_max_len=None):
+    """
+    从 Minecraft Wiki 抓取版本更新摘要。
+    支持多章节（更改、修复、新增等），支持二级项目缩进。
+    """
+    if max_items is None:
+        max_items = CHANGELOG_MAX_ITEMS
+    if item_max_len is None:
+        item_max_len = CHANGELOG_ITEM_MAX_LEN
+
     page_title = "Java版" + version
     try:
         params = {
@@ -318,27 +331,44 @@ def fetch_changelog(version, max_items=4):
             return []
 
         lines = wikitext.split("\n")
-        in_section = False
+        in_target_section = False
         section_level = 0
         items = []
+        current_section_title = ""
 
         for line in lines:
+            # 匹配章节标题 == 更改 ==
             m = re.match(r"^(==+)\s*(.+?)\s*==+\s*$", line)
             if m:
                 level = len(m.group(1))
-                title = m.group(2)
-                if any(k in title for k in ["更改", "修复", "新增", "改动", "变更", "特性"]):
-                    in_section = True
+                title = m.group(2).strip()
+                if any(k in title for k in ["更改", "修复", "新增", "改动", "变更", "特性", "常规"]):
+                    in_target_section = True
                     section_level = level
-                elif in_section and level <= section_level:
-                    in_section = False
+                    current_section_title = title
+                elif in_target_section and level <= section_level:
+                    in_target_section = False
+                    current_section_title = ""
                 continue
 
-            if in_section and line.strip().startswith("*"):
-                item = line.strip().lstrip("*").strip()
-                cleaned = clean_wiki_text(item)
-                if cleaned and len(cleaned) > 8:
-                    items.append(cleaned)
+            if in_target_section and line.strip().startswith("*"):
+                stripped = line.strip()
+                # 计算 * 的数量，判断缩进级别
+                star_count = len(stripped) - len(stripped.lstrip("*"))
+                item_text = stripped.lstrip("*").strip()
+                cleaned = clean_wiki_text(item_text)
+                if not cleaned or len(cleaned) <= 5:
+                    continue
+
+                # 长条目截断
+                if len(cleaned) > item_max_len:
+                    cleaned = cleaned[:item_max_len - 1] + "…"
+
+                # 二级项目加缩进前缀
+                if star_count >= 2:
+                    cleaned = "　└ " + cleaned
+
+                items.append(cleaned)
                 if len(items) >= max_items:
                     break
 
@@ -480,7 +510,7 @@ def build_xaml():
 
     wiki_version_url = "https://zh.minecraft.wiki/w/Java版" + main_version
 
-    changelog_items = fetch_changelog(main_version, max_items=4)
+    changelog_items = fetch_changelog(main_version)
     if changelog_items:
         changelog_text = ""
         for i, item in enumerate(changelog_items):
