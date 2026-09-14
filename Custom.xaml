@@ -49,7 +49,7 @@
                     <TextBlock Text="2026 年 · 星期一" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
                 </StackPanel>
             </Border>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：睡觉可以跳过夜晚，但会让你失去刷怪的机会。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：下界合金比钻石更耐用，但更难找。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -196,7 +196,7 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <TextBlock Text="86" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="82" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
