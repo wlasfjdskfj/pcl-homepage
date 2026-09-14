@@ -79,11 +79,18 @@
                 </Grid>
             </Border>
             <TextBlock Text="最新快照：26.3-rc-3 · 最新正式版：26.2" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />
-            <TextBlock Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />
+            <Grid Margin="0,0,0,6">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="更新摘要" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="（部分）" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="6,0,0,0" />
+            </Grid>
             <Border CornerRadius="6" Padding="14,12" Margin="0,0,0,6" Background="{DynamicResource ColorBrush7}">
                 <TextBlock TextWrapping="Wrap" LineHeight="20" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Text="• 暂无更新摘要。" />
             </Border>
-            <TextBlock Text="📖 点击下方【更新日志】查看完整更新内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
+            <TextBlock Text="📖 仅显示部分摘要，点击下方【更新日志】查看完整内容" FontSize="10" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -94,7 +101,7 @@
                 <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
                 <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
                 <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3-rc-3" />
+                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3-rc-3" />
             </Grid>
         </StackPanel>
     </local:MyCard>
