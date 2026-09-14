@@ -3,7 +3,7 @@
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="8" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png" FallbackSource="pack://application:,,,/images/Blocks/CommandBlock.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="4" Padding="16,6,16,6" Margin="0,0,0,12">
                         <TextBlock Text="26.3-rc-2" FontSize="16" FontWeight="Bold" Foreground="White" />
                     </Border>
@@ -51,7 +51,7 @@
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush5}" Margin="2,0" />
                 <Border Width="40" Height="3" CornerRadius="2" Background="{DynamicResource ColorBrush7}" Margin="2,0" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：信标需要金字塔底座，底座越大效果越强。" />
+            <local:MyHint Theme="Blue" Margin="0,0,0,16" Text="每日一言：附魔台周围放 15 个书架可以升到 30 级。" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -185,14 +185,14 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyButton>
-            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="由于技术原因不建议点太多次，有可能封禁IP。" />
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="73" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="62" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
