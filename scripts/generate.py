@@ -20,10 +20,7 @@ MAX_RETRIES = 3
 BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
-# 版本封面图的固定文件名，你自己放一张图片到 images/version.png 即可
 VERSION_IMAGE_FILE = "version.png"
-
-# 白名单：只保留版本封面图
 KEEP_FILES = [VERSION_IMAGE_FILE]
 
 HEADERS = {
@@ -214,7 +211,6 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    # 版本封面图：固定路径，加载失败自动回退到内置命令方块图
     version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/" + VERSION_IMAGE_FILE
     version_image_fallback = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
@@ -305,7 +301,6 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </StackPanel>')
     lines.append('            </Grid>')
-    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Center" Margin="0,14,0,0" Padding="20,0,20,0" Text="刷新主页" EventType="刷新页面" EventData="-" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -343,19 +338,22 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：彩蛋（弹窗 + 刷新） ==========
+    # ========== 卡片 5：彩蛋（无边框按钮） ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" Text="每次点开都不一样，看看你能抽到什么。" />')
-    lines.append('            <local:MyButton Height="36" HorizontalAlignment="Left" Padding="20,0,20,0" Text="打开彩蛋">')
-    lines.append('                <local:CustomEventService.Events>')
-    lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
-    lines.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
-    lines.append('                    </local:CustomEventCollection>')
-    lines.append('                </local:CustomEventService.Events>')
-    lines.append('            </local:MyButton>')
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,12,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
+    lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />')
+    lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                <local:MyTextButton Margin="0,0,32,0" Text="打开彩蛋">')
+    lines.append('                    <local:CustomEventService.Events>')
+    lines.append('                        <local:CustomEventCollection>')
+    lines.append('                            <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
+    lines.append('                            <local:CustomEvent Type="刷新页面" Data="-" />')
+    lines.append('                        </local:CustomEventCollection>')
+    lines.append('                    </local:CustomEventService.Events>')
+    lines.append('                </local:MyTextButton>')
+    lines.append('                <local:MyTextButton Text="刷新主页" EventType="刷新页面" EventData="-" />')
+    lines.append('            </StackPanel>')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
