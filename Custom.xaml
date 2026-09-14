@@ -177,7 +177,7 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,16" Text="每次点开都不一样，看看你能抽到什么。" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <local:MyTextButton Margin="0,0,32,0" Text="打开彩蛋">
+                <local:MyTextButton Margin="0,0,60,0" Text="打开彩蛋" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
                     <local:CustomEventService.Events>
                         <local:CustomEventCollection>
                             <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
@@ -185,7 +185,7 @@
                         </local:CustomEventCollection>
                     </local:CustomEventService.Events>
                 </local:MyTextButton>
-                <local:MyTextButton Text="刷新主页" EventType="刷新页面" EventData="-" />
+                <local:MyTextButton Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
             </StackPanel>
             <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
@@ -194,14 +194,14 @@
         <StackPanel Margin="25,40,23,20">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="70" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="7" FontSize="52" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="4,0,0,12" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="R" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="N--" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
             </StackPanel>
-            <local:MyHint Theme="Blue" Text="运气不错，平平淡淡才是真。" />
+            <local:MyHint Theme="Blue" Text="非酋认证，建议在家种地。" />
         </StackPanel>
     </local:MyCard>
 </StackPanel>
