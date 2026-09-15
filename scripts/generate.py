@@ -27,7 +27,7 @@ BASE_URL = "https://www.mkejga.de5.net"
 IMAGES_DIR_NAME = "images"
 
 VERSION_IMAGE_CACHE_DAYS = 7
-KEEP_FILES = ["version.png"]
+KEEP_FILES = ["version.png", "kkange.png"]
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 SOURCE_URL = "https://github.com/wlasfjdskfj/pcl-homepage"
@@ -298,8 +298,14 @@ def clean_old_images():
 # ============ 必应每日壁纸 ============
 
 def fetch_bing_wallpaper():
-    """从必应获取今日壁纸 URL，失败返回 PCL 内置图片"""
-    fallback = "pack://application:,,,/images/Blocks/GrassPath.png"
+    """从必应获取今日壁纸 URL，失败时回退到 kkange.png，再回退到内置图片"""
+    # 优先兜底：用户自己的图片
+    local_fallback = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME / "kkange.png"
+    if local_fallback.exists():
+        fallback = BASE_URL + "/" + IMAGES_DIR_NAME + "/kkange.png"
+    else:
+        fallback = "pack://application:,,,/images/Blocks/GrassPath.png"
+
     try:
         resp = requests.get(BING_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
@@ -307,13 +313,12 @@ def fetch_bing_wallpaper():
         images = data.get("images", [])
         if images:
             url = "https://www.bing.com" + images[0]["url"]
-            # Bing 的 URL 里带 & 参数，XAML 属性里需要转义
             url = url.replace("&", "&amp;")
             print("[Bing] 今日壁纸：" + url[:100] + "...")
             return url
-        print("[Bing] API 返回为空，使用兜底图片")
+        print("[Bing] API 返回为空，使用兜底图片：" + fallback)
     except Exception as e:
-        print("[Bing] 获取壁纸失败：" + str(e) + "，使用兜底图片")
+        print("[Bing] 获取壁纸失败：" + str(e) + "，使用兜底图片：" + fallback)
     return fallback
 
 
@@ -431,24 +436,24 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # 日期大块（带必应壁纸背景）
-    lines.append('            <Border CornerRadius="12" Height="180" Margin="0,0,0,16" ClipToBounds="True">')
+    # 日期大块（正方形，带必应壁纸背景）
+    lines.append('            <Border Width="300" Height="300" HorizontalAlignment="Center" CornerRadius="16" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <local:MyImage Source="' + wallpaper_url + '" FallbackSource="' + BASE_URL + '/' + IMAGES_DIR_NAME + '/kkange.png" Width="300" Height="300" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
     lines.append('                    <Border Background="#99000000" />')
     lines.append('                    <StackPanel VerticalAlignment="Center" Margin="24,20">')
-    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+    lines.append('                            <Border Width="24" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
     lines.append('                            <TextBlock Text="  今 日  " FontSize="10" FontWeight="Bold" Foreground="#CCFFFFFF" VerticalAlignment="Center" />')
-    lines.append('                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
+    lines.append('                            <Border Width="24" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <TextBlock Text="' + month + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
-    lines.append('                            <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,4,14" Foreground="#CCFFFFFF" />')
-    lines.append('                            <TextBlock Text="' + day + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
-    lines.append('                            <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,14" Foreground="#CCFFFFFF" />')
+    lines.append('                            <TextBlock Text="' + month + '" FontSize="42" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 月 " FontSize="12" VerticalAlignment="Bottom" Margin="0,0,4,12" Foreground="#CCFFFFFF" />')
+    lines.append('                            <TextBlock Text="' + day + '" FontSize="42" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 日" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="#CCFFFFFF" />')
     lines.append('                        </StackPanel>')
-    lines.append('                        <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,6,0,0" />')
+    lines.append('                        <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,8,0,0" />')
     lines.append('                    </StackPanel>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
