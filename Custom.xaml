@@ -1,4 +1,27 @@
 <StackPanel>
+    <local:MyCard Title="我的世界服务器" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="欢迎加入我们的服务器！复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <TextBlock Text="服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
+                </StackPanel>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="投稿服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="投稿服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器投稿」。" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyIconTextButton>
+            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想把自己的服务器放到这里？点上方按钮查看投稿邮箱。" />
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True">
