@@ -795,40 +795,25 @@ def build_xaml():
     lines.append('                <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('            </StackPanel>')
 
-    # 版本列表
+    # 版本列表（MyListItem 可点击启动）
     if recent_releases:
         for idx, rel in enumerate(recent_releases):
             is_latest = (idx == 0)
-            lines.append('            <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,6" Background="' + ('#1F17DD62' if is_latest else '{DynamicResource ColorBrush7}') + '">')
-            lines.append('                <Grid>')
-            lines.append('                    <Grid.ColumnDefinitions>')
-            lines.append('                        <ColumnDefinition Width="Auto" />')
-            lines.append('                        <ColumnDefinition Width="*" />')
-            lines.append('                        <ColumnDefinition Width="Auto" />')
-            lines.append('                    </Grid.ColumnDefinitions>')
-            lines.append('                    <TextBlock Grid.Column="0" Text="' + rel["version"] + '" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + ('#17DD62' if is_latest else '{DynamicResource ColorBrush1}') + '" />')
-            lines.append('                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">')
             if is_latest:
-                lines.append('                        <Border Background="#17DD62" CornerRadius="6" Padding="7,2,7,2">')
-                lines.append('                            <TextBlock Text="最新" FontSize="9" FontWeight="Bold" Foreground="White" />')
-                lines.append('                        </Border>')
-            lines.append('                    </StackPanel>')
-            lines.append('                    <StackPanel Grid.Column="2" VerticalAlignment="Center">')
-            lines.append('                        <TextBlock Text="' + rel["date"] + '" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" Foreground="{DynamicResource ColorBrush1}" />')
-            if rel["days_ago"] == 0:
-                days_text = "今天"
-            elif rel["days_ago"] == 1:
-                days_text = "昨天"
+                info_text = rel["date"] + " · " + ("今天" if rel["days_ago"] == 0 else ("昨天" if rel["days_ago"] == 1 else str(rel["days_ago"]) + " 天前")) + " · 最新"
             else:
-                days_text = str(rel["days_ago"]) + " 天前"
-            lines.append('                        <TextBlock Text="' + days_text + '" FontSize="9" HorizontalAlignment="Right" Foreground="{DynamicResource ColorBrush3}" Margin="0,1,0,0" />')
-            lines.append('                    </StackPanel>')
-            lines.append('                </Grid>')
-            lines.append('            </Border>')
+                if rel["days_ago"] == 0:
+                    days_text = "今天"
+                elif rel["days_ago"] == 1:
+                    days_text = "昨天"
+                else:
+                    days_text = str(rel["days_ago"]) + " 天前"
+                info_text = rel["date"] + " · " + days_text
+            lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 ' + rel["version"] + '" Info="' + info_text + '" EventType="启动游戏" EventData="' + rel["version"] + '" />')
     else:
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
 
     # 按钮网格
     lines.append('            <Grid>')
@@ -859,7 +844,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 7：游戏指令速查（美化版） ==========
+    # ========== 卡片 7：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -867,17 +852,14 @@ def build_xaml():
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
 
-        # 每组一张独立小卡片
         lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
         lines.append('                <StackPanel>')
 
-        # 组标题行：色条 + 组名
         lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
         lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
         lines.append('                        <TextBlock Text="' + group_title + '" FontSize="12" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
         lines.append('                    </StackPanel>')
 
-        # 按钮行
         lines.append('                    <Grid>')
         lines.append('                        <Grid.ColumnDefinitions>')
         lines.append('                            <ColumnDefinition Width="1*" />')
