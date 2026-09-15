@@ -6,9 +6,9 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
                         <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="Hypixel" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="mc.hypixel.net" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                         <Border Width="8" Height="8" CornerRadius="4" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />
                         <TextBlock Text="离线 / 查询失败" FontSize="11" Foreground="#FF5555" VerticalAlignment="Center" />
@@ -16,39 +16,61 @@
                     <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
                 </StackPanel>
             </Border>
-            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="2B2T" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            </StackPanel>
+            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Hypixel" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="离线" FontSize="10" Foreground="#FF5555" VerticalAlignment="Center" />
+                        </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="connect.2b2t.org" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        <TextBlock Text="1163 / 1" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        <TextBlock Text="1.7.2-26.2" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="connect.2b2t.org" />
-                </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mc.hypixel.net" />
+                </Grid>
             </Border>
-            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="Mineplex" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="1161 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        </StackPanel>
                     </StackPanel>
-                    <TextBlock Text="mineplex.com" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        <TextBlock Text="215 / 216" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mineplex.com" />
-                </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="connect.2b2t.org" />
+                </Grid>
             </Border>
-            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,4,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
+            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Mineplex" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="225 / 226" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mineplex.com" />
+                </Grid>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
                 <local:CustomEventService.Events>
                     <local:CustomEventCollection>
                         <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />
@@ -61,7 +83,7 @@
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">
+            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.IcyCubs_ZH-CN5287408951_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
@@ -188,7 +210,7 @@
     </local:MyCard>
     <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">
+            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
                 <Grid>
                     <Border>
                         <Border.Background>
@@ -216,14 +238,11 @@
     </local:MyCard>
     <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">
+            <Border CornerRadius="14" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
                 <Grid>
                     <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
-                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="{DynamicResource ColorBrush7}" CornerRadius="14" Padding="16,7,16,7" Margin="0,0,0,14" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock Text="26.3" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
-                        </StackPanel>
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#FF6B6B" CornerRadius="10" Padding="24,8,24,8" Margin="0,0,0,-2">
+                        <TextBlock Text="26.3" FontSize="14" FontWeight="Bold" Foreground="White" />
                     </Border>
                 </Grid>
             </Border>
