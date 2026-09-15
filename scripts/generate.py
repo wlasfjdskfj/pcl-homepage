@@ -166,15 +166,36 @@ def fetch_patch_notes(count=1):
         for entry in entries[:count]:
             version = entry.get("version", "")
             title = entry.get("title", "")
-            body = entry.get("body", [])
-            if not title and not body:
-                continue
+            # 直接递归提取整条 entry 里的所有文本
+            all_texts = extract_texts(entry)
+
+            # 去掉 title 和 version 本身
+            filtered = []
+            seen = set()
+            for t in all_texts:
+                if not t or len(t) <= 1:
+                    continue
+                if t == title or t == version:
+                    continue
+                if t in ("paragraph", "list", "listItem", "image", "header", "modules", "type", "version", "title"):
+                    continue
+                if t in seen:
+                    continue
+                # 跳过纯英文类型名
+                if t.islower() and len(t) < 20 and ' ' not in t and '：' not in t and ':' not in t:
+                    continue
+                seen.add(t)
+                filtered.append(t)
+
             result.append({
                 "version": version,
                 "title": title if title else ("Minecraft " + version + " 更新总结"),
-                "body": body,
-                "raw_entry": entry,
+                "texts": filtered,
             })
+
+            print("[PatchNotes] " + version + " 提取 " + str(len(filtered)) + " 条文本")
+            for i, t in enumerate(filtered[:5]):
+                print("  " + str(i+1) + ". " + t[:50])
 
         print("[PatchNotes] 获取 " + str(len(result)) + " 条更新总结")
         return result
@@ -743,7 +764,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
+    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border>')
@@ -886,7 +907,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
+    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
     lines.append('                        <Border.Background>')
@@ -918,11 +939,14 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
+    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#FF6B6B" CornerRadius="10" Padding="24,8,24,8" Margin="0,0,0,-2">')
-    lines.append('                        <TextBlock Text="' + main_version + '" FontSize="14" FontWeight="Bold" Foreground="White" />')
+    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">')
+    lines.append('                        <StackPanel Orientation="Horizontal">')
+    lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
+    lines.append('                            <TextBlock Text="' + main_version + '" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
+    lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
@@ -976,30 +1000,16 @@ def build_xaml():
         lines.append('            <local:MyCard Title="' + escaped_title + '" Margin="0,0,0,10" CanSwap="True" IsSwapped="False">')
         lines.append('                <StackPanel Margin="25,40,23,20">')
 
-        # 递归提取所有文本
-        raw_entry = note.get("raw_entry", {})
-        body_raw = raw_entry.get("body", [])
-        texts = extract_texts(body_raw)
+        texts = note.get("texts", [])
 
-        # 过滤：去掉纯数字、单字符、重复
-        filtered = []
-        seen = set()
-        for t in texts:
-            if len(t) <= 1:
-                continue
-            if t in seen:
-                continue
-            if t == note_title:
-                continue
-            if t in ("paragraph", "list", "listItem", "image", "header", "modules"):
-                continue
-            seen.add(t)
-            filtered.append(t)
-
-        if filtered:
-            for t in filtered:
+        if texts:
+            for t in texts:
                 escaped_t = escape_xaml_attr(t)
-                lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+                # 标题行（短文本）加粗
+                if len(t) < 30 and not t.startswith("·"):
+                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" FontWeight="Bold" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,8,0,4" />')
+                else:
+                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
         else:
             lines.append('                    <TextBlock Text="暂无详细内容，请点击下方「更新日志」查看。" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />')
 
