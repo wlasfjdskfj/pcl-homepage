@@ -394,6 +394,14 @@ def build_xaml():
     comment = "__COMMENT__"
     grade = "__GRADE__"
 
+    fortune_good = "__FORTUNE_GOOD__"
+    fortune_bad = "__FORTUNE_BAD__"
+    fortune_tip = "__FORTUNE_TIP__"
+    challenge = "__CHALLENGE__"
+    challenge_diff = "__CHALLENGE_DIFF__"
+    seed = "__SEED__"
+    seed_desc = "__SEED_DESC__"
+
     clean_old_images()
 
     wallpaper_url = fetch_bing_wallpaper()
@@ -585,7 +593,27 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：当前最新版本 ==========
+    # ========== 卡片 3：随机挑战 ==========
+    lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
+    lines.append('                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
+    lines.append('                        <TextBlock Text="本次挑战" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock Text="' + challenge + '" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    <Border HorizontalAlignment="Center" Background="#22FF5555" CornerRadius="10" Padding="12,4,12,4" Margin="0,12,0,0">')
+    lines.append('                        <TextBlock Text="难度：' + challenge_diff + '" FontSize="11" FontWeight="Bold" Foreground="#FF5555" />')
+    lines.append('                    </Border>')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 4：当前最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -625,7 +653,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 4：常用链接 ==========
+    # ========== 卡片 5：常用链接 ==========
     lines.append('    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
@@ -637,7 +665,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 5：游戏指令速查 ==========
+    # ========== 卡片 6：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -666,7 +694,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 6：彩蛋 ==========
+    # ========== 卡片 7：彩蛋 ==========
     lines.append('    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
@@ -693,26 +721,69 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 7：人品测试 ==========
-    lines.append('    <local:MyCard Title="人品测试" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    # ========== 卡片 8：今日运势 ==========
+    lines.append('    <local:MyCard Title="今日运势" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
     lines.append('                <TextBlock Text="' + str(score) + '" FontSize="56" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,14" />')
     lines.append('            </StackPanel>')
-
     lines.append('            __SCORE_BAR__')
-
-    lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+    lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
     lines.append('                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />')
     lines.append('                <TextBlock Text="' + grade + '" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('            </StackPanel>')
-    lines.append('            <local:MyHint Theme="Blue" Text="' + comment + '" />')
+
+    lines.append('            <Grid Margin="0,0,0,12">')
+    lines.append('                <Grid.ColumnDefinitions>')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                    <ColumnDefinition Width="1*" />')
+    lines.append('                </Grid.ColumnDefinitions>')
+    lines.append('                <Border Grid.Column="0" CornerRadius="10" Padding="14,12" Margin="0,0,6,0" Background="#1F17DD62">')
+    lines.append('                    <StackPanel>')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">')
+    lines.append('                            <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#17DD62" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <TextBlock Text="' + fortune_good + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#17DD62" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </Border>')
+    lines.append('                <Border Grid.Column="1" CornerRadius="10" Padding="14,12" Margin="6,0,0,0" Background="#1FFF5555">')
+    lines.append('                    <StackPanel>')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">')
+    lines.append('                            <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#FF5555" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <TextBlock Text="' + fortune_bad + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF5555" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </Border>')
+    lines.append('            </Grid>')
+
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="' + comment + '" />')
+    lines.append('            <local:MyHint Theme="Yellow" Text="小贴士：' + fortune_tip + '" />')
+
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 8：反馈 ==========
+    # ========== 卡片 9：今日种子推荐 ==========
+    lines.append('    <local:MyCard Title="今日种子推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel Orientation="Horizontal">')
+    lines.append('                    <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+    lines.append('                    <StackPanel VerticalAlignment="Center">')
+    lines.append('                        <TextBlock Text="种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />')
+    lines.append('                        <TextBlock Text="' + seed + '" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="' + seed_desc + '" />')
+    lines.append('            <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="' + seed + '" />')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="创建新世界时，在「种子」栏粘贴即可。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 10：反馈 ==========
     lines.append('    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" FontSize="13" LineHeight="20" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />')
