@@ -4,7 +4,7 @@ PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
 玩家 ID 由 PCL 的 {user} 替换标记自动填充。
-版本封面图优先从 Mojang 官方启动器新闻接口抓取，失败时回退 Wiki。
+版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
 日期卡片背景使用必应每日壁纸。
 """
 
@@ -478,17 +478,17 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    # 优先用 Mojang 官方启动器新闻封面
-    official_image = fetch_official_version_image(main_version)
-    if official_image:
-        version_image_source = official_image
-        print("[Version-Image] 使用官方新闻封面")
+    # 优先 Wiki 抓取（图质更适合卡片）
+    version_img_ok = fetch_version_image(main_version, filename="version.png")
+    if version_img_ok:
+        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
+        print("[Version-Image] 使用 Wiki 封面")
     else:
-        # 回退到 Wiki 抓取
-        print("[Version-Image] 官方封面不可用，回退 Wiki")
-        version_img_ok = fetch_version_image(main_version, filename="version.png")
-        if version_img_ok:
-            version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
+        # 回退官方新闻图
+        print("[Version-Image] Wiki 不可用，回退官方新闻图")
+        official_image = fetch_official_version_image(main_version)
+        if official_image:
+            version_image_source = official_image
         else:
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
@@ -680,8 +680,8 @@ def build_xaml():
 
     lines.append('            <Border CornerRadius="10" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Left" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="16,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
+    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="0,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">')
     lines.append('                        <StackPanel Orientation="Horizontal">')
     lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
     lines.append('                            <TextBlock Text="' + main_version + '" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
