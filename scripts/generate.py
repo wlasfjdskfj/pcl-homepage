@@ -130,6 +130,27 @@ def fetch_recent_releases(count=5):
 
 # ============ 官方更新总结 ============
 
+def extract_texts(obj, result=None, depth=0):
+    """递归遍历 JSON 对象，提取所有文本。"""
+    if result is None:
+        result = []
+    if depth > 10:
+        return result
+    if isinstance(obj, str):
+        s = obj.strip()
+        if s:
+            result.append(s)
+    elif isinstance(obj, dict):
+        for key, val in obj.items():
+            if key in ("type", "category"):
+                continue
+            extract_texts(val, result, depth + 1)
+    elif isinstance(obj, list):
+        for item in obj:
+            extract_texts(item, result, depth + 1)
+    return result
+
+
 def fetch_patch_notes(count=1):
     """从 Mojang 官方启动器新闻接口获取最近 N 条更新总结。"""
     try:
@@ -152,6 +173,7 @@ def fetch_patch_notes(count=1):
                 "version": version,
                 "title": title if title else ("Minecraft " + version + " 更新总结"),
                 "body": body,
+                "raw_entry": entry,
             })
 
         print("[PatchNotes] 获取 " + str(len(result)) + " 条更新总结")
@@ -721,7 +743,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">')
+    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border>')
@@ -864,7 +886,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">')
+    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
     lines.append('                        <Border.Background>')
@@ -896,7 +918,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="14" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">')
+    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#FF6B6B" CornerRadius="10" Padding="24,8,24,8" Margin="0,0,0,-2">')
@@ -939,6 +961,7 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
 
+    # 更新总结
     if patch_notes:
         note = patch_notes[0]
         note_title = note["title"]
@@ -950,29 +973,35 @@ def build_xaml():
         lines.append('                <TextBlock Text="更新总结" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
         lines.append('            </StackPanel>')
 
-        lines.append('            <local:MyCard Title="' + escaped_title + '" Margin="0,0,0,10" CanSwap="True" IsSwapped="True">')
+        lines.append('            <local:MyCard Title="' + escaped_title + '" Margin="0,0,0,10" CanSwap="True" IsSwapped="False">')
         lines.append('                <StackPanel Margin="25,40,23,20">')
 
-        for module in note["body"]:
-            header = module.get("header", "")
-            if header:
-                lines.append('                    <TextBlock Text="' + escape_xaml_attr(header) + '" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,8" />')
+        # 递归提取所有文本
+        raw_entry = note.get("raw_entry", {})
+        body_raw = raw_entry.get("body", [])
+        texts = extract_texts(body_raw)
 
-            for sub in module.get("modules", []):
-                if sub.get("type") == "list":
-                    for item in sub.get("body", []):
-                        if item.get("type") == "listItem":
-                            text = item.get("body", "")
-                            if text:
-                                escaped_text = escape_xaml_attr(text)
-                                lines.append('                    <TextBlock Text="· ' + escaped_text + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,4" />')
-                elif sub.get("type") == "paragraph":
-                    text = sub.get("body", "")
-                    if text:
-                        escaped_text = escape_xaml_attr(text)
-                        lines.append('                    <TextBlock Text="' + escaped_text + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+        # 过滤：去掉纯数字、单字符、重复
+        filtered = []
+        seen = set()
+        for t in texts:
+            if len(t) <= 1:
+                continue
+            if t in seen:
+                continue
+            if t == note_title:
+                continue
+            if t in ("paragraph", "list", "listItem", "image", "header", "modules"):
+                continue
+            seen.add(t)
+            filtered.append(t)
 
-            lines.append('                    <Border Height="8" />')
+        if filtered:
+            for t in filtered:
+                escaped_t = escape_xaml_attr(t)
+                lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+        else:
+            lines.append('                    <TextBlock Text="暂无详细内容，请点击下方「更新日志」查看。" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />')
 
         lines.append('                </StackPanel>')
         lines.append('            </local:MyCard>')
