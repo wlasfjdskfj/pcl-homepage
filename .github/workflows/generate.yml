@@ -1,9 +1,9 @@
 name: Generate Custom.xaml
 
 on:
-  # 每天北京时间 0 点（UTC 16 点）自动更新
+  # 每 12 小时跑一次（北京时间 0 点和 12 点）
   schedule:
-    - cron: '0 16 * * *'
+    - cron: '0 16,4 * * *'
   # 手动触发
   workflow_dispatch:
   # 推送到 main 分支时触发
