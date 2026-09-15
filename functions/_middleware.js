@@ -743,6 +743,20 @@ const SCORE_COMMENTS = {
   ],
 };
 
+// ============ 兜底页面 ============
+
+function buildFallbackXaml(title, message) {
+  return '<StackPanel>' +
+    '    <local:MyCard Title="' + title + '" Margin="0,0,0,15">' +
+    '        <StackPanel Margin="25,40,23,20">' +
+    '            <local:MyHint Theme="Yellow" Text="' + message + '" />' +
+    '            <local:MyIconTextButton Margin="0,16,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
+    '            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="如果一直看到这个页面，请去 GitHub 提 Issue。" />' +
+    '        </StackPanel>' +
+    '    </local:MyCard>' +
+    '</StackPanel>';
+}
+
 // ============ 工具函数 ============
 
 function pickRandom(arr) {
@@ -872,14 +886,46 @@ export async function onRequest(context) {
       response = await env.ASSETS.fetch(assetUrl);
     } catch (e) {
       console.error('[Middleware] 获取静态资源失败：', e);
-      return new Response('Internal Error', { status: 500 });
+      return new Response(buildFallbackXaml('服务器连接失败', '无法读取主页文件，请稍后重试。'), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
     }
 
     if (!response.ok) {
-      return response;
+      console.error('[Middleware] 静态资源返回错误：', response.status);
+      return new Response(buildFallbackXaml('主页暂时不可用', '服务器返回了 ' + response.status + '，请稍后重试。'), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
     }
 
-    let xaml = await response.text();
+    let xaml;
+    try {
+      xaml = await response.text();
+    } catch (e) {
+      console.error('[Middleware] 读取响应文本失败：', e);
+      return new Response(buildFallbackXaml('读取失败', '无法解析主页内容，请稍后重试。'), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
+    }
+
+    if (!xaml || xaml.trim().length < 50) {
+      console.error('[Middleware] 主页内容为空或过短');
+      return new Response(buildFallbackXaml('主页内容异常', '主页文件为空或损坏，请稍后重试。'), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
+    }
 
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
