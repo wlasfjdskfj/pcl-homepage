@@ -207,7 +207,7 @@ def fetch_version_image(version, filename="version.png"):
             "titles": image_title,
             "prop": "imageinfo",
             "iiprop": "url",
-            "iiurlwidth": "400",
+            "iiurlwidth": "1200",
             "format": "json",
         }
         resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
@@ -519,7 +519,7 @@ def build_xaml():
 
     lines.append('            <Border CornerRadius="10" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="150" Stretch="UniformToFill" />')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="14" Padding="18,7,18,7" Margin="0,0,0,12">')
     lines.append('                        <TextBlock Text="' + main_version + '" FontSize="14" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
