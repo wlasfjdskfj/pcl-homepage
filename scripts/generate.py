@@ -8,7 +8,6 @@ PCL 主页生成脚本
 日期卡片背景使用必应每日壁纸。
 """
 
-import random
 import time
 import requests
 from datetime import datetime
@@ -299,7 +298,6 @@ def clean_old_images():
 
 def fetch_bing_wallpaper():
     """从必应获取今日壁纸 URL，失败时回退到 kkange.png，再回退到内置图片"""
-    # 优先兜底：用户自己的图片
     local_fallback = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME / "kkange.png"
     if local_fallback.exists():
         fallback = BASE_URL + "/" + IMAGES_DIR_NAME + "/kkange.png"
@@ -369,7 +367,11 @@ CMD_GROUPS = [
 
 
 def escape_xaml_attr(text):
-    return text.replace('"', "&quot;")
+    return (text
+            .replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;"))
 
 
 # ============ XAML 生成 ============
@@ -393,7 +395,6 @@ def build_xaml():
 
     clean_old_images()
 
-    # 必应每日壁纸
     wallpaper_url = fetch_bing_wallpaper()
 
     ver = fetch_latest_version()
@@ -417,7 +418,7 @@ def build_xaml():
 
     version_img_ok = fetch_version_image(main_version, filename="version.png")
     if version_img_ok:
-        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png"
+        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
     else:
         version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
@@ -436,10 +437,9 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # 日期大块（横向宽矩形，带必应壁纸背景）
     lines.append('            <Border CornerRadius="14" Height="240" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + wallpaper_url + '" FallbackSource="' + BASE_URL + '/' + IMAGES_DIR_NAME + '/kkange.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border Background="#99000000" />')
     lines.append('                    <StackPanel VerticalAlignment="Center" Margin="24,20">')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
@@ -458,7 +458,6 @@ def build_xaml():
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
-    # 每日一言
     lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
@@ -470,7 +469,6 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    # 幸运数字 / 幸运颜色
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -494,7 +492,7 @@ def build_xaml():
     lines.append('                            <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <Border Width="22" Height="22" CornerRadius="11" Background="' + lucky_color["hex"] + '" Margin="0,0,10,0" VerticalAlignment="Center" />')
+    lines.append('                            <Border Width="22" Height="22" CornerRadius="11" Background="' + lucky_color["hex"] + '" BorderBrush="#22FFFFFF" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center" />')
     lines.append('                            <TextBlock Text="' + lucky_color["name"] + '" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </StackPanel>')
@@ -556,8 +554,11 @@ def build_xaml():
     lines.append('            <Border CornerRadius="10" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="14" Padding="18,7,18,7" Margin="0,0,0,12">')
-    lines.append('                        <TextBlock Text="' + main_version + '" FontSize="14" FontWeight="Bold" Foreground="White" />')
+    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="0,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">')
+    lines.append('                        <StackPanel Orientation="Horizontal">')
+    lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
+    lines.append('                            <TextBlock Text="' + main_version + '" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
+    lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
@@ -683,7 +684,7 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
     lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="问题反馈" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="' + FEEDBACK_URL + '" />')
-    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="查看源码" LogoScale="0.9" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="' + SOURCE_URL + '" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="查看源码" LogoScale="0.9" Logo="M384 320l-192 192 192 192z M640 320v384l192-192z" EventType="打开网页" EventData="' + SOURCE_URL + '" />')
     lines.append('            </Grid>')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
