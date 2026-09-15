@@ -100,7 +100,7 @@
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="10" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png" HorizontalAlignment="Center" VerticalAlignment="Center" Width="800" Height="150" Stretch="UniformToFill" />
+                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#E6FF5555" CornerRadius="14" Padding="18,7,18,7" Margin="0,0,0,12">
                         <TextBlock Text="26.3-rc-3" FontSize="14" FontWeight="Bold" Foreground="White" />
                     </Border>
