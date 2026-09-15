@@ -307,11 +307,11 @@ function buildScoreBar(score) {
     } else {
       const pos = i / blocks;
       if (pos < 0.4) {
-        bg = '#FF5555';
+        bg = '#FF6B6B';
       } else if (pos < 0.7) {
-        bg = '#FFAA00';
+        bg = '#FFC93C';
       } else {
-        bg = '#17DD62';
+        bg = '#4ADE80';
       }
     }
     bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
