@@ -3,8 +3,8 @@
  * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 日期 / 幸运数字 / 每日一言 / 彩蛋：每次请求随机
- * 人品分数 / 幸运颜色：用 IP + 北京时间日期 hash，同一 IP 同一天固定
+ * 日期 / 幸运数字 / 每日一言 / 彩蛋 / 随机挑战：每次请求随机
+ * 人品分数 / 幸运颜色 / 今日运势 / 种子推荐：用 IP / 日期 hash，同一天固定
  */
 
 // ============ 每日一言（80 条） ============
@@ -179,6 +179,118 @@ const COLORS = [
   { name: "龙息紫",     hex: "#C08BF5" },
   { name: "美西螈粉",   hex: "#F5A0B8" },
   { name: "蜜蜂黄",     hex: "#F4C542" },
+];
+
+// ============ 今日运势 · 宜 ============
+
+const FORTUNE_GOOD = [
+  "挖矿", "探险", "钓鱼", "建造", "战斗", "交易",
+  "种田", "养动物", "附魔", "下界探险", "末地挑战",
+  "刷怪", "合成", "整理箱子", "修路", "造红石",
+  "找村庄", "驯狼", "采花", "砍树", "挖沙子",
+  "煮药水", "炼金", "造地图", "放烟花", "睡午觉",
+];
+
+// ============ 今日运势 · 忌 ============
+
+const FORTUNE_BAD = [
+  "垂直挖矿", "靠近岩浆", "夜晚出门", "进下界", "打末影龙",
+  "惹苦力怕", "惹蜜蜂", "空手打劫掠", "从高处跳下",
+  "看末影人", "潜行挖矿", "深夜挖矿", "单人挑凋灵",
+  "在悬崖边建家", "把床放下界", "TNT 玩火", "看监守者",
+  "水下挖矿", "在沙子上建家", "把家建在雷区",
+  "用地狱门回家", "在村庄里打掠夺者", "在末地乱跑",
+  "在灵魂沙上走", "带金锭见猪灵",
+];
+
+// ============ 今日运势 · 小贴士 ============
+
+const FORTUNE_TIPS = [
+  "带上足够的火把再出发。",
+  "别忘了带水桶，能救命。",
+  "多准备点食物，饥饿很致命。",
+  "留一个末影箱放贵重物品。",
+  "出门前先睡一觉，避免幻翼。",
+  "把家附近点亮，防止刷怪。",
+  "背包里常备木头，随时能做工具。",
+  "遇到苦力怕别慌，往后退。",
+  "下矿前先记好坐标。",
+  "在岩浆边放个水桶。",
+  "把重要物品放末影箱。",
+  "定期备份存档。",
+  "探索前先标记基地位置。",
+  "多带点箭，骷髅很烦。",
+  "别小看岩浆，它能烧掉一切。",
+  "打末影龙前准备好床。",
+  "带上金苹果以防万一。",
+  "附魔装备别乱扔。",
+  "多养点动物，食物稳定。",
+  "村民交易可以省钱。",
+];
+
+// ============ 随机挑战（30 个） ============
+
+const CHALLENGES = [
+  { text: "不用床通关末地",       diff: "困难" },
+  { text: "不挖钻石通关末地",     diff: "困难" },
+  { text: "只用木制工具打末影龙", diff: "噩梦" },
+  { text: "不用附魔打通末地",     diff: "困难" },
+  { text: "一条命通关末地",       diff: "噩梦" },
+  { text: "不用药水打凋灵",       diff: "困难" },
+  { text: "不用床打末影龙",       diff: "困难" },
+  { text: "在生存模式下建一座城堡", diff: "普通" },
+  { text: "驯服 10 只狼",         diff: "普通" },
+  { text: "建一个自动农场",       diff: "普通" },
+  { text: "收集所有颜色的羊毛",   diff: "普通" },
+  { text: "在 1 小时内找到钻石",  diff: "普通" },
+  { text: "建一个下界交通枢纽",   diff: "困难" },
+  { text: "驯服一只猫",           diff: "简单" },
+  { text: "养 20 只鸡",           diff: "简单" },
+  { text: "种一片小麦田",         diff: "简单" },
+  { text: "挖到 Y=-59",           diff: "简单" },
+  { text: "建一个 10×10 的房子",  diff: "简单" },
+  { text: "在下界挖到远古残骸",   diff: "普通" },
+  { text: "找到一座海底神殿",     diff: "普通" },
+  { text: "找到一座林地府邸",     diff: "困难" },
+  { text: "找到一座远古城市",     diff: "困难" },
+  { text: "驯服一只美西螈",       diff: "普通" },
+  { text: "用烟花滑翔 1000 米",   diff: "普通" },
+  { text: "建一个信标",           diff: "困难" },
+  { text: "击败一只劫掠兽",       diff: "普通" },
+  { text: "在生存模式下复活一个僵尸村民", diff: "困难" },
+  { text: "建一个自动刷石机",     diff: "普通" },
+  { text: "给全套装备附魔",       diff: "普通" },
+  { text: "在末地建一个基地",     diff: "困难" },
+];
+
+// ============ MC 种子推荐（25 个） ============
+
+const SEEDS = [
+  { seed: "-343522682",   desc: "出生点旁边就是村庄，还有废弃传送门" },
+  { seed: "1400",         desc: "出生点附近有两个村庄，适合开局" },
+  { seed: "999",          desc: "出生点旁边就是掠夺者前哨站" },
+  { seed: "-772528963",   desc: "出生点附近有蘑菇岛和海底神殿" },
+  { seed: "1",            desc: "经典种子，出生点旁边有村庄" },
+  { seed: "-887553494",   desc: "附近有 6 个村庄和 2 个要塞" },
+  { seed: "0",            desc: "出生点旁边就是冰刺之地" },
+  { seed: "1234567890",   desc: "出生点附近有樱花树林和村庄" },
+  { seed: "-1158469226",  desc: "出生点旁边就是远古城市" },
+  { seed: "777",          desc: "出生点附近有两个村庄和一个要塞" },
+  { seed: "42",           desc: "出生点旁边就是繁花森林" },
+  { seed: "-578303778",   desc: "出生点旁边就是蘑菇岛" },
+  { seed: "10086",        desc: "中国区经典种子，出生点旁边有村庄" },
+  { seed: "233333",       desc: "出生点附近有竹林和熊猫" },
+  { seed: "-1943522019",  desc: "出生点旁边是热带草原和村庄" },
+  { seed: "66666",        desc: "出生点附近有丛林神庙" },
+  { seed: "12345",        desc: "出生点旁边就是雪原村庄" },
+  { seed: "-888",         desc: "出生点旁边就是废弃矿井" },
+  { seed: "555555",       desc: "出生点附近有 4 个村庄" },
+  { seed: "2024",         desc: "出生点旁边就是樱花树林" },
+  { seed: "2025",         desc: "出生点旁边有村庄和掠夺者前哨站" },
+  { seed: "-505050",      desc: "出生点旁边是沙漠村庄和沙漠神殿" },
+  { seed: "123123",       desc: "出生点附近有繁茂洞穴" },
+  { seed: "-789",         desc: "出生点旁边就是海底神殿" },
+  { seed: "31415926",     desc: "出生点附近有远古城市和要塞" },
 ];
 
 // ============ 人品评语库 ============
@@ -380,6 +492,21 @@ export async function onRequest(context) {
     const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
     const color = COLORS[colorIdx];
 
+    // 今日运势
+    const fortuneGoodIdx = deterministicIndex(ip, today, "fortune_good", FORTUNE_GOOD.length);
+    const fortuneBadIdx = deterministicIndex(ip, today, "fortune_bad", FORTUNE_BAD.length);
+    const fortuneTipIdx = deterministicIndex(ip, today, "fortune_tip", FORTUNE_TIPS.length);
+    const fortuneGood = FORTUNE_GOOD[fortuneGoodIdx];
+    const fortuneBad = FORTUNE_BAD[fortuneBadIdx];
+    const fortuneTip = FORTUNE_TIPS[fortuneTipIdx];
+
+    // 随机挑战
+    const challenge = pickRandom(CHALLENGES);
+
+    // 种子推荐（按日期固定，所有人当天相同）
+    const seedIdx = deterministicIndex("seed", today, "seed", SEEDS.length);
+    const seed = SEEDS[seedIdx];
+
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
       .replace(/__DATE_MONTH__/g, date.month)
@@ -395,7 +522,14 @@ export async function onRequest(context) {
       .replace(/__SCORE__/g, String(score))
       .replace(/__COMMENT__/g, info.comment)
       .replace(/__GRADE__/g, info.grade)
-      .replace(/__SCORE_BAR__/g, scoreBar);
+      .replace(/__SCORE_BAR__/g, scoreBar)
+      .replace(/__FORTUNE_GOOD__/g, fortuneGood)
+      .replace(/__FORTUNE_BAD__/g, fortuneBad)
+      .replace(/__FORTUNE_TIP__/g, fortuneTip)
+      .replace(/__CHALLENGE__/g, challenge.text)
+      .replace(/__CHALLENGE_DIFF__/g, challenge.diff)
+      .replace(/__SEED__/g, seed.seed)
+      .replace(/__SEED_DESC__/g, seed.desc);
 
     return new Response(xaml, {
       headers: {
