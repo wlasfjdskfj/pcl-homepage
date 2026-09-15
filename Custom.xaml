@@ -128,17 +128,27 @@
     </local:MyCard>
     <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                        <TextBlock Text="本次挑战" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <TextBlock Text="__CHALLENGE__" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" />
-                    <Border HorizontalAlignment="Center" Background="#22FF5555" CornerRadius="10" Padding="12,4,12,4" Margin="0,12,0,0">
-                        <TextBlock Text="难度：__CHALLENGE_DIFF__" FontSize="11" FontWeight="Bold" Foreground="#FF5555" />
+            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True">
+                <Grid>
+                    <Border>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#4A1A2E" Offset="0" />
+                                <GradientStop Color="#2D1B4E" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
                     </Border>
-                </StackPanel>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66FFFFFF" CornerRadius="10" Padding="10,4,10,4">
+                        <StackPanel Orientation="Horizontal">
+                            <local:MyImage Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                            <TextBlock Text="本次挑战" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#CCFF5555" CornerRadius="10" Padding="10,4,10,4">
+                        <TextBlock Text="__CHALLENGE_DIFF__" FontSize="10" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="__CHALLENGE__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />
+                </Grid>
             </Border>
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />
@@ -412,7 +422,7 @@
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="创建新世界时，在「种子」栏粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
