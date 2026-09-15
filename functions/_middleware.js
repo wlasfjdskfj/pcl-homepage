@@ -4,7 +4,7 @@
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
  * 日期 / 幸运数字 / 每日一言 / 彩蛋 / 随机挑战：每次请求随机
- * 人品分数 / 幸运颜色 / 今日运势 / 种子推荐 / 知识小测：用 IP / 日期 hash，同一天固定
+ * 人品分数 / 幸运颜色 / 今日运势 / 种子推荐 / 知识小测：用 IP + 北京时间日期 hash，同一 IP 同一天固定
  */
 
 // ============ 每日一言（80 条） ============
@@ -897,7 +897,7 @@ export async function onRequest(context) {
     const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
     const color = COLORS[colorIdx];
 
-    // 今日运势
+    // 今日运势（按 IP + 日期固定）
     const fortuneGoodIdx = deterministicIndex(ip, today, "fortune_good", FORTUNE_GOOD.length);
     const fortuneBadIdx = deterministicIndex(ip, today, "fortune_bad", FORTUNE_BAD.length);
     const fortuneTipIdx = deterministicIndex(ip, today, "fortune_tip", FORTUNE_TIPS.length);
@@ -905,15 +905,15 @@ export async function onRequest(context) {
     const fortuneBad = FORTUNE_BAD[fortuneBadIdx];
     const fortuneTip = FORTUNE_TIPS[fortuneTipIdx];
 
-    // 随机挑战
+    // 随机挑战（每次刷新随机）
     const challenge = pickRandom(CHALLENGES);
 
-    // 种子推荐（按日期固定，所有人当天相同）
-    const seedIdx = deterministicIndex("seed", today, "seed", SEEDS.length);
+    // 种子推荐（按 IP + 日期固定，每人每天不同）
+    const seedIdx = deterministicIndex(ip, today, "seed", SEEDS.length);
     const seed = SEEDS[seedIdx];
 
-    // MC 知识小测（按日期固定）
-    const quizIdx = deterministicIndex("quiz", today, "quiz", QUIZ.length);
+    // MC 知识小测（按 IP + 日期固定，每人每天不同）
+    const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
 
     xaml = xaml
