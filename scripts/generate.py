@@ -800,7 +800,7 @@ def build_xaml():
     lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="答案：' + quiz_a + '" />')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|' + quiz_a + '" />')
     lines.append('                    </local:CustomEventCollection>')
     lines.append('                </local:CustomEventService.Events>')
     lines.append('            </local:MyIconTextButton>')
