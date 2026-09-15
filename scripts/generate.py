@@ -657,18 +657,34 @@ def build_xaml():
     # ========== 卡片 3：随机挑战 ==========
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
-    lines.append('                        <TextBlock Text="本次挑战" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + challenge + '" FontSize="17" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                    <Border HorizontalAlignment="Center" Background="#22FF5555" CornerRadius="10" Padding="12,4,12,4" Margin="0,12,0,0">')
-    lines.append('                        <TextBlock Text="难度：' + challenge_diff + '" FontSize="11" FontWeight="Bold" Foreground="#FF5555" />')
+
+    # 大号渐变挑战卡
+    lines.append('            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True">')
+    lines.append('                <Grid>')
+    lines.append('                    <Border>')
+    lines.append('                        <Border.Background>')
+    lines.append('                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">')
+    lines.append('                                <GradientStop Color="#4A1A2E" Offset="0" />')
+    lines.append('                                <GradientStop Color="#2D1B4E" Offset="1" />')
+    lines.append('                            </LinearGradientBrush>')
+    lines.append('                        </Border.Background>')
     lines.append('                    </Border>')
-    lines.append('                </StackPanel>')
+    # 左上角标签
+    lines.append('                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66FFFFFF" CornerRadius="10" Padding="10,4,10,4">')
+    lines.append('                        <StackPanel Orientation="Horizontal">')
+    lines.append('                            <local:MyImage Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
+    lines.append('                            <TextBlock Text="本次挑战" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                    </Border>')
+    # 难度角标
+    lines.append('                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#CCFF5555" CornerRadius="10" Padding="10,4,10,4">')
+    lines.append('                        <TextBlock Text="' + challenge_diff + '" FontSize="10" FontWeight="Bold" Foreground="White" />')
+    lines.append('                    </Border>')
+    # 中间挑战文字
+    lines.append('                    <TextBlock Text="' + challenge + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />')
+    lines.append('                </Grid>')
     lines.append('            </Border>')
+
     lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />')
     lines.append('        </StackPanel>')
@@ -852,8 +868,8 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 10：MC 知识小测 ==========
-    lines.append('    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    # ========== 卡片 10：MC 知识小测（默认折叠） ==========
+    lines.append('    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
