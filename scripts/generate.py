@@ -99,13 +99,23 @@ def fetch_official_version_image(version):
                     print("[Official-Image] 精确匹配：" + version + " → " + full_url)
                     return full_url
 
-        # 没精确匹配，用最新一条
+        # 没精确匹配，找 type=release 的第一条
+        for entry in entries:
+            if entry.get("type") == "release":
+                img = entry.get("image", {})
+                url = img.get("url", "")
+                if url:
+                    full_url = "https://launchercontent.mojang.com" + url
+                    print("[Official-Image] 无精确匹配，用最新正式版：" + entry.get("version", "?") + " → " + full_url)
+                    return full_url
+
+        # 兜底用第一条
         first = entries[0]
         img = first.get("image", {})
         url = img.get("url", "")
         if url:
             full_url = "https://launchercontent.mojang.com" + url
-            print("[Official-Image] 无精确匹配，用最新：" + first.get("version", "?") + " → " + full_url)
+            print("[Official-Image] 兜底用最新：" + first.get("version", "?") + " → " + full_url)
             return full_url
 
         print("[Official-Image] 未找到任何图片")
@@ -668,10 +678,10 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="10" Height="150" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
+    lines.append('            <Border CornerRadius="10" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                <Grid>')
-    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="0,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">')
+    lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Left" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="16,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">')
     lines.append('                        <StackPanel Orientation="Horizontal">')
     lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
     lines.append('                            <TextBlock Text="' + main_version + '" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
