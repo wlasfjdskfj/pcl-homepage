@@ -52,8 +52,14 @@
                     </Grid.ColumnDefinitions>
                     <local:MyImage Grid.Column="0" Width="24" Height="24" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__USER_IP__" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="玩家 ID：" FontSize="13" Foreground="{DynamicResource ColorBrush1}" />
+                            <TextBlock Text="{user}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                            <TextBlock Text="公网 IP：" FontSize="13" Foreground="{DynamicResource ColorBrush1}" />
+                            <TextBlock Text="__USER_IP__" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        </StackPanel>
                     </StackPanel>
                 </Grid>
             </Border>
