@@ -248,15 +248,31 @@ function getBeijingDate() {
   const year = beijing.getUTCFullYear();
   const month = beijing.getUTCMonth() + 1;
   const day = beijing.getUTCDate();
+  const hour = beijing.getUTCHours();
   const weekdayIdx = beijing.getUTCDay();
   const weekdayMap = ["日", "一", "二", "三", "四", "五", "六"];
   const dateStr = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+  let greeting;
+  if (hour < 6) {
+    greeting = "凌晨好";
+  } else if (hour < 11) {
+    greeting = "早上好";
+  } else if (hour < 14) {
+    greeting = "中午好";
+  } else if (hour < 18) {
+    greeting = "下午好";
+  } else if (hour < 23) {
+    greeting = "晚上好";
+  } else {
+    greeting = "夜深了";
+  }
   return {
     year: String(year),
     month: String(month),
     day: String(day),
     weekday: weekdayMap[weekdayIdx],
     dateStr: dateStr,
+    greeting: greeting,
   };
 }
 
@@ -370,6 +386,7 @@ export async function onRequest(context) {
       .replace(/__DATE_MONTH__/g, date.month)
       .replace(/__DATE_DAY__/g, date.day)
       .replace(/__DATE_WEEKDAY__/g, date.weekday)
+      .replace(/__GREETING__/g, date.greeting)
       .replace(/__USER_IP__/g, ip)
       .replace(/__LUCKY_NUMBER__/g, String(num))
       .replace(/__LUCKY_COLOR_NAME__/g, color.name)
