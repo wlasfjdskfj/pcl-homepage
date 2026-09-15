@@ -500,32 +500,32 @@ def build_xaml():
     lines = []
     lines.append('<StackPanel>')
 
-    # ========== 卡片 1：我的世界服务器 ==========
-    lines.append('    <local:MyCard Title="我的世界服务器" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
+    # ========== 卡片 1：服务器推荐 ==========
+    lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="欢迎加入我们的服务器！复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
 
     lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
     lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
-    lines.append('                        <TextBlock Text="服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('                    </StackPanel>')
     lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />')
     lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + server_address + '" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="投稿服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="投稿服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器投稿」。" />')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
     lines.append('                    </local:CustomEventCollection>')
     lines.append('                </local:CustomEventService.Events>')
     lines.append('            </local:MyIconTextButton>')
 
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想把自己的服务器放到这里？点上方按钮查看投稿邮箱。" />')
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
