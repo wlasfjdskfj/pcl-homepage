@@ -3,6 +3,7 @@
 PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
+玩家 ID 由 PCL 的 {user} 替换标记自动填充。
 版本封面图从 Minecraft Wiki 抓取。
 """
 
@@ -466,7 +467,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 2：你的信息 ==========
+    # ========== 卡片 2：你的信息（玩家 ID + IP 同卡片） ==========
     lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -478,8 +479,14 @@ def build_xaml():
     lines.append('                    </Grid.ColumnDefinitions>')
     lines.append('                    <local:MyImage Grid.Column="0" Width="24" Height="24" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />')
     lines.append('                    <StackPanel Grid.Column="1" VerticalAlignment="Center">')
-    lines.append('                        <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                        <TextBlock Text="' + user_ip + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />')
+    lines.append('                        <StackPanel Orientation="Horizontal">')
+    lines.append('                            <TextBlock Text="玩家 ID：" FontSize="13" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                            <TextBlock Text="{user}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <StackPanel Orientation="Horizontal" Margin="0,4,0,0">')
+    lines.append('                            <TextBlock Text="公网 IP：" FontSize="13" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                            <TextBlock Text="' + user_ip + '" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                        </StackPanel>')
     lines.append('                    </StackPanel>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
@@ -497,7 +504,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 3：当前最新版本（填满居中） ==========
+    # ========== 卡片 3：当前最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
