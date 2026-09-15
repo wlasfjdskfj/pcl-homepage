@@ -45,7 +45,7 @@
                             <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" Text="__QUOTE__" />
-                        <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M480 128v192h192a64 64 0 0 1 0 128H448a64 64 0 0 1-64-64V128a64 64 0 0 1 128 0z M448 832a320 320 0 0 1 0-640v128a192 192 0 0 0 0 384z" EventType="刷新页面" EventData="-" />
+                        <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -120,8 +120,8 @@
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
                 </Grid.ColumnDefinitions>
-                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M256 256h512v512H256z M320 320v384h384V320z M384 128h64v128H384z M576 128h64v128H576z M384 768h64v128H384z M576 768h64v128H576z M128 384h128v64H128z M128 576h128v64H128z M768 384h128v64H768z M768 576h128v64H768z" EventType="内存优化" EventData="-" />
-                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128l256 256-64 64-256-256z M576 384l320 320-64 64-320-320z M192 704l128-128 192 192-128 128z M128 768l64 64-128 128z" EventType="清理垃圾" EventData="-" />
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M128 192h768v192H128z M128 448h768v192H128z M256 224v128 M256 480v128" EventType="内存优化" EventData="-" />
+                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="清理垃圾" EventData="-" />
             </Grid>
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />
         </StackPanel>
@@ -140,7 +140,7 @@
                     </Border>
                 </StackPanel>
             </Border>
-            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M256 128h512a128 128 0 0 1 128 128v512a128 128 0 0 1-128 128H256a128 128 0 0 1-128-128V256a128 128 0 0 1 128-128z M320 256a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M704 256a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M512 448a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M320 640a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M704 640a64 64 0 1 0 0 128 64 64 0 0 0 0-128z" EventType="刷新页面" EventData="-" />
+            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />
         </StackPanel>
     </local:MyCard>
@@ -197,9 +197,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="创造模式" ToolTip="/gamemode creative" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamemode creative" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="生存模式" ToolTip="/gamemode survival" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamemode survival" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="冒险模式" ToolTip="/gamemode adventure" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamemode adventure" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="创造模式" ToolTip="/gamemode creative" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode creative" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="生存模式" ToolTip="/gamemode survival" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode survival" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="冒险模式" ToolTip="/gamemode adventure" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode adventure" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -215,9 +215,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="设为白天" ToolTip="/time set day" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/time set day" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="晴天" ToolTip="/weather clear" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/weather clear" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="清除效果" ToolTip="/effect clear @s" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/effect clear @s" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="设为白天" ToolTip="/time set day" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/time set day" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="晴天" ToolTip="/weather clear" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/weather clear" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="清除效果" ToolTip="/effect clear @s" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect clear @s" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -233,9 +233,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="夜视" ToolTip="夜视 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/effect give @s night_vision 99999 1 true" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="抗性提升" ToolTip="抗性提升 V 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/effect give @s resistance 99999 4 true" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="急迫" ToolTip="急迫 III 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/effect give @s haste 99999 2 true" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="夜视" ToolTip="夜视 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s night_vision 99999 1 true" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="抗性提升" ToolTip="抗性提升 V 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s resistance 99999 4 true" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="急迫" ToolTip="急迫 III 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s haste 99999 2 true" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -251,9 +251,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="鞘翅" ToolTip="/give @s elytra" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s elytra" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="附魔金苹果" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s enchanted_golden_apple 64" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="经验瓶" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s experience_bottle 64" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="鞘翅" ToolTip="/give @s elytra" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s elytra" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="附魔金苹果" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s enchanted_golden_apple 64" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="经验瓶" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s experience_bottle 64" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -269,9 +269,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.20.5 及以后。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Notch&quot;}]" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.20.5 及以后。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;@s&quot;}]" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.20.5 及以后。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Steve&quot;}]" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.20.5 及以后。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Notch&quot;}]" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.20.5 及以后。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;@s&quot;}]" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.20.5 及以后。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Steve&quot;}]" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -287,9 +287,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.13-1.20.4。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Notch&quot;}" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.13-1.20.4。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;@s&quot;}" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.13-1.20.4。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Steve&quot;}" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.13-1.20.4。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Notch&quot;}" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.13-1.20.4。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;@s&quot;}" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.13-1.20.4。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Steve&quot;}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -305,9 +305,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="传送到坐标" ToolTip="把 0 64 0 换成目标坐标" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/tp @s 0 64 0" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="设置重生点" ToolTip="把当前位置设为重生点" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/spawnpoint @s ~ ~ ~" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="回到出生点" ToolTip="回到世界出生点附近" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/tp @s 0 64 0" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="传送到坐标" ToolTip="把 0 64 0 换成目标坐标" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/tp @s 0 64 0" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="设置重生点" ToolTip="把当前位置设为重生点" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/spawnpoint @s ~ ~ ~" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="回到出生点" ToolTip="回到世界出生点附近" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/tp @s 0 64 0" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -323,9 +323,9 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="关闭生物破坏" ToolTip="禁止苦力怕、末影人破坏方块" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamerule mobGriefing false" />
-                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="死亡不掉落" ToolTip="死亡后保留物品" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamerule keepInventory true" />
-                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="锁定白天" ToolTip="时间不再流动" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="/gamerule doDaylightCycle false" />
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="关闭生物破坏" ToolTip="禁止苦力怕、末影人破坏方块" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule mobGriefing false" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="死亡不掉落" ToolTip="死亡后保留物品" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule keepInventory true" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="锁定白天" ToolTip="时间不再流动" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule doDaylightCycle false" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -345,7 +345,7 @@
                 </StackPanel>
             </Border>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M128 384h768v128H128z M192 544h640v384H192z M448 128h128v384H448z M128 256h384v128H128z M512 256h384v128H512z M256 128h128v128H256z M640 128h128v128H640z">
+                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
                     <local:CustomEventService.Events>
                         <local:CustomEventCollection>
                             <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
@@ -353,7 +353,7 @@
                         </local:CustomEventCollection>
                     </local:CustomEventService.Events>
                 </local:MyIconTextButton>
-                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M480 128v192h192a64 64 0 0 1 0 128H448a64 64 0 0 1-64-64V128a64 64 0 0 1 128 0z M448 832a320 320 0 0 1 0-640v128a192 192 0 0 0 0 384z" EventType="刷新页面" EventData="-" />
+                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
             </StackPanel>
             <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
         </StackPanel>
