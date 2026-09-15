@@ -24,7 +24,7 @@
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True">
+            <Border CornerRadius="18" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#22FFFFFF" BorderThickness="1">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.IcyCubs_ZH-CN5287408951_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
@@ -151,7 +151,7 @@
     </local:MyCard>
     <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True">
+            <Border CornerRadius="18" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#33FFFFFF" BorderThickness="1">
                 <Grid>
                     <Border>
                         <Border.Background>
@@ -179,10 +179,10 @@
     </local:MyCard>
     <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+            <Border CornerRadius="18" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#22FFFFFF" BorderThickness="1">
                 <Grid>
                     <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
-                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="0,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="14" Padding="16,7,16,7" Margin="0,0,0,14" BorderBrush="#44FFFFFF" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="26.3" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
