@@ -155,7 +155,6 @@ const EGGS = [
 // ============ 幸运颜色（24 种） ============
 
 const COLORS = [
-  // ===== 矿物系列 =====
   { name: "钻石蓝",     hex: "#4AEDD9" },
   { name: "红石红",     hex: "#FF5555" },
   { name: "金锭黄",     hex: "#FFAA00" },
@@ -164,36 +163,26 @@ const COLORS = [
   { name: "紫水晶紫",   hex: "#A64DFF" },
   { name: "下界石英白", hex: "#E0E0E0" },
   { name: "煤炭黑",     hex: "#1A1A1A" },
-
-  // ===== 金属系列 =====
   { name: "铁锭银",     hex: "#D8D8D8" },
   { name: "铜锭橙",     hex: "#E77C56" },
   { name: "下界合金灰", hex: "#4A4A4A" },
-
-  // ===== 植物系列 =====
   { name: "苔藓绿",     hex: "#6BA941" },
   { name: "樱花粉",     hex: "#F7B5CB" },
   { name: "竹子绿",     hex: "#7FB069" },
   { name: "仙人掌绿",   hex: "#4A7A3A" },
   { name: "蘑菇红",     hex: "#C14444" },
-
-  // ===== 特殊方块 =====
   { name: "岩浆橙",     hex: "#FF7722" },
   { name: "凋灵黑",     hex: "#3C3C3C" },
   { name: "末影紫",     hex: "#8E44FF" },
   { name: "荧石黄",     hex: "#FFDD55" },
   { name: "海晶青",     hex: "#5FE3C9" },
   { name: "龙息紫",     hex: "#C08BF5" },
-
-  // ===== 生物系列 =====
   { name: "美西螈粉",   hex: "#F5A0B8" },
   { name: "蜜蜂黄",     hex: "#F4C542" },
 ];
 
 // ============ 人品评语库 ============
 
-// 每个段位有多条评语，用 score % 条数 选一条
-// 这样同一用户同一天分数固定，评语也固定
 const SCORE_COMMENTS = {
   SSR: [
     "欧皇降世！建议立刻去抽卡。",
@@ -285,10 +274,6 @@ function deterministicIndex(ip, date, salt, max) {
   return seed % max;
 }
 
-/**
- * 根据分数返回评语和评级
- * 每个段位有 6 条评语，用 score % 6 选一条
- */
 function getScoreInfo(score) {
   let grade, comments;
   if (score >= 95) {
@@ -311,10 +296,6 @@ function getScoreInfo(score) {
   return { comment: comment, grade: grade };
 }
 
-/**
- * 生成人品进度条 XAML 片段
- * 10 格，每格 10 分，已完成格按分数段显示红→橙→绿
- */
 function buildScoreBar(score) {
   const blocks = 10;
   const filled = Math.floor(score / 10);
@@ -326,11 +307,11 @@ function buildScoreBar(score) {
     } else {
       const pos = i / blocks;
       if (pos < 0.4) {
-        bg = '#FF5555';        // 红：低分
+        bg = '#FF5555';
       } else if (pos < 0.7) {
-        bg = '#FFAA00';        // 橙：中分
+        bg = '#FFAA00';
       } else {
-        bg = '#17DD62';        // 绿：高分
+        bg = '#17DD62';
       }
     }
     bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
@@ -368,31 +349,22 @@ export async function onRequest(context) {
 
     let xaml = await response.text();
 
-    // 每次请求随机
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
-    // 当前北京时间（用于显示和 hash）
     const date = getBeijingDate();
-
-    // 用户 IP
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
-
-    // 用北京日期做 hash，这样每天北京时间 0 点更新
     const today = date.dateStr;
 
-    // 人品分数
     const score = deterministicIndex(ip, today, "score", 100) + 1;
     const info = getScoreInfo(score);
     const scoreBar = buildScoreBar(score);
 
-    // 幸运颜色
     const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
     const color = COLORS[colorIdx];
 
-    // 替换占位符
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
       .replace(/__DATE_MONTH__/g, date.month)
@@ -412,6 +384,5 @@ export async function onRequest(context) {
     return noCacheResponse(xaml, 'application/xml; charset=utf-8');
   }
 
-  // 3. 其他路径
   return context.next();
 }
