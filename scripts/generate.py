@@ -130,19 +130,59 @@ def fetch_recent_releases(count=5):
 
 # ============ 官方更新总结 ============
 
+def is_valid_patch_text(t):
+    """判断一条文本是否是有效的更新正文，过滤图片路径 / 时间戳 / 版本号 / 文件名等垃圾。"""
+    if not t:
+        return False
+    t = t.strip()
+    if len(t) <= 1:
+        return False
+
+    # 图片路径 / 协议头 / 资源包路径
+    if t.startswith("/") or t.startswith("http") or t.startswith("pack:"):
+        return False
+
+    # ISO 时间戳，如 2026-09-15T11:23:02.000Z
+    if t.endswith("Z") and "T" in t:
+        return False
+
+    # 纯数字 / 版本号（如 26-3、1.21.4、26.3）
+    stripped = t.replace(".", "").replace("-", "").replace("_", "")
+    if stripped.isdigit():
+        return False
+
+    # 文件名后缀
+    lower = t.lower()
+    if lower.endswith((".jpg", ".jpeg", ".png", ".gif", ".json", ".webp")):
+        return False
+
+    # 字段值噪声
+    if t in ("paragraph", "list", "listItem", "image", "header",
+             "modules", "type", "version", "title", "category",
+             "release", "snapshot", "body", "content"):
+        return False
+
+    # 无中文且长度 < 30 的英文短句，多半是字段名 / 路径片段
+    has_chinese = any("\u4e00" <= ch <= "\u9fff" for ch in t)
+    if not has_chinese and len(t) < 30:
+        return False
+
+    return True
+
+
 def extract_texts(obj, result=None, depth=0):
-    """递归遍历 JSON 对象，提取所有文本。"""
+    """递归遍历 JSON 对象，提取所有有效文本。"""
     if result is None:
         result = []
     if depth > 10:
         return result
     if isinstance(obj, str):
         s = obj.strip()
-        if s:
+        if is_valid_patch_text(s):
             result.append(s)
     elif isinstance(obj, dict):
         for key, val in obj.items():
-            if key in ("type", "category"):
+            if key in ("type", "category", "image", "id"):
                 continue
             extract_texts(val, result, depth + 1)
     elif isinstance(obj, list):
@@ -166,23 +206,15 @@ def fetch_patch_notes(count=1):
         for entry in entries[:count]:
             version = entry.get("version", "")
             title = entry.get("title", "")
-            # 直接递归提取整条 entry 里的所有文本
             all_texts = extract_texts(entry)
 
             # 去掉 title 和 version 本身
             filtered = []
             seen = set()
             for t in all_texts:
-                if not t or len(t) <= 1:
-                    continue
                 if t == title or t == version:
                     continue
-                if t in ("paragraph", "list", "listItem", "image", "header", "modules", "type", "version", "title"):
-                    continue
                 if t in seen:
-                    continue
-                # 跳过纯英文类型名
-                if t.islower() and len(t) < 20 and ' ' not in t and '：' not in t and ':' not in t:
                     continue
                 seen.add(t)
                 filtered.append(t)
@@ -195,7 +227,7 @@ def fetch_patch_notes(count=1):
 
             print("[PatchNotes] " + version + " 提取 " + str(len(filtered)) + " 条文本")
             for i, t in enumerate(filtered[:5]):
-                print("  " + str(i+1) + ". " + t[:50])
+                print("  " + str(i + 1) + ". " + t[:50])
 
         print("[PatchNotes] 获取 " + str(len(result)) + " 条更新总结")
         return result
@@ -764,7 +796,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
+    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border>')
@@ -907,7 +939,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
+    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
     lines.append('                        <Border.Background>')
@@ -939,7 +971,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="4">')
+    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">')
@@ -1005,7 +1037,6 @@ def build_xaml():
         if texts:
             for t in texts:
                 escaped_t = escape_xaml_attr(t)
-                # 标题行（短文本）加粗
                 if len(t) < 30 and not t.startswith("·"):
                     lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" FontWeight="Bold" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,8,0,4" />')
                 else:
