@@ -5,6 +5,7 @@ PCL 主页生成脚本
 日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
 玩家 ID 由 PCL 的 {user} 替换标记自动填充。
 版本封面图从 Minecraft Wiki 抓取。
+日期卡片背景使用必应每日壁纸。
 """
 
 import random
@@ -17,6 +18,7 @@ from pathlib import Path
 
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
+BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -293,6 +295,28 @@ def clean_old_images():
         print("[Clean] 共清理 " + str(removed_count) + " 个文件")
 
 
+# ============ 必应每日壁纸 ============
+
+def fetch_bing_wallpaper():
+    """从必应获取今日壁纸 URL，失败返回 PCL 内置图片"""
+    fallback = "pack://application:,,,/images/Blocks/GrassPath.png"
+    try:
+        resp = requests.get(BING_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        images = data.get("images", [])
+        if images:
+            url = "https://www.bing.com" + images[0]["url"]
+            # Bing 的 URL 里带 & 参数，XAML 属性里需要转义
+            url = url.replace("&", "&amp;")
+            print("[Bing] 今日壁纸：" + url[:100] + "...")
+            return url
+        print("[Bing] API 返回为空，使用兜底图片")
+    except Exception as e:
+        print("[Bing] 获取壁纸失败：" + str(e) + "，使用兜底图片")
+    return fallback
+
+
 # ============ 指令分组数据 ============
 
 CMD_GROUPS = [
@@ -364,6 +388,9 @@ def build_xaml():
 
     clean_old_images()
 
+    # 必应每日壁纸
+    wallpaper_url = fetch_bing_wallpaper()
+
     ver = fetch_latest_version()
     release = ver["release"]
     snapshot = ver["snapshot"]
@@ -404,22 +431,26 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    # 日期大块
-    lines.append('            <Border CornerRadius="12" Padding="24,20" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                        <Border Width="28" Height="1" CornerRadius="0.5" Background="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                        <TextBlock Text="  今 日  " FontSize="10" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                        <Border Width="28" Height="1" CornerRadius="0.5" Background="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    # 日期大块（带必应壁纸背景）
+    lines.append('            <Border CornerRadius="12" Height="180" Margin="0,0,0,16" ClipToBounds="True">')
+    lines.append('                <Grid>')
+    lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    lines.append('                    <Border Background="#99000000" />')
+    lines.append('                    <StackPanel VerticalAlignment="Center" Margin="24,20">')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
+    lines.append('                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
+    lines.append('                            <TextBlock Text="  今 日  " FontSize="10" FontWeight="Bold" Foreground="#CCFFFFFF" VerticalAlignment="Center" />')
+    lines.append('                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
+    lines.append('                            <TextBlock Text="' + month + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,4,14" Foreground="#CCFFFFFF" />')
+    lines.append('                            <TextBlock Text="' + day + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,14" Foreground="#CCFFFFFF" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,6,0,0" />')
     lines.append('                    </StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                        <TextBlock Text="' + month + '" FontSize="46" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,4,14" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                        <TextBlock Text="' + day + '" FontSize="46" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,14" Foreground="{DynamicResource ColorBrush3}" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Margin="0,6,0,0" />')
-    lines.append('                </StackPanel>')
+    lines.append('                </Grid>')
     lines.append('            </Border>')
 
     # 每日一言
