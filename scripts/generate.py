@@ -116,6 +116,40 @@ def fetch_recent_releases(count=5):
         return []
 
 
+# ============ 官方更新总结 ============
+
+def fetch_patch_notes(count=1):
+    """从 Mojang 官方启动器新闻接口获取最近 N 条更新总结。"""
+    try:
+        resp = requests.get(LAUNCHER_NEWS_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        entries = data.get("entries", [])
+        if not entries:
+            print("[PatchNotes] 新闻接口无内容")
+            return []
+
+        result = []
+        for entry in entries[:count]:
+            version = entry.get("version", "")
+            title = entry.get("title", "")
+            body = entry.get("body", [])
+            if not title and not body:
+                continue
+            result.append({
+                "version": version,
+                "title": title if title else ("Minecraft " + version + " 更新总结"),
+                "body": body,
+            })
+
+        print("[PatchNotes] 获取 " + str(len(result)) + " 条更新总结")
+        return result
+
+    except Exception as e:
+        print("[PatchNotes] 请求失败：" + str(e))
+        return []
+
+
 # ============ 官方启动器新闻封面 ============
 
 def fetch_official_version_image(version):
@@ -530,6 +564,7 @@ def build_xaml():
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     recent_releases = fetch_recent_releases(5)
+    patch_notes = fetch_patch_notes(1)
 
     news_title = "当前最新版本 · " + main_version
 
@@ -575,7 +610,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="18" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
+    lines.append('            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border>')
@@ -718,7 +753,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="18" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
+    lines.append('            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
     lines.append('                        <Border.Background>')
@@ -750,13 +785,13 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="18" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
+    lines.append('            <Border CornerRadius="14" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
-    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="14" Padding="16,7,16,7" Margin="0,0,0,14" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
+    lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="{DynamicResource ColorBrush7}" CornerRadius="14" Padding="16,7,16,7" Margin="0,0,0,14" BorderBrush="{DynamicResource ColorBrush6}" BorderThickness="1">')
     lines.append('                        <StackPanel Orientation="Horizontal">')
     lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
-    lines.append('                            <TextBlock Text="' + main_version + '" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
+    lines.append('                            <TextBlock Text="' + main_version + '" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
     lines.append('                </Grid>')
@@ -798,6 +833,45 @@ def build_xaml():
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
+
+    # ========== 更新总结（只显示最新 1 条） ==========
+    if patch_notes:
+        note = patch_notes[0]
+        note_title = note["title"]
+        escaped_title = escape_xaml_attr(note_title)
+
+        lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+        lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+        lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+        lines.append('                <TextBlock Text="更新总结" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+        lines.append('            </StackPanel>')
+
+        lines.append('            <local:MyCard Title="' + escaped_title + '" Margin="0,0,0,10" CanSwap="True" IsSwapped="True">')
+        lines.append('                <StackPanel Margin="25,40,23,20">')
+
+        for module in note["body"]:
+            header = module.get("header", "")
+            if header:
+                lines.append('                    <TextBlock Text="' + escape_xaml_attr(header) + '" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,8" />')
+
+            for sub in module.get("modules", []):
+                if sub.get("type") == "list":
+                    for item in sub.get("body", []):
+                        if item.get("type") == "listItem":
+                            text = item.get("body", "")
+                            if text:
+                                escaped_text = escape_xaml_attr(text)
+                                lines.append('                    <TextBlock Text="· ' + escaped_text + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,4" />')
+                elif sub.get("type") == "paragraph":
+                    text = sub.get("body", "")
+                    if text:
+                        escaped_text = escape_xaml_attr(text)
+                        lines.append('                    <TextBlock Text="' + escaped_text + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+
+            lines.append('                    <Border Height="8" />')
+
+        lines.append('                </StackPanel>')
+        lines.append('            </local:MyCard>')
 
     # 按钮网格
     lines.append('            <Grid>')
