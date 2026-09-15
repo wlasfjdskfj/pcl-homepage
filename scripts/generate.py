@@ -6,6 +6,7 @@ PCL 主页生成脚本
 玩家 ID 由 PCL 的 {user} 替换标记自动填充。
 版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
 日期卡片背景使用必应每日壁纸。
+服务器状态从 api.mcsrvstat.us 查询。
 """
 
 import time
@@ -19,6 +20,7 @@ VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
 BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
 LAUNCHER_NEWS_API = "https://launchercontent.mojang.com/v2/javaPatchNotes.json"
+MC_SRV_API = "https://api.mcsrvstat.us/3/"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -31,6 +33,16 @@ KEEP_FILES = ["version.png", "kkange.png"]
 
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 SOURCE_URL = "https://github.com/wlasfjdskfj/pcl-homepage"
+
+# 主推服务器
+SERVER_ADDRESS = "mc.hypixel.net"
+
+# 服务器列表（第一个是主推）
+SERVER_LIST = [
+    ("Hypixel", SERVER_ADDRESS),
+    ("2B2T", "connect.2b2t.org"),
+    ("Mineplex", "mineplex.com"),
+]
 
 HEADERS = {
     "User-Agent": "PCL-Homepage/1.0 (https://github.com/wlasfjdskfj/pcl-homepage)",
@@ -148,6 +160,48 @@ def fetch_patch_notes(count=1):
     except Exception as e:
         print("[PatchNotes] 请求失败：" + str(e))
         return []
+
+
+# ============ 服务器状态 ============
+
+def fetch_server_status(address):
+    """查询 MC 服务器状态。返回 {online, players_online, players_max, version} 或 None。"""
+    try:
+        api = MC_SRV_API + address
+        resp = requests.get(api, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        if not data.get("online"):
+            print("[ServerStatus] " + address + " 离线")
+            return None
+        players = data.get("players", {})
+        version = data.get("version", "")
+        result = {
+            "address": address,
+            "online": True,
+            "players_online": players.get("online", 0),
+            "players_max": players.get("max", 0),
+            "version": version,
+        }
+        print("[ServerStatus] " + address + " 在线：" + str(result["players_online"]) + "/" + str(result["players_max"]) + " 版本 " + version)
+        return result
+    except Exception as e:
+        print("[ServerStatus] " + address + " 请求失败：" + str(e))
+        return None
+
+
+def fetch_server_list():
+    """批量查询服务器列表。"""
+    result = []
+    for name, address in SERVER_LIST:
+        status = fetch_server_status(address)
+        result.append({
+            "name": name,
+            "address": address,
+            "status": status,
+        })
+    print("[ServerList] 共 " + str(len(result)) + " 个服务器")
+    return result
 
 
 # ============ 官方启动器新闻封面 ============
@@ -526,7 +580,7 @@ def build_xaml():
     quiz_q = "__QUIZ_Q__"
     quiz_a = "__QUIZ_A__"
 
-    server_address = "mc.hypixel.net"
+    server_address = SERVER_ADDRESS
 
     clean_old_images()
 
@@ -565,6 +619,7 @@ def build_xaml():
 
     recent_releases = fetch_recent_releases(5)
     patch_notes = fetch_patch_notes(1)
+    server_list = fetch_server_list()
 
     news_title = "当前最新版本 · " + main_version
 
@@ -583,18 +638,51 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
 
-    lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
-    lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />')
-    lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + server_address + '" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
+    # 每个服务器一张大卡
+    for idx, srv in enumerate(server_list):
+        srv_name = srv["name"]
+        srv_addr = srv["address"]
+        srv_status = srv["status"]
 
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
+        margin_bottom = "14" if idx == 0 else "10"
+
+        lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
+        lines.append('                <StackPanel>')
+
+        # 标题行：图标 + 服务器名
+        lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
+        lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+        lines.append('                    </StackPanel>')
+
+        # 地址
+        lines.append('                    <TextBlock Text="' + srv_addr + '" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />')
+
+        # 状态
+        if srv_status:
+            online = srv_status["players_online"]
+            maxp = srv_status["players_max"]
+            ver_str = srv_status["version"]
+            lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+            lines.append('                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
+            lines.append('                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />')
+            lines.append('                        <TextBlock Text="' + str(online) + " / " + str(maxp) + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />')
+            lines.append('                        <TextBlock Text="' + ver_str + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+            lines.append('                    </StackPanel>')
+        else:
+            lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+            lines.append('                        <Border Width="8" Height="8" CornerRadius="4" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
+            lines.append('                        <TextBlock Text="离线 / 查询失败" FontSize="11" Foreground="#FF5555" VerticalAlignment="Center" />')
+            lines.append('                    </StackPanel>')
+
+        # 复制按钮
+        lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + srv_addr + '" />')
+
+        lines.append('                </StackPanel>')
+        lines.append('            </Border>')
+
+    # 推荐按钮
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,4,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
     lines.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
@@ -603,6 +691,7 @@ def build_xaml():
     lines.append('            </local:MyIconTextButton>')
 
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,0" Text="服务器状态来源：api.mcsrvstat.us，每次更新主页时重新查询。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -805,16 +894,13 @@ def build_xaml():
 
     lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
 
-    # 分隔线
     lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
 
-    # 版本对照标题
     lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
     lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
     lines.append('                <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('            </StackPanel>')
 
-    # 版本列表（MyListItem 可点击启动）
     if recent_releases:
         for idx, rel in enumerate(recent_releases):
             is_latest = (idx == 0)
@@ -834,7 +920,6 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
 
-    # ========== 更新总结（只显示最新 1 条） ==========
     if patch_notes:
         note = patch_notes[0]
         note_title = note["title"]
@@ -873,7 +958,6 @@ def build_xaml():
         lines.append('                </StackPanel>')
         lines.append('            </local:MyCard>')
 
-    # 按钮网格
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
