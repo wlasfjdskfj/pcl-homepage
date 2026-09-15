@@ -479,7 +479,7 @@ def build_xaml():
 
     version_img_ok = fetch_version_image(main_version, filename="version.png")
     if version_img_ok:
-        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
+        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version.replace(" ", "_")
         print("[Version-Image] 使用 Wiki 封面")
     else:
         print("[Version-Image] Wiki 不可用，回退官方新闻图")
