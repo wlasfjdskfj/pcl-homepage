@@ -437,7 +437,7 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
     # 日期大块（横向宽矩形，带必应壁纸背景）
-    lines.append('            <Border CornerRadius="14" Height="180" Margin="0,0,0,16" ClipToBounds="True">')
+    lines.append('            <Border CornerRadius="14" Height="240" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" FallbackSource="' + BASE_URL + '/' + IMAGES_DIR_NAME + '/kkange.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border Background="#99000000" />')
@@ -448,10 +448,10 @@ def build_xaml():
     lines.append('                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                            <TextBlock Text="' + month + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
-    lines.append('                            <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,4,14" Foreground="#CCFFFFFF" />')
-    lines.append('                            <TextBlock Text="' + day + '" FontSize="46" FontWeight="Bold" Foreground="White" />')
-    lines.append('                            <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,14" Foreground="#CCFFFFFF" />')
+    lines.append('                            <TextBlock Text="' + month + '" FontSize="54" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 月 " FontSize="14" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#CCFFFFFF" />')
+    lines.append('                            <TextBlock Text="' + day + '" FontSize="54" FontWeight="Bold" Foreground="White" />')
+    lines.append('                            <TextBlock Text=" 日" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#CCFFFFFF" />')
     lines.append('                        </StackPanel>')
     lines.append('                        <TextBlock Text="' + year + ' 年 · 星期' + weekday + '" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,6,0,0" />')
     lines.append('                    </StackPanel>')
