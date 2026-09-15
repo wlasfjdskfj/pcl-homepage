@@ -401,6 +401,8 @@ def build_xaml():
     challenge_diff = "__CHALLENGE_DIFF__"
     seed = "__SEED__"
     seed_desc = "__SEED_DESC__"
+    quiz_q = "__QUIZ_Q__"
+    quiz_a = "__QUIZ_A__"
 
     clean_old_images()
 
@@ -783,7 +785,30 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 10：反馈 ==========
+    # ========== 卡片 10：MC 知识小测 ==========
+    lines.append('    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+    lines.append('                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />')
+    lines.append('                        <TextBlock Text="每日一题" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock Text="' + quiz_q + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z">')
+    lines.append('                <local:CustomEventService.Events>')
+    lines.append('                    <local:CustomEventCollection>')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="答案：' + quiz_a + '" />')
+    lines.append('                    </local:CustomEventCollection>')
+    lines.append('                </local:CustomEventService.Events>')
+    lines.append('            </local:MyIconTextButton>')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="每天更新一道 MC 知识题，看看你能答对几道。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
+    # ========== 卡片 11：反馈 ==========
     lines.append('    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" FontSize="13" LineHeight="20" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />')
