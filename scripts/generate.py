@@ -554,6 +554,7 @@ def build_xaml():
     lines.append('                        <StackPanel Grid.Column="1" VerticalAlignment="Center">')
     lines.append('                            <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />')
     lines.append('                            <TextBlock Text="{user}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />')
+    lines.append('                            <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Grid>')
     lines.append('                    <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />')
@@ -740,9 +741,9 @@ def main():
     print("已生成：" + str(output))
 
     version_file = base_dir / "Custom.xaml.version"
-    version_str = datetime.now().strftime("%Y%m%d%H")
+    version_str = "0"
     version_file.write_text(version_str, encoding="utf-8")
-    print("已写入版本号：" + version_str)
+    print("已写入版本号占位：" + version_str)
 
 
 if __name__ == "__main__":
