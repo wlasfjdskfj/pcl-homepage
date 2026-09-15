@@ -46,7 +46,7 @@
                         <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="1161 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1160 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
@@ -83,7 +83,7 @@
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
+            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.IcyCubs_ZH-CN5287408951_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
@@ -210,7 +210,7 @@
     </local:MyCard>
     <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
+            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">
                 <Grid>
                     <Border>
                         <Border.Background>
@@ -238,7 +238,7 @@
     </local:MyCard>
     <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="14" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="2">
+            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF6B6B" BorderThickness="3">
                 <Grid>
                     <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#FF6B6B" CornerRadius="10" Padding="24,8,24,8" Margin="0,0,0,-2">
@@ -264,8 +264,9 @@
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="更新总结" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
-            <local:MyCard Title="Minecraft: Java Edition 26.3" Margin="0,0,0,10" CanSwap="True" IsSwapped="True">
+            <local:MyCard Title="Minecraft: Java Edition 26.3" Margin="0,0,0,10" CanSwap="True" IsSwapped="False">
                 <StackPanel Margin="25,40,23,20">
+                    <TextBlock Text="暂无详细内容，请点击下方「更新日志」查看。" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />
                 </StackPanel>
             </local:MyCard>
             <Grid>
