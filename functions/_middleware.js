@@ -232,16 +232,6 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function noCacheResponse(body, contentType) {
-  return new Response(body, {
-    headers: {
-      'Content-Type': contentType,
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'Pragma': 'no-cache',
-    },
-  });
-}
-
 function getBeijingDate() {
   const now = new Date();
   const beijing = new Date(now.getTime() + 8 * 60 * 60 * 1000);
@@ -342,9 +332,18 @@ export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
 
-  // 1. 版本号文件
+  // 1. 版本号文件：每次请求返回新时间戳，强制 PCL 重新下载
   if (url.pathname === '/Custom.xaml.version') {
-    return noCacheResponse(Date.now().toString(), 'text/plain; charset=utf-8');
+    return new Response(Date.now().toString(), {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'CDN-Cache-Control': 'no-store',
+        'Cloudflare-CDN-Cache-Control': 'no-store',
+      },
+    });
   }
 
   // 2. 主页文件
@@ -398,7 +397,17 @@ export async function onRequest(context) {
       .replace(/__GRADE__/g, info.grade)
       .replace(/__SCORE_BAR__/g, scoreBar);
 
-    return noCacheResponse(xaml, 'application/xml; charset=utf-8');
+    return new Response(xaml, {
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'CDN-Cache-Control': 'no-store',
+        'Cloudflare-CDN-Cache-Control': 'no-store',
+        'Vary': 'CF-Connecting-IP',
+      },
+    });
   }
 
   return context.next();
