@@ -148,8 +148,8 @@
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="10" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://launchercontent.mojang.com/v2/images/dappledcamp540x540.jpg" HorizontalAlignment="Left" VerticalAlignment="Stretch" Stretch="UniformToFill" />
-                    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="16,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">
+                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#D91A1A1A" CornerRadius="10" Padding="16,7,16,7" Margin="0,0,0,12" BorderBrush="#33FFFFFF" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="26.3" FontSize="13" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
