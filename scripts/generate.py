@@ -7,6 +7,7 @@ PCL 主页生成脚本
 版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
 日期卡片背景使用必应每日壁纸。
 服务器状态从 api.mcsrvstat.us 查询。
+更新总结自动翻译成中文。
 """
 
 import time
@@ -21,6 +22,7 @@ WIKI_API = "https://zh.minecraft.wiki/api.php"
 BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
 LAUNCHER_NEWS_API = "https://launchercontent.mojang.com/v2/javaPatchNotes.json"
 MC_SRV_API = "https://api.mcsrvstat.us/3/"
+TRANSLATE_API = "https://translate.googleapis.com/translate_a/single"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -128,6 +130,39 @@ def fetch_recent_releases(count=5):
         return []
 
 
+# ============ 翻译 ============
+
+def translate_to_chinese(text):
+    """调用 Google 翻译免费接口，把英文翻译成中文。失败时返回原文。"""
+    if not text:
+        return text
+    # 已经含中文就不翻
+    if any("\u4e00" <= ch <= "\u9fff" for ch in text):
+        return text
+    # 太短不翻
+    if len(text) < 5:
+        return text
+    try:
+        params = {
+            "client": "gtx",
+            "sl": "auto",
+            "tl": "zh-CN",
+            "dt": "t",
+            "q": text,
+        }
+        resp = requests.get(TRANSLATE_API, params=params, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        translated = "".join(seg[0] for seg in data[0] if seg and seg[0])
+        if translated:
+            print("[Translate] " + text[:30] + " → " + translated[:30])
+            return translated.strip()
+        return text
+    except Exception as e:
+        print("[Translate] 失败：" + str(e) + "，保留原文")
+        return text
+
+
 # ============ 官方更新总结 ============
 
 def is_valid_patch_text(t):
@@ -207,6 +242,9 @@ def fetch_patch_notes(count=1):
             version = entry.get("version", "")
             title = entry.get("title", "")
             all_texts = extract_texts(entry)
+
+            # 先翻译每条文本（英文 → 中文）
+            all_texts = [translate_to_chinese(t) for t in all_texts]
 
             # 去掉 title 和 version 本身
             filtered = []
@@ -796,7 +834,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
+    lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
     lines.append('                    <Border>')
@@ -939,7 +977,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
+    lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
     lines.append('                        <Border.Background>')
@@ -971,7 +1009,7 @@ def build_xaml():
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="5">')
+    lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
     lines.append('                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">')
@@ -1037,10 +1075,12 @@ def build_xaml():
         if texts:
             for t in texts:
                 escaped_t = escape_xaml_attr(t)
-                if len(t) < 30 and not t.startswith("·"):
+                # 中文短标题 → 加粗
+                has_chinese = any("\u4e00" <= ch <= "\u9fff" for ch in t)
+                if has_chinese and len(t) < 30 and not t.startswith("·"):
                     lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" FontWeight="Bold" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,8,0,4" />')
                 else:
-                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,6" />')
+                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />')
         else:
             lines.append('                    <TextBlock Text="暂无详细内容，请点击下方「更新日志」查看。" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />')
 
