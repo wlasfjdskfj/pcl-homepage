@@ -133,7 +133,7 @@ def fetch_recent_releases(count=5):
 # ============ 翻译 ============
 
 def translate_to_chinese(text):
-    """调用 Google 翻译免费接口，把英文翻译成中文。失败时返回原文。"""
+    """调用 MyMemory 免费翻译接口，把英文翻译成中文。失败时返回原文。"""
     if not text:
         return text
     # 已经含中文就不翻
@@ -142,21 +142,22 @@ def translate_to_chinese(text):
     # 太短不翻
     if len(text) < 5:
         return text
+    # MyMemory 单次上限约 500 字符，超长截断
+    if len(text) > 480:
+        text = text[:480]
     try:
         params = {
-            "client": "gtx",
-            "sl": "auto",
-            "tl": "zh-CN",
-            "dt": "t",
             "q": text,
+            "langpair": "en|zh-CN",
         }
         resp = requests.get(TRANSLATE_API, params=params, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
         data = resp.json()
-        translated = "".join(seg[0] for seg in data[0] if seg and seg[0])
-        if translated:
+        translated = data.get("responseData", {}).get("translatedText", "")
+        if translated and translated.lower() != text.lower():
             print("[Translate] " + text[:30] + " → " + translated[:30])
             return translated.strip()
+        print("[Translate] 返回为空，保留原文")
         return text
     except Exception as e:
         print("[Translate] 失败：" + str(e) + "，保留原文")
