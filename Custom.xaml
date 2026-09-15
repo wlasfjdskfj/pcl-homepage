@@ -6,13 +6,49 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
                         <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        <TextBlock Text="Hypixel" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <TextBlock Text="mc.hypixel.net" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <Border Width="8" Height="8" CornerRadius="4" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="离线 / 查询失败" FontSize="11" Foreground="#FF5555" VerticalAlignment="Center" />
+                    </StackPanel>
                     <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
                 </StackPanel>
             </Border>
-            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <TextBlock Text="2B2T" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="connect.2b2t.org" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <TextBlock Text="1163 / 1" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <TextBlock Text="1.7.2-26.2" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="connect.2b2t.org" />
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <TextBlock Text="Mineplex" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="mineplex.com" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <TextBlock Text="215 / 216" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                        <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mineplex.com" />
+                </StackPanel>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,4,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
                 <local:CustomEventService.Events>
                     <local:CustomEventCollection>
                         <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />
@@ -20,6 +56,7 @@
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />
+            <local:MyHint Theme="Blue" Margin="0,6,0,0" Text="服务器状态来源：api.mcsrvstat.us，每次更新主页时重新查询。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
