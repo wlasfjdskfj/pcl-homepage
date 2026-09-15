@@ -672,24 +672,35 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
     for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
-        margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "16"
+        margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
-        lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">')
-        lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
-        lines.append('                <TextBlock Text="' + group_title + '" FontSize="11" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
-        lines.append('            </StackPanel>')
-        lines.append('            <Grid Margin="0,0,0,' + margin_bottom + '">')
-        lines.append('                <Grid.ColumnDefinitions>')
-        lines.append('                    <ColumnDefinition Width="1*" />')
-        lines.append('                    <ColumnDefinition Width="1*" />')
-        lines.append('                    <ColumnDefinition Width="1*" />')
-        lines.append('                </Grid.ColumnDefinitions>')
+
+        # 每组一个独立小卡片
+        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
+        lines.append('                <StackPanel>')
+
+        # 组标题行：色条 + 组名 + 数量标签
+        lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+        lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
+        lines.append('                        <TextBlock Text="' + group_title + '" FontSize="12" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
+        lines.append('                    </StackPanel>')
+
+        # 按钮行
+        lines.append('                    <Grid>')
+        lines.append('                        <Grid.ColumnDefinitions>')
+        lines.append('                            <ColumnDefinition Width="1*" />')
+        lines.append('                            <ColumnDefinition Width="1*" />')
+        lines.append('                            <ColumnDefinition Width="1*" />')
+        lines.append('                        </Grid.ColumnDefinitions>')
         for i, (btn_text, cmd, tip) in enumerate(cmds):
-            margin = ' Margin="0,0,10,0"' if i < 2 else ''
+            margin = ' Margin="0,0,8,0"' if i < 2 else ''
             escaped_cmd = escape_xaml_attr(cmd)
             escaped_tip = escape_xaml_attr(tip)
-            lines.append('                <local:MyButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" EventType="复制文本" EventData="' + escaped_cmd + '" />')
-        lines.append('            </Grid>')
+            lines.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.8" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
+        lines.append('                    </Grid>')
+
+        lines.append('                </StackPanel>')
+        lines.append('            </Border>')
 
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />')
     lines.append('            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />')
