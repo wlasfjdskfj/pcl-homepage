@@ -4,7 +4,7 @@ PCL 主页生成脚本
 由 GitHub Actions 每天定时运行，生成带动态数据的 Custom.xaml。
 日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
 玩家 ID 由 PCL 的 {user} 替换标记自动填充。
-版本封面图从 Minecraft Wiki 抓取。
+版本封面图优先从 Mojang 官方启动器新闻接口抓取，失败时回退 Wiki。
 日期卡片背景使用必应每日壁纸。
 """
 
@@ -18,6 +18,7 @@ from pathlib import Path
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
 BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
+LAUNCHER_NEWS_API = "https://launchercontent.mojang.com/v2/javaPatchNotes.json"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -73,6 +74,46 @@ def fetch_latest_version():
     except Exception as e:
         print("[Version] 请求失败：" + str(e) + "，使用默认数据。")
         return default
+
+
+# ============ 官方启动器新闻封面 ============
+
+def fetch_official_version_image(version):
+    """从 Mojang 官方启动器新闻接口获取版本封面图。返回图片 URL 或 None。"""
+    try:
+        resp = requests.get(LAUNCHER_NEWS_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        entries = data.get("entries", [])
+        if not entries:
+            print("[Official-Image] 新闻接口无内容")
+            return None
+
+        # 优先精确匹配 version
+        for entry in entries:
+            if entry.get("version") == version:
+                img = entry.get("image", {})
+                url = img.get("url", "")
+                if url:
+                    full_url = "https://launchercontent.mojang.com" + url
+                    print("[Official-Image] 精确匹配：" + version + " → " + full_url)
+                    return full_url
+
+        # 没精确匹配，用最新一条
+        first = entries[0]
+        img = first.get("image", {})
+        url = img.get("url", "")
+        if url:
+            full_url = "https://launchercontent.mojang.com" + url
+            print("[Official-Image] 无精确匹配，用最新：" + first.get("version", "?") + " → " + full_url)
+            return full_url
+
+        print("[Official-Image] 未找到任何图片")
+        return None
+
+    except Exception as e:
+        print("[Official-Image] 请求失败：" + str(e))
+        return None
 
 
 # ============ Wiki 版本封面图获取 ============
@@ -427,11 +468,19 @@ def build_xaml():
         second_version = ""
         second_label = ""
 
-    version_img_ok = fetch_version_image(main_version, filename="version.png")
-    if version_img_ok:
-        version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
+    # 优先用 Mojang 官方启动器新闻封面
+    official_image = fetch_official_version_image(main_version)
+    if official_image:
+        version_image_source = official_image
+        print("[Version-Image] 使用官方新闻封面")
     else:
-        version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
+        # 回退到 Wiki 抓取
+        print("[Version-Image] 官方封面不可用，回退 Wiki")
+        version_img_ok = fetch_version_image(main_version, filename="version.png")
+        if version_img_ok:
+            version_image_source = BASE_URL + "/" + IMAGES_DIR_NAME + "/version.png?v=" + main_version
+        else:
+            version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     news_title = "当前最新版本 · " + main_version
 
