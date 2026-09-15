@@ -501,7 +501,7 @@ def build_xaml():
     lines.append('                            <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                        <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" Text="' + quote + '" />')
-    lines.append('                        <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('                        <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M480 128v192h192a64 64 0 0 1 0 128H448a64 64 0 0 1-64-64V128a64 64 0 0 1 128 0z M448 832a320 320 0 0 1 0-640v128a192 192 0 0 0 0 384z" EventType="刷新页面" EventData="-" />')
     lines.append('                    </StackPanel>')
     lines.append('                </Grid>')
     lines.append('            </Border>')
@@ -587,8 +587,8 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
-    lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M128 192h768v192H128z M128 448h768v192H128z M256 224v128 M256 480v128" EventType="内存优化" EventData="-" />')
-    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="清理垃圾" EventData="-" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M256 256h512v512H256z M320 320v384h384V320z M384 128h64v128H384z M576 128h64v128H576z M384 768h64v128H384z M576 768h64v128H576z M128 384h128v64H128z M128 576h128v64H128z M768 384h128v64H768z M768 576h128v64H768z" EventType="内存优化" EventData="-" />')
+    lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128l256 256-64 64-256-256z M576 384l320 320-64 64-320-320z M192 704l128-128 192 192-128 128z M128 768l64 64-128 128z" EventType="清理垃圾" EventData="-" />')
     lines.append('            </Grid>')
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />')
@@ -610,7 +610,7 @@ def build_xaml():
     lines.append('                    </Border>')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M256 128h512a128 128 0 0 1 128 128v512a128 128 0 0 1-128 128H256a128 128 0 0 1-128-128V256a128 128 0 0 1 128-128z M320 256a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M704 256a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M512 448a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M320 640a64 64 0 1 0 0 128 64 64 0 0 0 0-128z M704 640a64 64 0 1 0 0 128 64 64 0 0 0 0-128z" EventType="刷新页面" EventData="-" />')
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
@@ -675,17 +675,14 @@ def build_xaml():
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
 
-        # 每组一个独立小卡片
         lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
         lines.append('                <StackPanel>')
 
-        # 组标题行：色条 + 组名 + 数量标签
         lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
         lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
         lines.append('                        <TextBlock Text="' + group_title + '" FontSize="12" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
         lines.append('                    </StackPanel>')
 
-        # 按钮行
         lines.append('                    <Grid>')
         lines.append('                        <Grid.ColumnDefinitions>')
         lines.append('                            <ColumnDefinition Width="1*" />')
@@ -696,7 +693,7 @@ def build_xaml():
             margin = ' Margin="0,0,8,0"' if i < 2 else ''
             escaped_cmd = escape_xaml_attr(cmd)
             escaped_tip = escape_xaml_attr(tip)
-            lines.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.8" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
+            lines.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.9" ColorType="Highlight" Logo="M384 256l320 256-320 256z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
         lines.append('                    </Grid>')
 
         lines.append('                </StackPanel>')
@@ -720,7 +717,7 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
+    lines.append('                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M128 384h768v128H128z M192 544h640v384H192z M448 128h128v384H448z M128 256h384v128H128z M512 256h384v128H512z M256 128h128v128H256z M640 128h128v128H640z">')
     lines.append('                    <local:CustomEventService.Events>')
     lines.append('                        <local:CustomEventCollection>')
     lines.append('                            <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
@@ -728,7 +725,7 @@ def build_xaml():
     lines.append('                        </local:CustomEventCollection>')
     lines.append('                    </local:CustomEventService.Events>')
     lines.append('                </local:MyIconTextButton>')
-    lines.append('                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
+    lines.append('                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M480 128v192h192a64 64 0 0 1 0 128H448a64 64 0 0 1-64-64V128a64 64 0 0 1 128 0z M448 832a320 320 0 0 1 0-640v128a192 192 0 0 0 0 384z" EventType="刷新页面" EventData="-" />')
     lines.append('            </StackPanel>')
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />')
     lines.append('        </StackPanel>')
@@ -808,7 +805,7 @@ def build_xaml():
     lines.append('                    <TextBlock Text="' + quiz_q + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z">')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
     lines.append('                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|' + quiz_a + '" />')
