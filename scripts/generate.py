@@ -408,6 +408,52 @@ def fetch_bing_wallpaper():
     return fallback
 
 
+# ============ 指令分组数据 ============
+
+CMD_GROUPS = [
+    ("基础模式", [
+        ("创造模式", "/gamemode creative", "/gamemode creative"),
+        ("生存模式", "/gamemode survival", "/gamemode survival"),
+        ("冒险模式", "/gamemode adventure", "/gamemode adventure"),
+    ]),
+    ("环境控制", [
+        ("设为白天", "/time set day", "/time set day"),
+        ("晴天", "/weather clear", "/weather clear"),
+        ("清除效果", "/effect clear @s", "/effect clear @s"),
+    ]),
+    ("实用效果", [
+        ("夜视", "/effect give @s night_vision 99999 1 true", "夜视 99999 秒"),
+        ("抗性提升", "/effect give @s resistance 99999 4 true", "抗性提升 V 级 99999 秒"),
+        ("急迫", "/effect give @s haste 99999 2 true", "急迫 III 级 99999 秒"),
+    ]),
+    ("物品获取", [
+        ("鞘翅", "/give @s elytra", "/give @s elytra"),
+        ("附魔金苹果", "/give @s enchanted_golden_apple 64", "一次给 64 个"),
+        ("经验瓶", "/give @s experience_bottle 64", "一次给 64 个"),
+    ]),
+    ("玩家头颅 · 1.20.5+", [
+        ("Notch 头颅", "/give @s minecraft:player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。直接获取 Notch 的头颅"),
+        ("自己的头颅", "/give @s minecraft:player_head[profile={name:\"@s\"}]", "1.20.5 及以后。获取自己的头颅"),
+        ("自定义头颅", "/give @s minecraft:player_head[profile={name:\"Steve\"}]", "1.20.5 及以后。把 Steve 换成任意玩家 ID"),
+    ]),
+    ("玩家头颅 · 1.13-1.20.4", [
+        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。直接获取 Notch 的头颅"),
+        ("自己的头颅", "/give @s player_head{SkullOwner:\"@s\"}", "1.13-1.20.4。获取自己的头颅"),
+        ("自定义头颅", "/give @s player_head{SkullOwner:\"Steve\"}", "1.13-1.20.4。把 Steve 换成任意玩家 ID"),
+    ]),
+    ("传送定位", [
+        ("传送到坐标", "/tp @s 0 64 0", "把 0 64 0 换成目标坐标"),
+        ("设置重生点", "/spawnpoint @s ~ ~ ~", "把当前位置设为重生点"),
+        ("回到出生点", "/tp @s 0 64 0", "回到世界出生点附近"),
+    ]),
+    ("世界规则", [
+        ("关闭生物破坏", "/gamerule mobGriefing false", "禁止苦力怕、末影人破坏方块"),
+        ("死亡不掉落", "/gamerule keepInventory true", "死亡后保留物品"),
+        ("锁定白天", "/gamerule doDaylightCycle false", "时间不再流动"),
+    ]),
+]
+
+
 # ============ 合成表数据（10 个常用物品） ============
 
 CRAFTING_ITEMS = [
@@ -784,7 +830,7 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。" />')
 
-    # 按钮网格（移到最后）
+    # 按钮网格
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -813,7 +859,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 7：游戏指令速查 ==========
+    # ========== 卡片 7：游戏指令速查（美化版） ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -821,14 +867,17 @@ def build_xaml():
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
 
+        # 每组一张独立小卡片
         lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
         lines.append('                <StackPanel>')
 
+        # 组标题行：色条 + 组名
         lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
         lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
         lines.append('                        <TextBlock Text="' + group_title + '" FontSize="12" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
         lines.append('                    </StackPanel>')
 
+        # 按钮行
         lines.append('                    <Grid>')
         lines.append('                        <Grid.ColumnDefinitions>')
         lines.append('                            <ColumnDefinition Width="1*" />')
