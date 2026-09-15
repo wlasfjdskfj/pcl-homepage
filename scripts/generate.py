@@ -76,6 +76,46 @@ def fetch_latest_version():
         return default
 
 
+# ============ 最近 5 个正式版 ============
+
+def fetch_recent_releases(count=5):
+    """获取最近 N 个正式版（release），返回 [{version, date, days_ago}, ...]"""
+    try:
+        resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        data = resp.json()
+        versions = data.get("versions", [])
+
+        today = datetime.now().date()
+        result = []
+        for v in versions:
+            if v.get("type") != "release":
+                continue
+            vid = v.get("id", "")
+            rt = v.get("releaseTime", "")[:10]
+            if not vid or not rt:
+                continue
+            try:
+                release_date = datetime.strptime(rt, "%Y-%m-%d").date()
+                days_ago = (today - release_date).days
+            except Exception:
+                days_ago = 0
+            result.append({
+                "version": vid,
+                "date": rt,
+                "days_ago": days_ago,
+            })
+            if len(result) >= count:
+                break
+
+        print("[Releases] 最近 " + str(len(result)) + " 个正式版")
+        return result
+
+    except Exception as e:
+        print("[Releases] 获取失败：" + str(e))
+        return []
+
+
 # ============ 官方启动器新闻封面 ============
 
 def fetch_official_version_image(version):
@@ -368,49 +408,19 @@ def fetch_bing_wallpaper():
     return fallback
 
 
-# ============ 指令分组数据 ============
+# ============ 合成表数据（10 个常用物品） ============
 
-CMD_GROUPS = [
-    ("基础模式", [
-        ("创造模式", "/gamemode creative", "/gamemode creative"),
-        ("生存模式", "/gamemode survival", "/gamemode survival"),
-        ("冒险模式", "/gamemode adventure", "/gamemode adventure"),
-    ]),
-    ("环境控制", [
-        ("设为白天", "/time set day", "/time set day"),
-        ("晴天", "/weather clear", "/weather clear"),
-        ("清除效果", "/effect clear @s", "/effect clear @s"),
-    ]),
-    ("实用效果", [
-        ("夜视", "/effect give @s night_vision 99999 1 true", "夜视 99999 秒"),
-        ("抗性提升", "/effect give @s resistance 99999 4 true", "抗性提升 V 级 99999 秒"),
-        ("急迫", "/effect give @s haste 99999 2 true", "急迫 III 级 99999 秒"),
-    ]),
-    ("物品获取", [
-        ("鞘翅", "/give @s elytra", "/give @s elytra"),
-        ("附魔金苹果", "/give @s enchanted_golden_apple 64", "一次给 64 个"),
-        ("经验瓶", "/give @s experience_bottle 64", "一次给 64 个"),
-    ]),
-    ("玩家头颅 · 1.20.5+", [
-        ("Notch 头颅", "/give @s minecraft:player_head[profile={name:\"Notch\"}]", "1.20.5 及以后。直接获取 Notch 的头颅"),
-        ("自己的头颅", "/give @s minecraft:player_head[profile={name:\"@s\"}]", "1.20.5 及以后。获取自己的头颅"),
-        ("自定义头颅", "/give @s minecraft:player_head[profile={name:\"Steve\"}]", "1.20.5 及以后。把 Steve 换成任意玩家 ID"),
-    ]),
-    ("玩家头颅 · 1.13-1.20.4", [
-        ("Notch 头颅", "/give @s player_head{SkullOwner:\"Notch\"}", "1.13-1.20.4。直接获取 Notch 的头颅"),
-        ("自己的头颅", "/give @s player_head{SkullOwner:\"@s\"}", "1.13-1.20.4。获取自己的头颅"),
-        ("自定义头颅", "/give @s player_head{SkullOwner:\"Steve\"}", "1.13-1.20.4。把 Steve 换成任意玩家 ID"),
-    ]),
-    ("传送定位", [
-        ("传送到坐标", "/tp @s 0 64 0", "把 0 64 0 换成目标坐标"),
-        ("设置重生点", "/spawnpoint @s ~ ~ ~", "把当前位置设为重生点"),
-        ("回到出生点", "/tp @s 0 64 0", "回到世界出生点附近"),
-    ]),
-    ("世界规则", [
-        ("关闭生物破坏", "/gamerule mobGriefing false", "禁止苦力怕、末影人破坏方块"),
-        ("死亡不掉落", "/gamerule keepInventory true", "死亡后保留物品"),
-        ("锁定白天", "/gamerule doDaylightCycle false", "时间不再流动"),
-    ]),
+CRAFTING_ITEMS = [
+    ("工作台", "4 个木板", "3×3 合成界面，几乎所有合成都要它"),
+    ("熔炉", "8 个圆石", "烧炼矿石、食物、玻璃"),
+    ("箱子", "8 个木板", "27 格储物空间"),
+    ("火把", "1 个煤炭 + 1 个木棍 → 4 个", "照亮黑暗，防止刷怪"),
+    ("床", "3 个羊毛 + 3 个木板", "跳过夜晚，设置重生点"),
+    ("铁镐", "3 个铁锭 + 2 个木棍", "挖钻石、红石、金矿"),
+    ("钻石剑", "2 个钻石 + 1 个木棍", "基础攻击力 7 点"),
+    ("末影箱", "8 个黑曜石 + 1 个末影之眼", "全世界共享储物空间"),
+    ("信标", "5 个玻璃 + 3 个黑曜石 + 1 个下界之星", "给范围内玩家加 buff"),
+    ("附魔台", "4 个黑曜石 + 2 个钻石 + 1 本书", "给装备附魔"),
 ]
 
 
@@ -488,6 +498,8 @@ def build_xaml():
             version_image_source = official_image
         else:
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
+
+    recent_releases = fetch_recent_releases(5)
 
     news_title = "当前最新版本 · " + main_version
 
@@ -726,8 +738,53 @@ def build_xaml():
         version_info = main_label + "：" + main_version
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
 
-    lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,12" />')
+    lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
 
+    # 分隔线
+    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+
+    # 版本对照标题
+    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+    lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+    lines.append('                <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('            </StackPanel>')
+
+    # 版本列表
+    if recent_releases:
+        for idx, rel in enumerate(recent_releases):
+            is_latest = (idx == 0)
+            lines.append('            <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,6" Background="' + ('#1F17DD62' if is_latest else '{DynamicResource ColorBrush7}') + '">')
+            lines.append('                <Grid>')
+            lines.append('                    <Grid.ColumnDefinitions>')
+            lines.append('                        <ColumnDefinition Width="Auto" />')
+            lines.append('                        <ColumnDefinition Width="*" />')
+            lines.append('                        <ColumnDefinition Width="Auto" />')
+            lines.append('                    </Grid.ColumnDefinitions>')
+            lines.append('                    <TextBlock Grid.Column="0" Text="' + rel["version"] + '" FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="' + ('#17DD62' if is_latest else '{DynamicResource ColorBrush1}') + '" />')
+            lines.append('                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">')
+            if is_latest:
+                lines.append('                        <Border Background="#17DD62" CornerRadius="6" Padding="7,2,7,2">')
+                lines.append('                            <TextBlock Text="最新" FontSize="9" FontWeight="Bold" Foreground="White" />')
+                lines.append('                        </Border>')
+            lines.append('                    </StackPanel>')
+            lines.append('                    <StackPanel Grid.Column="2" VerticalAlignment="Center">')
+            lines.append('                        <TextBlock Text="' + rel["date"] + '" FontSize="11" FontWeight="Bold" HorizontalAlignment="Right" Foreground="{DynamicResource ColorBrush1}" />')
+            if rel["days_ago"] == 0:
+                days_text = "今天"
+            elif rel["days_ago"] == 1:
+                days_text = "昨天"
+            else:
+                days_text = str(rel["days_ago"]) + " 天前"
+            lines.append('                        <TextBlock Text="' + days_text + '" FontSize="9" HorizontalAlignment="Right" Foreground="{DynamicResource ColorBrush3}" Margin="0,1,0,0" />')
+            lines.append('                    </StackPanel>')
+            lines.append('                </Grid>')
+            lines.append('            </Border>')
+    else:
+        lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
+
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。" />')
+
+    # 按钮网格（移到最后）
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
