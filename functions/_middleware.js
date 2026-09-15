@@ -4,7 +4,7 @@
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
  * 日期 / 幸运数字 / 每日一言 / 彩蛋：每次请求随机
- * 人品分数 / 幸运颜色：用 IP + 日期 hash，同一 IP 同一天固定
+ * 人品分数 / 幸运颜色：用 IP + 北京时间日期 hash，同一 IP 同一天固定
  */
 
 // ============ 每日一言（80 条） ============
@@ -261,11 +261,13 @@ function getBeijingDate() {
   const day = beijing.getUTCDate();
   const weekdayIdx = beijing.getUTCDay();
   const weekdayMap = ["日", "一", "二", "三", "四", "五", "六"];
+  const dateStr = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
   return {
     year: String(year),
     month: String(month),
     day: String(day),
     weekday: weekdayMap[weekdayIdx],
+    dateStr: dateStr,
   };
 }
 
@@ -309,12 +311,29 @@ function getScoreInfo(score) {
   return { comment: comment, grade: grade };
 }
 
+/**
+ * 生成人品进度条 XAML 片段
+ * 10 格，每格 10 分，已完成格按分数段显示红→橙→绿
+ */
 function buildScoreBar(score) {
-  const scoreBlocks = Math.floor(score / 10);
+  const blocks = 10;
+  const filled = Math.floor(score / 10);
   let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
-  for (let i = 0; i < 10; i++) {
-    const colorRes = i < scoreBlocks ? '{DynamicResource ColorBrush1}' : '{DynamicResource ColorBrush7}';
-    bar += '<Border Width="22" Height="8" CornerRadius="2" Margin="1,0" Background="' + colorRes + '" />';
+  for (let i = 0; i < blocks; i++) {
+    let bg;
+    if (i >= filled) {
+      bg = '{DynamicResource ColorBrush7}';
+    } else {
+      const pos = i / blocks;
+      if (pos < 0.4) {
+        bg = '#FF5555';        // 红：低分
+      } else if (pos < 0.7) {
+        bg = '#FFAA00';        // 橙：中分
+      } else {
+        bg = '#17DD62';        // 绿：高分
+      }
+    }
+    bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
   }
   bar += '</StackPanel>';
   return bar;
@@ -355,14 +374,14 @@ export async function onRequest(context) {
     const quote = pickRandom(QUOTES);
     const eggData = egg.title + "|" + egg.content;
 
-    // 当前北京时间
+    // 当前北京时间（用于显示和 hash）
     const date = getBeijingDate();
 
     // 用户 IP
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
-    // 今日 UTC 日期（用于稳定 hash）
-    const today = new Date().toISOString().slice(0, 10);
+    // 用北京日期做 hash，这样每天北京时间 0 点更新
+    const today = date.dateStr;
 
     // 人品分数
     const score = deterministicIndex(ip, today, "score", 100) + 1;
