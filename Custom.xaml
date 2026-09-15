@@ -1,23 +1,23 @@
 <StackPanel>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border Width="300" Height="300" HorizontalAlignment="Center" CornerRadius="16" Margin="0,0,0,16" ClipToBounds="True">
+            <Border CornerRadius="14" Height="180" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.bing.com/th?id=OHR.RedMacawsFlight_ZH-CN5045822113_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" FallbackSource="https://www.mkejga.de5.net/images/kkange.png" Width="300" Height="300" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
+                    <local:MyImage Source="https://www.bing.com/th?id=OHR.RedMacawsFlight_ZH-CN5045822113_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" FallbackSource="https://www.mkejga.de5.net/images/kkange.png" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border Background="#99000000" />
                     <StackPanel VerticalAlignment="Center" Margin="24,20">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                            <Border Width="24" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />
                             <TextBlock Text="  今 日  " FontSize="10" FontWeight="Bold" Foreground="#CCFFFFFF" VerticalAlignment="Center" />
-                            <Border Width="24" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />
+                            <Border Width="28" Height="1" CornerRadius="0.5" Background="#88FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="__DATE_MONTH__" FontSize="42" FontWeight="Bold" Foreground="White" />
-                            <TextBlock Text=" 月 " FontSize="12" VerticalAlignment="Bottom" Margin="0,0,4,12" Foreground="#CCFFFFFF" />
-                            <TextBlock Text="__DATE_DAY__" FontSize="42" FontWeight="Bold" Foreground="White" />
-                            <TextBlock Text=" 日" FontSize="12" VerticalAlignment="Bottom" Margin="0,0,0,12" Foreground="#CCFFFFFF" />
+                            <TextBlock Text="__DATE_MONTH__" FontSize="46" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text=" 月 " FontSize="13" VerticalAlignment="Bottom" Margin="0,0,4,14" Foreground="#CCFFFFFF" />
+                            <TextBlock Text="__DATE_DAY__" FontSize="46" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text=" 日" FontSize="13" VerticalAlignment="Bottom" Margin="0,0,0,14" Foreground="#CCFFFFFF" />
                         </StackPanel>
-                        <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,8,0,0" />
+                        <TextBlock Text="__DATE_YEAR__ 年 · 星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" Foreground="#CCFFFFFF" Margin="0,6,0,0" />
                     </StackPanel>
                 </Grid>
             </Border>
