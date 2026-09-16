@@ -7,11 +7,12 @@
  *   HOMEPAGE_KV      KV 绑定（已有）
  *   CF_API_TOKEN     Cloudflare API Token（Account Analytics: Read）
  *   CF_ACCOUNT_ID    Cloudflare Account ID
- *   QUOTA_LIMIT      每日请求配额（免费版 100000）
  */
 
 const COOKIE_NAME = "admin_session";
 const SESSION_TTL = 60 * 60 * 8; // 8 小时
+
+const QUOTA_LIMIT = 100000; // 每日请求配额上限，固定写死
 
 /* ---------------- 工具函数 ---------------- */
 
@@ -380,7 +381,7 @@ export async function onRequest(context) {
       todayStr
     );
 
-    const quotaLimit = Number(env.QUOTA_LIMIT) || 100000;
+    const quotaLimit = QUOTA_LIMIT;
     const quotaUsed = apiRequests;
     const quotaPct = Math.min(100, (quotaUsed / quotaLimit) * 100);
     const quotaColor =
