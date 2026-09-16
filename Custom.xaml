@@ -8,11 +8,7 @@
                         <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                         <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                        <Border Width="8" Height="8" CornerRadius="4" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock Text="离线 / 查询失败" FontSize="11" Foreground="#FF5555" VerticalAlignment="Center" />
-                    </StackPanel>
+                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />
                     <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
                 </StackPanel>
             </Border>
@@ -20,52 +16,41 @@
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
-            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Hypixel" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="离线" FontSize="10" Foreground="#FF5555" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Text="Hypixel" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="mc.hypixel.net" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
                     </StackPanel>
                     <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mc.hypixel.net" />
                 </Grid>
             </Border>
-            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="1167 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Text="2B2T" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="connect.2b2t.org" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
                     </StackPanel>
                     <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="connect.2b2t.org" />
                 </Grid>
             </Border>
-            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Mineplex" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="233 / 234" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
+                        <TextBlock Text="Mineplex" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="mineplex.com" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
                     </StackPanel>
                     <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mineplex.com" />
                 </Grid>
@@ -78,7 +63,6 @@
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />
-            <local:MyHint Theme="Blue" Margin="0,6,0,0" Text="服务器状态来源：api.mcsrvstat.us，每次更新主页时重新查询。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
@@ -267,60 +251,60 @@
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="更新内容" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="新内容" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="新内容" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="· 随杨树生成的自然方块。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 有红色、橙色、黄色三种颜色。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 一种新的树苗，由杨树树叶掉落。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 可以与流浪商人交易获得。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 随杨树生成的自然方块。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 有对应的去皮变种。 可以合成对应种类的悬挂式告示牌。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 由4个杨木原木合成。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 有对应的去皮变种。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 一种新的木板。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 可用于合成对应的按钮、门、栅栏、栅栏门、压力板、告示牌、台阶、楼梯、活板门、船和运输船。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 会生成在杨树和倒下的杨树的树干上。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 可以与流浪商人交易获得。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 有小型和大型两种尺寸。 对小型层孔菇使用骨粉可使其生长为大型层孔菇。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 大型层孔菇被破坏后会掉落两个层孔菇。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 可用于合成蘑菇煲。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 摔落其上减免50%摔落高度的摔落伤害，类似于床。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 具有一定的弹性，类似于床。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 只能使用一次，使用后会被摧毁。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉，则麦秆床会被破坏而不掉落自身，不会爆炸或生成火。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                    <TextBlock Text="· 随杨树生成的自然方块。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有红色、橙色、黄色三种颜色。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 一种新的树苗，由杨树树叶掉落。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可以与流浪商人交易获得。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 随杨树生成的自然方块。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有对应的去皮变种。 可以合成对应种类的悬挂式告示牌。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 由4个杨木原木合成。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有对应的去皮变种。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 一种新的木板。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可用于合成对应的按钮、门、栅栏、栅栏门、压力板、告示牌、台阶、楼梯、活板门、船和运输船。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 会生成在杨树和倒下的杨树的树干上。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可以与流浪商人交易获得。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有小型和大型两种尺寸。 对小型层孔菇使用骨粉可使其生长为大型层孔菇。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 大型层孔菇被破坏后会掉落两个层孔菇。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可用于合成蘑菇煲。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 摔落其上减免50%摔落高度的摔落伤害，类似于床。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 具有一定的弹性，类似于床。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 只能使用一次，使用后会被摧毁。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉，则麦秆床会被破坏而不掉落自身，不会爆炸或生成火。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
                 </StackPanel>
             </Border>
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="更改" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="更改" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />
                     </StackPanel>
-                    <TextBlock Text="· 现在村民升级时解锁的新交易能在交易界面中刷新。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在处于骑乘状态时会受到弹射物伤害。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 不再会传送到基岩上、危险的方块上和世界边界外。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在浸没在流体中的犰狳不会再尝试蜷缩。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 不再会传送到基岩上。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 移除了纹理中的多余像素。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在不再会产生落叶粒子。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 更改了部分间歇泉粒子的纹理。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 食用紫颂果不再会传送到世界边界外。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在生物食用后传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 更改了合成配方，现在可任意搭配两个红色蘑菇、棕色蘑菇或层孔菇合成。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在可以使用层孔菇合成兔肉煲。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在空地图和部分探险家地图可以在废弃营地的箱子或氧化的铜箱子中找到。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 更改了地图和已有探险家地图的物品纹理。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 更改了玩家指针的纹理，现在位于范围外的玩家指针也会指示方向。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 加入了5个新的地图图标。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 现在探险家地图各自使用独立的ID。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 重命名了以下探险家地图： 海洋探险家地图 → 海底神殿地图" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 沼泽探险家地图 → 沼泽小屋地图" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                    <TextBlock Text="· 现在村民升级时解锁的新交易能在交易界面中刷新。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在处于骑乘状态时会受到弹射物伤害。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 不再会传送到基岩上、危险的方块上和世界边界外。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在浸没在流体中的犰狳不会再尝试蜷缩。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 不再会传送到基岩上。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 移除了纹理中的多余像素。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在不再会产生落叶粒子。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了部分间歇泉粒子的纹理。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 食用紫颂果不再会传送到世界边界外。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在生物食用后传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了合成配方，现在可任意搭配两个红色蘑菇、棕色蘑菇或层孔菇合成。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在可以使用层孔菇合成兔肉煲。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在空地图和部分探险家地图可以在废弃营地的箱子或氧化的铜箱子中找到。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了地图和已有探险家地图的物品纹理。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了玩家指针的纹理，现在位于范围外的玩家指针也会指示方向。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 加入了5个新的地图图标。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在探险家地图各自使用独立的ID。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 重命名了以下探险家地图： 海洋探险家地图 → 海底神殿地图" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 沼泽探险家地图 → 沼泽小屋地图" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
                 </StackPanel>
             </Border>
             <Grid>
