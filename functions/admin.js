@@ -1,5 +1,5 @@
 /**
- * 访问统计管理页面（方案 B + Workers/Pages 拆分 + 深浅主题 + 动画 + KV 读取压缩）
+ * 访问统计管理页面（完整版 + IP 详情弹窗）
  * 访问：https://www.mkejga.de5.net/admin
  *
  * 环境变量：
@@ -7,12 +7,12 @@
  *   HOMEPAGE_KV      KV 绑定（已有）
  *   CF_API_TOKEN     Cloudflare API Token（Account Analytics: Read）
  *   CF_ACCOUNT_ID    Cloudflare Account ID
+ *   IPAPI_TOKEN      （可选）ipapi.is 的 token，用于提升速率限制
  */
 
 const COOKIE_NAME = "admin_session";
-const SESSION_TTL = 60 * 60 * 8; // 8 小时
-
-const QUOTA_LIMIT = 100000; // 每日请求配额上限，固定写死
+const SESSION_TTL = 60 * 60 * 8;
+const QUOTA_LIMIT = 100000;
 
 /* ---------------- 工具函数 ---------------- */
 
@@ -29,9 +29,7 @@ function safeEqual(a, b) {
   if (typeof a !== "string" || typeof b !== "string") return false;
   const len = Math.max(a.length, b.length);
   let diff = a.length ^ b.length;
-  for (let i = 0; i < len; i++) {
-    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
-  }
+  for (let i = 0; i < len; i++) diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
   return diff === 0;
 }
 
@@ -57,7 +55,20 @@ function securityHeaders(extra = {}) {
   };
 }
 
-/* ---------------- 主题脚本（内联，最先执行，避免闪屏） ---------------- */
+function ccToFlag(cc) {
+  if (!cc || cc.length !== 2) return "🌐";
+  const OFFSET = 127397;
+  try {
+    return String.fromCodePoint(
+      cc.toUpperCase().charCodeAt(0) + OFFSET,
+      cc.toUpperCase().charCodeAt(1) + OFFSET
+    );
+  } catch {
+    return "🌐";
+  }
+}
+
+/* ---------------- 主题脚本 ---------------- */
 
 const THEME_SCRIPT = `
 (function(){
@@ -85,7 +96,7 @@ const THEME_SCRIPT = `
 })();
 `;
 
-/* ---------------- 主题 CSS 变量（共用） ---------------- */
+/* ---------------- 主题变量 ---------------- */
 
 const THEME_CSS = `
 :root {
@@ -114,6 +125,8 @@ const THEME_CSS = `
   --color-pages: #3b82f6;
   --color-quota: #FFB020;
   --tip-highlight: #d97706;
+  --modal-bg: #1e1e20;
+  --modal-card: rgba(255,255,255,.03);
 }
 html[data-theme="light"] {
   --bg: #f4f5f7;
@@ -141,6 +154,8 @@ html[data-theme="light"] {
   --color-pages: #2563eb;
   --color-quota: #d97706;
   --tip-highlight: #b45309;
+  --modal-bg: #ffffff;
+  --modal-card: #fafafa;
 }
 `;
 
@@ -180,8 +195,7 @@ function loginPage(hasTried) {
   .box {
     position:relative; z-index:1;
     background:var(--card);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     padding:40px; border-radius:16px; width:340px;
     border:1px solid var(--card-border);
     box-shadow: 0 20px 60px rgba(0,0,0,.35);
@@ -202,14 +216,14 @@ function loginPage(hasTried) {
     outline:none; border-color:var(--accent);
     box-shadow:0 0 0 3px rgba(255,68,68,.15), 0 0 20px rgba(255,68,68,.25);
   }
-  button {
+  button[type=submit] {
     width:100%; margin-top:18px; padding:13px; border:none; border-radius:10px;
     background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:white;
     font-size:14px; font-weight:bold; cursor:pointer; letter-spacing:.5px;
     transition: transform .15s, box-shadow .25s, filter .25s;
   }
-  button:hover { filter:brightness(1.1); box-shadow:0 8px 24px rgba(255,68,68,.4); }
-  button:active { transform: scale(.97); }
+  button[type=submit]:hover { filter:brightness(1.1); box-shadow:0 8px 24px rgba(255,68,68,.4); }
+  button[type=submit]:active { transform: scale(.97); }
   .err {
     color:var(--accent-2); font-size:12px; margin-top:10px; text-align:center;
     animation: shake .4s;
@@ -229,9 +243,20 @@ function loginPage(hasTried) {
     transition: transform .2s, background .3s;
   }
   .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
+  .top-band {
+    position: fixed; top:0; left:0; right:0; height:3px; z-index: 100;
+    background: linear-gradient(90deg, #FF4444, #3b82f6, #FFB020, #FF4444);
+    background-size: 300% 100%;
+    animation: bandFlow 6s linear infinite;
+  }
+  @keyframes bandFlow {
+    0% { background-position: 0% 0; }
+    100% { background-position: 300% 0; }
+  }
 </style>
 </head>
 <body>
+  <div class="top-band" aria-hidden="true"></div>
   <button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
   <div class="box">
     <h1>管理员登录</h1>
@@ -245,7 +270,7 @@ function loginPage(hasTried) {
 </html>`;
 }
 
-/* ---------------- Cloudflare GraphQL API（Workers + Pages 拆分） ---------------- */
+/* ---------------- Cloudflare API ---------------- */
 
 async function fetchUsageSplit(env, dateStr) {
   if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID) {
@@ -280,7 +305,6 @@ async function fetchUsageSplit(env, dateStr) {
     });
 
     if (!res.ok) return { workers: 0, pages: 0, error: "api_" + res.status };
-
     const json = await res.json();
     if (json.errors) return { workers: 0, pages: 0, error: "api_error" };
 
@@ -288,24 +312,18 @@ async function fetchUsageSplit(env, dateStr) {
     const workers = acc.workers?.[0]?.sum?.requests || 0;
     const pages = acc.pages?.[0]?.sum?.requests || 0;
     return { workers, pages, error: null };
-  } catch (e) {
+  } catch {
     return { workers: 0, pages: 0, error: "network" };
   }
 }
 
-/* ---------------- 重置倒计时 ---------------- */
+/* ---------------- 倒计时 ---------------- */
 
 function getResetCountdown() {
   const now = Date.now();
-  // 转北京时间
   const bj = new Date(now + 8 * 3600 * 1000);
-  const y = bj.getUTCFullYear();
-  const m = bj.getUTCMonth();
-  const d = bj.getUTCDate();
-  // 北京时间今天 08:00 对应的 UTC 时间戳
-  const today8 = Date.UTC(y, m, d, 8, 0, 0) - 8 * 3600 * 1000;
-  let target = today8;
-  if (now >= today8) target = today8 + 24 * 3600 * 1000;
+  const today8 = Date.UTC(bj.getUTCFullYear(), bj.getUTCMonth(), bj.getUTCDate(), 8, 0, 0) - 8 * 3600 * 1000;
+  const target = now >= today8 ? today8 + 24 * 3600 * 1000 : today8;
   return { resetAt: target, diffMs: target - now };
 }
 
@@ -324,11 +342,8 @@ export async function onRequest(context) {
     if (session === "1") isAdmin = true;
   }
 
-  // ---- 登出 ----
   if (url.pathname === "/admin/logout") {
-    if (cookieToken) {
-      await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
-    }
+    if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
     return new Response(null, {
       status: 302,
       headers: securityHeaders({
@@ -338,15 +353,12 @@ export async function onRequest(context) {
     });
   }
 
-  // ---- 登录 POST ----
   if (request.method === "POST") {
     const form = await request.formData();
     const providedPwd = String(form.get("pwd") || "");
     if (adminPwd && safeEqual(providedPwd, adminPwd)) {
       const token = randomToken();
-      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", {
-        expirationTtl: SESSION_TTL,
-      });
+      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
       return new Response(null, {
         status: 302,
         headers: securityHeaders({
@@ -361,7 +373,6 @@ export async function onRequest(context) {
     });
   }
 
-  // ---- 未登录 ----
   if (!isAdmin) {
     const hasTried = url.searchParams.has("pwd");
     return new Response(loginPage(hasTried), {
@@ -370,18 +381,14 @@ export async function onRequest(context) {
     });
   }
 
-  /* ---------------- 已登录：读取数据 ---------------- */
   try {
     const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
 
     let ipMap = {};
     try {
       ipMap = JSON.parse((await env.HOMEPAGE_KV.get("visit:ipmap")) || "{}");
-    } catch {
-      ipMap = {};
-    }
+    } catch { ipMap = {}; }
 
-    // 最近 7 天日期
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -389,65 +396,57 @@ export async function onRequest(context) {
       dates.push(d.toISOString().slice(0, 10));
     }
 
-    // 优先读 7 天汇总 key，缺失则降级为逐天读
     let days7Map = null;
     try {
       const raw = await env.HOMEPAGE_KV.get("visit:days:7");
       if (raw) days7Map = JSON.parse(raw);
-    } catch {
-      days7Map = null;
-    }
+    } catch { days7Map = null; }
 
     let days;
     if (days7Map && typeof days7Map === "object" && !Array.isArray(days7Map)) {
-      days = dates.map((date) => ({
-        date,
-        count: Number(days7Map[date]) || 0,
-      }));
+      days = dates.map((date) => ({ date, count: Number(days7Map[date]) || 0 }));
     } else {
       days = await Promise.all(
         dates.map(async (date) => {
           let set = [];
           try {
-            set = JSON.parse(
-              (await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]"
-            );
-          } catch {
-            set = [];
-          }
+            set = JSON.parse((await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]");
+          } catch { set = []; }
           return { date, count: Array.isArray(set) ? set.length : 0 };
         })
       );
     }
 
-    // Cloudflare 真实请求量（Workers + Pages 拆分）
     const todayStr = dates[0];
-    const { workers, pages, error: apiError } = await fetchUsageSplit(
-      env,
-      todayStr
-    );
+    const { workers, pages, error: apiError } = await fetchUsageSplit(env, todayStr);
 
     const quotaLimit = QUOTA_LIMIT;
     const quotaUsed = workers + pages;
     const quotaPct = Math.min(100, (quotaUsed / quotaLimit) * 100);
-    const quotaColor =
-      quotaPct >= 80 ? "#FF4444" : quotaPct >= 60 ? "#FFB020" : "#17DD62";
+    const quotaColor = quotaPct >= 80 ? "#FF4444" : quotaPct >= 60 ? "#FFB020" : "#17DD62";
 
     const resetInfo = getResetCountdown();
 
     const entries = Object.entries(ipMap)
-      .filter(([, cnt]) => Number.isFinite(Number(cnt)))
-      .sort((a, b) => Number(b[1]) - Number(a[1]));
+      .map(([ip, val]) => {
+        if (typeof val === "number") return [ip, { c: val, cc: "XX" }];
+        return [ip, { c: Number(val?.c) || 0, cc: val?.cc || "XX" }];
+      })
+      .filter(([, v]) => Number.isFinite(v.c))
+      .sort((a, b) => b[1].c - a[1].c);
 
-    const ipRows = entries
-      .slice(0, 100)
-      .map(
-        ([ipAddr, cnt], i) =>
-          `<tr><td>${i + 1}</td><td>${escapeHtml(ipAddr)}</td><td>${escapeHtml(
-            cnt
-          )}</td></tr>`
-      )
-      .join("");
+    const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
+      const flag = ccToFlag(v.cc);
+      return `<tr>
+        <td>${i + 1}</td>
+        <td>
+          <span class="ip-flag" title="${escapeHtml(v.cc)}">${flag}</span>
+          <span class="ip-text">${escapeHtml(ipAddr)}</span>
+          <button class="ip-detail-btn" data-ip="${escapeHtml(ipAddr)}" title="查看详情">ℹ</button>
+        </td>
+        <td>${escapeHtml(v.c)}</td>
+      </tr>`;
+    }).join("");
 
     const dayRows = days
       .map((d) => `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`)
@@ -457,6 +456,8 @@ export async function onRequest(context) {
       ? `<div class="warn animate-in">ℹ Cloudflare 数据暂不可用，配额显示为 0</div>`
       : "";
 
+    const updatedAt = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(11, 19);
+
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -464,6 +465,7 @@ export async function onRequest(context) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>访问统计</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   ${THEME_CSS}
   * { box-sizing: border-box; }
@@ -486,23 +488,72 @@ export async function onRequest(context) {
     from { transform: translate(0,0) scale(1); }
     to   { transform: translate(3%, -3%) scale(1.06); }
   }
+  .top-band {
+    position: fixed; top:0; left:0; right:0; height:3px; z-index: 100;
+    background: linear-gradient(90deg, var(--accent), var(--split-border), var(--color-quota), var(--accent));
+    background-size: 300% 100%;
+    animation: bandFlow 6s linear infinite;
+  }
+  @keyframes bandFlow {
+    0% { background-position: 0% 0; }
+    100% { background-position: 300% 0; }
+  }
+  .cursor-glow {
+    position: fixed; width: 320px; height: 320px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,68,68,.10), transparent 65%);
+    transform: translate(-50%, -50%);
+    pointer-events:none; z-index:0; opacity:0;
+    transition: opacity .4s;
+    mix-blend-mode: screen;
+  }
+  html[data-theme="light"] .cursor-glow {
+    mix-blend-mode: multiply;
+    background: radial-gradient(circle, rgba(230,57,70,.07), transparent 65%);
+  }
   .container { max-width:960px; margin:0 auto; position:relative; z-index:1; }
 
-  h1 {
-    font-size:26px; color: var(--text-strong); margin:0 0 28px;
+  .hero {
+    position:relative;
     display:flex; align-items:center; justify-content:space-between;
-    font-weight:600; letter-spacing:.3px;
+    gap:16px; flex-wrap:wrap;
+    padding:18px 22px; margin-bottom:22px;
+    border-radius:16px;
+    background: var(--card);
+    border:1px solid var(--card-border);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    overflow:hidden;
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
   }
-  h1 .title-dot {
-    display:inline-block; width:10px; height:10px; border-radius:50%;
-    background: var(--accent); margin-right:12px;
-    box-shadow: 0 0 12px var(--accent);
-    animation: pulse 2s ease-in-out infinite;
+  .hero::after {
+    content:""; position:absolute; left:0; right:0; bottom:0; height:2px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--split-border), transparent);
+    background-size: 200% 100%;
+    animation: heroLine 6s linear infinite;
+    opacity:.7;
   }
-  @keyframes pulse {
-    0%,100% { opacity:1; transform:scale(1); }
-    50% { opacity:.5; transform:scale(1.3); }
+  @keyframes heroLine {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
   }
+  .hero-title {
+    display:flex; align-items:center; gap:12px;
+    font-size:22px; font-weight:700; color: var(--text-strong);
+    letter-spacing:.3px;
+  }
+  .hero-icon {
+    width:36px; height:36px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color:#fff; font-size:18px;
+    box-shadow:0 6px 18px rgba(255,68,68,.35);
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%,100% { transform: translateY(0); box-shadow:0 6px 18px rgba(255,68,68,.35); }
+    50% { transform: translateY(-2px); box-shadow:0 10px 24px rgba(255,68,68,.5); }
+  }
+  .hero-sub { font-size:12px; color: var(--text-dim); margin-top:6px; letter-spacing:.3px; }
+
   .actions { display:flex; gap:10px; align-items:center; }
   .btn {
     padding:9px 16px; border-radius:9px; font-size:13px; font-weight:500;
@@ -524,10 +575,7 @@ export async function onRequest(context) {
     border-color: rgba(255,68,68,.3);
   }
   .btn:active { transform: scale(.96); }
-  .theme-toggle-btn {
-    width: 38px; padding: 0; height: 36px;
-    font-size: 15px; line-height: 1;
-  }
+  .theme-toggle-btn { width: 38px; padding: 0; height: 36px; font-size: 15px; line-height: 1; }
   .theme-toggle-btn:hover { transform: rotate(20deg) scale(1.08); }
 
   .animate-in { animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both; }
@@ -536,7 +584,6 @@ export async function onRequest(context) {
     to   { opacity:1; transform: translateY(0); }
   }
 
-  /* 统计卡片 */
   .cards {
     display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
     gap:16px; margin-bottom:24px;
@@ -558,26 +605,18 @@ export async function onRequest(context) {
     border-color: rgba(255,68,68,.3);
     box-shadow: var(--shadow-card), 0 0 0 1px rgba(255,68,68,.1);
   }
-  .card::after {
-    content:""; position:absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity:0; transition: opacity .3s;
-  }
-  .card:hover::after { opacity:1; }
   .card .label {
     font-size:12px; color: var(--text-dim); margin-bottom:10px;
     letter-spacing:.5px; text-transform:uppercase;
   }
   .card .value {
-    font-size:36px; font-weight:700;
-    font-variant-numeric: tabular-nums;
+    font-size:36px; font-weight:700; font-variant-numeric: tabular-nums;
     background: linear-gradient(135deg, var(--text-strong), var(--accent-2));
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height:1.1;
   }
 
-  /* 配额进度条 */
   .quota {
     background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -587,10 +626,7 @@ export async function onRequest(context) {
     animation-delay:.26s;
     transition: background .4s, border-color .4s;
   }
-  .quota-head {
-    display:flex; align-items:center; justify-content:space-between;
-    margin-bottom:16px;
-  }
+  .quota-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
   .quota-title { font-size:15px; color: var(--text); font-weight:600; }
   .quota-sub { font-size:12px; color: var(--text-dim); }
   .quota-bar {
@@ -607,8 +643,7 @@ export async function onRequest(context) {
   }
   .quota-fill::after {
     content:""; position:absolute; inset:0;
-    background: linear-gradient(90deg,
-      transparent, rgba(255,255,255,.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
     animation: shimmer 2.4s infinite;
   }
   @keyframes shimmer {
@@ -623,23 +658,18 @@ export async function onRequest(context) {
     letter-spacing:.3px;
   }
 
-  /* 拆分卡片 */
   .split-card {
     display:grid; grid-template-columns:1fr 1fr 1fr;
     gap:0; margin-bottom:16px;
     background: var(--card);
     border:1px solid var(--card-border);
     border-left:4px solid var(--split-border);
-    border-radius:12px;
-    overflow:hidden;
+    border-radius:12px; overflow:hidden;
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.3s;
     transition: background .4s, border-color .4s;
   }
-  .split-item {
-    padding:18px 22px;
-    border-right:1px solid var(--card-border);
-  }
+  .split-item { padding:18px 22px; border-right:1px solid var(--card-border); }
   .split-item:last-child { border-right:none; }
   .split-label {
     font-size:11px; color: var(--text-dim);
@@ -653,9 +683,8 @@ export async function onRequest(context) {
   .split-value.pages   { color: var(--color-pages); }
   .split-value.quota   { color: var(--color-quota); }
 
-  /* 重置提示条 */
   .reset-tip {
-    display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
     background: var(--warn-bg);
     border:1px solid var(--warn-border);
     color: var(--warn-text);
@@ -664,7 +693,6 @@ export async function onRequest(context) {
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.34s;
     transition: background .4s, border-color .4s, color .4s;
-    flex-wrap: wrap;
   }
   .reset-tip b { color: var(--tip-highlight); font-weight:700; }
   .reset-icon {
@@ -683,7 +711,6 @@ export async function onRequest(context) {
     box-shadow: 0 0 8px rgba(255,68,68,.6);
   }
 
-  /* 表格 */
   .table-wrap {
     background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
@@ -704,40 +731,142 @@ export async function onRequest(context) {
     border-bottom:1px solid var(--row-border);
   }
   tbody tr:last-child { border-bottom:none; }
-  tbody tr:hover {
-    background: rgba(255,68,68,.06);
-    transform: translateX(3px);
-  }
+  tbody tr:hover { background: rgba(255,68,68,.06); }
   td:nth-child(3) { color:#17DD62; font-weight:600; font-variant-numeric: tabular-nums; }
-  tbody tr:hover td:nth-child(3) { color:#22ff7a; text-shadow: 0 0 10px rgba(23,221,98,.5); }
   .empty { text-align:center; color: var(--text-dim); padding:28px; font-size:13px; }
+
+  .ip-flag { display:inline-block; margin-right:8px; font-size:15px; vertical-align:-1px; }
+  .ip-text { font-variant-numeric: tabular-nums; }
+  .ip-detail-btn {
+    margin-left:8px; padding:2px 8px; border-radius:6px; cursor:pointer;
+    border:1px solid var(--card-border); background: var(--btn-ghost-bg);
+    color: var(--text-dim); font-size:12px;
+    transition: background .2s, color .2s, border-color .2s, transform .15s;
+  }
+  .ip-detail-btn:hover {
+    background: var(--btn-ghost-hover); color: var(--accent);
+    border-color: rgba(255,68,68,.35);
+  }
+  .ip-detail-btn:active { transform: scale(.94); }
+
   .warn {
     background: var(--warn-bg);
     border:1px solid var(--warn-border);
     color: var(--warn-text);
     padding:10px 16px; border-radius:10px;
     font-size:12px; margin-bottom:20px;
-    transition: background .4s, border-color .4s, color .4s;
   }
 
+  .footer {
+    max-width:960px; margin:32px auto 0;
+    padding:18px 22px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+    font-size:12px; color: var(--text-dim);
+    border-top:1px solid var(--card-border);
+    position:relative; z-index:1;
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:.5s;
+  }
+  .footer-dot { opacity:.4; margin:0 2px; }
+  .footer a {
+    color: var(--text-dim); text-decoration:none; margin-left:16px;
+    transition: color .2s, transform .2s; display:inline-block;
+  }
+  .footer a:hover { color: var(--accent); transform: translateX(2px); }
+
+  /* ---------- IP 详情弹窗 ---------- */
+  .ip-modal {
+    position: fixed; inset: 0; z-index: 200;
+    display: none; align-items: center; justify-content: center;
+  }
+  .ip-modal.show { display: flex; }
+  .ip-modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    animation: fadeIn .3s ease both;
+  }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .ip-modal-panel {
+    position: relative; width: min(920px, 92vw); max-height: 90vh;
+    overflow: auto; border-radius: 16px;
+    background: var(--modal-bg); color: var(--text);
+    box-shadow: 0 30px 80px rgba(0,0,0,.45);
+    border: 1px solid var(--card-border);
+    animation: popIn .3s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .ip-modal-head {
+    display:flex; align-items:center; gap:10px;
+    padding: 16px 22px; border-bottom: 1px solid var(--card-border);
+    position: sticky; top: 0; background: var(--modal-bg); z-index: 2;
+  }
+  .ip-modal-title { font-weight: 700; color: var(--accent); font-size: 15px; }
+  .ip-modal-source { font-size: 12px; color: var(--text-dim); }
+  .ip-modal-close {
+    margin-left: auto; border: none;
+    background: var(--btn-ghost-bg); color: var(--text);
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    transition: background .2s, transform .2s;
+  }
+  .ip-modal-close:hover { background: var(--btn-ghost-hover); transform: rotate(90deg); }
+  .ip-map { height: 340px; background: var(--card-strong); }
+  .ip-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    padding: 18px 22px 24px;
+  }
   @media (max-width: 640px) {
+    .ip-cards { grid-template-columns: 1fr; }
     .split-card { grid-template-columns:1fr; }
     .split-item { border-right:none; border-bottom:1px solid var(--card-border); }
     .split-item:last-child { border-bottom:none; }
-    h1 { flex-direction: column; align-items: flex-start; gap:12px; }
+    .hero { flex-direction: column; align-items: flex-start; }
+  }
+  .ip-card {
+    background: var(--modal-card); border-radius: 12px;
+    padding: 16px 18px; border: 1px solid var(--card-border);
+  }
+  .ip-card h4 { margin: 0 0 12px; font-size: 13px; color: var(--accent); }
+  .ip-kv {
+    display: grid; grid-template-columns: 1fr auto; gap: 8px 12px;
+    font-size: 13px;
+  }
+  .ip-kv span:nth-child(odd) { color: var(--text-dim); }
+  .ip-kv span:nth-child(even) { color: var(--text); font-weight: 600; text-align: right; }
+  .ip-loading { text-align: center; padding: 40px; color: var(--text-dim); font-size: 13px; }
+  .ip-badge-ok {
+    display:inline-block; padding:1px 8px; border-radius: 999px;
+    font-size: 11px; font-weight:700;
+    background: rgba(23,221,98,.12); color:#17DD62;
+    border: 1px solid rgba(23,221,98,.35);
+  }
+  .ip-badge-no {
+    display:inline-block; padding:1px 8px; border-radius: 999px;
+    font-size: 11px; font-weight:700;
+    background: rgba(255,68,68,.12); color:#FF4444;
+    border: 1px solid rgba(255,68,68,.35);
   }
 </style>
 </head>
 <body>
+  <div class="top-band" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
   <div class="container">
-    <h1 class="animate-in">
-      <span><span class="title-dot"></span>访问统计</span>
-      <span class="actions">
+    <div class="hero">
+      <div>
+        <div class="hero-title">
+          <span class="hero-icon">📊</span>
+          <span>访问统计</span>
+        </div>
+        <div class="hero-sub">更新于 ${updatedAt} (UTC+8)</div>
+      </div>
+      <div class="actions">
         <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
         <a href="/admin" class="btn btn-primary">↻ 刷新</a>
         <a href="/admin/logout" class="btn btn-ghost">退出</a>
-      </span>
-    </h1>
+      </div>
+    </div>
 
     ${warnHtml}
 
@@ -786,8 +915,7 @@ export async function onRequest(context) {
 
     <div class="reset-tip" data-reset-at="${resetInfo.resetAt}">
       <span class="reset-icon">⏱</span>
-      每日请求数重置清零：距离重置还有
-      <b id="countdown">--</b>，
+      每日请求数重置清零：距离重置还有 <b id="countdown">--</b>，
       北京时间（UTC+8）<b>8:00</b> 重置，
       今日使用情况总计：<b>${quotaUsed.toLocaleString()}</b>。
     </div>
@@ -809,8 +937,36 @@ export async function onRequest(context) {
     </div>
   </div>
 
+  <footer class="footer">
+    <div class="footer-left">
+      <span>访问统计后台</span>
+      <span class="footer-dot">·</span>
+      <span>数据源：KV + Cloudflare Analytics</span>
+    </div>
+    <div class="footer-right">
+      <a href="/admin">刷新</a>
+      <a href="/admin/logout">退出</a>
+    </div>
+  </footer>
+
+  <!-- IP 详情弹窗 -->
+  <div class="ip-modal" id="ipModal">
+    <div class="ip-modal-backdrop" data-close></div>
+    <div class="ip-modal-panel">
+      <div class="ip-modal-head">
+        <span class="ip-modal-title">🔍 IP 详细信息</span>
+        <span class="ip-modal-source" id="ipModalSource">数据来源：ipapi.is</span>
+        <button class="ip-modal-close" id="ipModalClose">✕</button>
+      </div>
+      <div id="ipModalBody">
+        <div class="ip-loading">加载中…</div>
+      </div>
+    </div>
+  </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // 数字滚动动画
+  // 数字滚动
   document.querySelectorAll('[data-count]').forEach((el) => {
     const target = Number(el.dataset.count) || 0;
     const duration = 900;
@@ -825,13 +981,13 @@ export async function onRequest(context) {
     requestAnimationFrame(tick);
   });
 
-  // 进度条宽度动画
+  // 进度条
   requestAnimationFrame(() => {
     const fill = document.querySelector('.quota-fill');
     if (fill) fill.style.width = fill.dataset.width;
   });
 
-  // 重置倒计时
+  // 倒计时
   (function(){
     const tip = document.querySelector('.reset-tip');
     const el = document.getElementById('countdown');
@@ -848,6 +1004,126 @@ export async function onRequest(context) {
     }
     tick();
   })();
+
+  // 鼠标跟随光斑
+  (function(){
+    const g = document.getElementById('cursorGlow');
+    if (!g) return;
+    let x = 0, y = 0, cx = 0, cy = 0;
+    addEventListener('mousemove', e => { x = e.clientX; y = e.clientY; g.style.opacity = 1; });
+    addEventListener('mouseleave', () => g.style.opacity = 0);
+    (function loop(){
+      cx += (x - cx) * 0.12;
+      cy += (y - cy) * 0.12;
+      g.style.left = cx + 'px';
+      g.style.top  = cy + 'px';
+      requestAnimationFrame(loop);
+    })();
+  })();
+
+  // ---------------- IP 详情弹窗 ----------------
+  const ipModal = document.getElementById('ipModal');
+  const ipModalBody = document.getElementById('ipModalBody');
+  let leafletMap = null, leafletMarker = null;
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+
+  function kvRow(k, v) {
+    return '<span>' + esc(k) + '</span><span>' + v + '</span>';
+  }
+
+  function badge(flag) {
+    if (flag === true)  return '<span class="ip-badge-ok">是</span>';
+    if (flag === false) return '<span class="ip-badge-no">否</span>';
+    return '—';
+  }
+
+  async function openIpDetail(ip) {
+    ipModal.classList.add('show');
+    ipModalBody.innerHTML = '<div class="ip-loading">加载中…</div>';
+
+    try {
+      const res = await fetch('/admin/ipinfo?ip=' + encodeURIComponent(ip));
+      const d = await res.json();
+
+      if (!res.ok || d.error) {
+        ipModalBody.innerHTML = '<div class="ip-loading">获取失败：' + esc(d.error || res.status) + '</div>';
+        return;
+      }
+
+      const loc = d.location || {};
+      const asn = d.asn || {};
+      const comp = d.company || {};
+      const score = typeof comp.abuser_score === 'number'
+        ? (comp.abuser_score * 100).toFixed(2) + '% ' + (comp.abuser_score < 0.01 ? '纯净' : '可疑')
+        : '—';
+
+      const basic = [
+        kvRow('IP 地址', esc(d.ip || ip)),
+        kvRow('地理位置', esc([loc.country_code ? '[' + loc.country_code + ']' : '', loc.country || '', loc.city || ''].filter(Boolean).join(' '))),
+        kvRow('时区', esc(loc.timezone || '-')),
+        kvRow('运营商 / ASN', esc((asn.org || '-') + ' / ' + (asn.asn != null ? asn.asn : '-'))),
+        kvRow('网络类型', esc(asn.type || '-')),
+        kvRow('风控评级', esc(score)),
+      ].join('');
+
+      const safety = [
+        kvRow('数据中心', badge(d.is_datacenter)),
+        kvRow('代理服务器', badge(d.is_proxy)),
+        kvRow('VPN 连线', badge(d.is_vpn)),
+        kvRow('Tor 网络', badge(d.is_tor)),
+        kvRow('网络爬虫', badge(d.is_crawler)),
+        kvRow('移动网络', badge(d.is_mobile)),
+        kvRow('卫星网络', badge(d.is_satellite)),
+        kvRow('已知滥用', badge(d.is_abuser)),
+      ].join('');
+
+      ipModalBody.innerHTML =
+        '<div id="ipMap" class="ip-map"></div>' +
+        '<div class="ip-cards">' +
+          '<div class="ip-card"><h4>📍 基本信息</h4><div class="ip-kv">' + basic + '</div></div>' +
+          '<div class="ip-card"><h4>🛡 安全检测</h4><div class="ip-kv">' + safety + '</div></div>' +
+        '</div>';
+
+      // 渲染地图
+      const lat = Number(loc.latitude), lng = Number(loc.longitude);
+      if (isFinite(lat) && isFinite(lng) && lat !== 0 && lng !== 0) {
+        if (!leafletMap) {
+          leafletMap = L.map('ipMap').setView([lat, lng], 6);
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+          }).addTo(leafletMap);
+        } else {
+          leafletMap.setView([lat, lng], 6);
+        }
+        if (leafletMarker) leafletMap.removeLayer(leafletMarker);
+        leafletMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(ip).openPopup();
+        setTimeout(() => leafletMap.invalidateSize(), 100);
+      }
+    } catch (e) {
+      ipModalBody.innerHTML = '<div class="ip-loading">网络错误</div>';
+    }
+  }
+
+  function closeIpModal() {
+    ipModal.classList.remove('show');
+    if (leafletMap) { leafletMap.remove(); leafletMap = null; leafletMarker = null; }
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.ip-detail-btn');
+    if (btn) { openIpDetail(btn.dataset.ip); return; }
+    if (e.target.id === 'ipModalClose' || e.target.hasAttribute('data-close')) {
+      closeIpModal();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && ipModal.classList.contains('show')) closeIpModal();
+  });
 </script>
 </body>
 </html>`;
@@ -855,7 +1131,7 @@ export async function onRequest(context) {
     return new Response(html, {
       headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
     });
-  } catch (e) {
+  } catch {
     return new Response("<h1>读取失败</h1><p>请稍后重试</p>", {
       status: 500,
       headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
