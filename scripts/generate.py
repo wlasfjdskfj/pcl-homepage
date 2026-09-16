@@ -7,10 +7,11 @@ PCL 主页生成脚本
 版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
 日期卡片背景使用必应每日壁纸。
 服务器状态从 api.mcsrvstat.us 查询。
-更新总结自动翻译成中文。
+更新内容从 Minecraft Wiki 抓取，抓不到时显示 PCL 原生加载动画。
 """
 
 import time
+import re
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -19,10 +20,10 @@ from pathlib import Path
 
 VERSION_API = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
 WIKI_API = "https://zh.minecraft.wiki/api.php"
+WIKI_PAGE_BASE = "https://zh.minecraft.wiki/w/"
 BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
 LAUNCHER_NEWS_API = "https://launchercontent.mojang.com/v2/javaPatchNotes.json"
 MC_SRV_API = "https://api.mcsrvstat.us/3/"
-TRANSLATE_API = "https://translate.googleapis.com/translate_a/single"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -130,150 +131,71 @@ def fetch_recent_releases(count=5):
         return []
 
 
-# ============ 翻译 ============
+# ============ Wiki 更新内容抓取 ============
 
-def translate_to_chinese(text):
-    """调用 MyMemory 免费翻译接口，把英文翻译成中文。失败时返回原文。"""
-    if not text:
-        return text
-    # 已经含中文就不翻
-    if any("\u4e00" <= ch <= "\u9fff" for ch in text):
-        return text
-    # 太短不翻
-    if len(text) < 5:
-        return text
-    # MyMemory 单次上限约 500 字符，超长截断
-    if len(text) > 480:
-        text = text[:480]
+def _clean_wiki_text(s):
+    if not s:
+        return ""
+    s = re.sub(r"\[\d+\]", "", s)
+    s = re.sub(r"\[编辑\]", "", s)
+    s = re.sub(r"\[[^\]]*\]", "", s)
+    s = re.sub(r"\s+", " ", s)
+    return s.strip()
+
+
+def _extract_wiki_sections(html):
+    sections = []
+    h2_pattern = re.compile(r"<h2[^>]*>(.*?)</h2>(.*?)(?=<h2|$)", re.DOTALL | re.IGNORECASE)
+    li_pattern = re.compile(r"<li[^>]*>(.*?)</li>", re.DOTALL | re.IGNORECASE)
+    p_pattern = re.compile(r"<p[^>]*>(.*?)</p>", re.DOTALL | re.IGNORECASE)
+    tag_pattern = re.compile(r"<[^>]+>")
+
+    def strip_tags(x):
+        x = tag_pattern.sub("", x)
+        return _clean_wiki_text(x)
+
+    for m in h2_pattern.finditer(html):
+        heading = strip_tags(m.group(1))
+        body_html = m.group(2)
+        if not heading:
+            continue
+        if not any(k in heading for k in ("更改", "新内容", "新增", "修复", "更新", "改动", "特性")):
+            continue
+        items = []
+        for li in li_pattern.finditer(body_html):
+            text = strip_tags(li.group(1))
+            if text and len(text) > 3:
+                items.append(text)
+        if not items:
+            for p in p_pattern.finditer(body_html):
+                text = strip_tags(p.group(1))
+                if text and len(text) > 3:
+                    items.append(text)
+        if items:
+            sections.append({"heading": heading, "items": items[:20]})
+    return sections
+
+
+def fetch_wiki_changelog(version):
+    page_title = "Java版" + version
+    url = WIKI_PAGE_BASE + page_title
     try:
-        params = {
-            "q": text,
-            "langpair": "en|zh-CN",
-        }
-        resp = requests.get(TRANSLATE_API, params=params, timeout=REQUEST_TIMEOUT, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
-        translated = data.get("responseData", {}).get("translatedText", "")
-        if translated and translated.lower() != text.lower():
-            print("[Translate] " + text[:30] + " → " + translated[:30])
-            return translated.strip()
-        print("[Translate] 返回为空，保留原文")
-        return text
+        resp = requests.get(url, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        if resp.status_code != 200:
+            print("[Wiki-Changelog] " + page_title + " 返回 " + str(resp.status_code))
+            return {"ok": False, "sections": [], "url": url}
+        sections = _extract_wiki_sections(resp.text)
+        if not sections:
+            print("[Wiki-Changelog] " + page_title + " 没找到有效章节")
+            return {"ok": False, "sections": [], "url": url}
+        total = sum(len(s["items"]) for s in sections)
+        print("[Wiki-Changelog] " + page_title + " 提取 " + str(len(sections)) + " 章节，" + str(total) + " 条")
+        for s in sections[:3]:
+            print("  章节：" + s["heading"] + "（" + str(len(s["items"])) + " 条）")
+        return {"ok": True, "sections": sections, "url": url}
     except Exception as e:
-        print("[Translate] 失败：" + str(e) + "，保留原文")
-        return text
-
-
-# ============ 官方更新总结 ============
-
-def is_valid_patch_text(t):
-    """判断一条文本是否是有效的更新正文，过滤图片路径 / 时间戳 / 版本号 / 文件名等垃圾。"""
-    if not t:
-        return False
-    t = t.strip()
-    if len(t) <= 1:
-        return False
-
-    # 图片路径 / 协议头 / 资源包路径
-    if t.startswith("/") or t.startswith("http") or t.startswith("pack:"):
-        return False
-
-    # ISO 时间戳，如 2026-09-15T11:23:02.000Z
-    if t.endswith("Z") and "T" in t:
-        return False
-
-    # 纯数字 / 版本号（如 26-3、1.21.4、26.3）
-    stripped = t.replace(".", "").replace("-", "").replace("_", "")
-    if stripped.isdigit():
-        return False
-
-    # 文件名后缀
-    lower = t.lower()
-    if lower.endswith((".jpg", ".jpeg", ".png", ".gif", ".json", ".webp")):
-        return False
-
-    # 字段值噪声
-    if t in ("paragraph", "list", "listItem", "image", "header",
-             "modules", "type", "version", "title", "category",
-             "release", "snapshot", "body", "content"):
-        return False
-
-    # 无中文且长度 < 30 的英文短句，多半是字段名 / 路径片段
-    has_chinese = any("\u4e00" <= ch <= "\u9fff" for ch in t)
-    if not has_chinese and len(t) < 30:
-        return False
-
-    return True
-
-
-def extract_texts(obj, result=None, depth=0):
-    """递归遍历 JSON 对象，提取所有有效文本。"""
-    if result is None:
-        result = []
-    if depth > 10:
-        return result
-    if isinstance(obj, str):
-        s = obj.strip()
-        if is_valid_patch_text(s):
-            result.append(s)
-    elif isinstance(obj, dict):
-        for key, val in obj.items():
-            if key in ("type", "category", "image", "id"):
-                continue
-            extract_texts(val, result, depth + 1)
-    elif isinstance(obj, list):
-        for item in obj:
-            extract_texts(item, result, depth + 1)
-    return result
-
-
-def fetch_patch_notes(count=1):
-    """从 Mojang 官方启动器新闻接口获取最近 N 条更新总结。"""
-    try:
-        resp = requests.get(LAUNCHER_NEWS_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
-        entries = data.get("entries", [])
-        if not entries:
-            print("[PatchNotes] 新闻接口无内容")
-            return []
-
-        result = []
-        for entry in entries[:count]:
-            version = entry.get("version", "")
-            title = entry.get("title", "")
-            all_texts = extract_texts(entry)
-
-            # 先翻译每条文本（英文 → 中文）
-            all_texts = [translate_to_chinese(t) for t in all_texts]
-
-            # 去掉 title 和 version 本身
-            filtered = []
-            seen = set()
-            for t in all_texts:
-                if t == title or t == version:
-                    continue
-                if t in seen:
-                    continue
-                seen.add(t)
-                filtered.append(t)
-
-            result.append({
-                "version": version,
-                "title": title if title else ("Minecraft " + version + " 更新总结"),
-                "texts": filtered,
-            })
-
-            print("[PatchNotes] " + version + " 提取 " + str(len(filtered)) + " 条文本")
-            for i, t in enumerate(filtered[:5]):
-                print("  " + str(i + 1) + ". " + t[:50])
-
-        print("[PatchNotes] 获取 " + str(len(result)) + " 条更新总结")
-        return result
-
-    except Exception as e:
-        print("[PatchNotes] 请求失败：" + str(e))
-        return []
+        print("[Wiki-Changelog] 请求失败：" + str(e))
+        return {"ok": False, "sections": [], "url": url}
 
 
 # ============ 服务器状态 ============
@@ -732,7 +654,7 @@ def build_xaml():
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     recent_releases = fetch_recent_releases(5)
-    patch_notes = fetch_patch_notes(1)
+    wiki_changelog = fetch_wiki_changelog(main_version)
     server_list = fetch_server_list()
 
     news_title = "当前最新版本 · " + main_version
@@ -1056,37 +978,29 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
 
-    # 更新总结
-    if patch_notes:
-        note = patch_notes[0]
-        note_title = note["title"]
-        escaped_title = escape_xaml_attr(note_title)
+    # ========== 更新内容 ==========
+    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+    lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+    lines.append('                <TextBlock Text="更新内容" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('            </StackPanel>')
 
-        lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
-        lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
-        lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
-        lines.append('                <TextBlock Text="更新总结" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-        lines.append('            </StackPanel>')
-
-        lines.append('            <local:MyCard Title="' + escaped_title + '" Margin="0,0,0,10" CanSwap="True" IsSwapped="False">')
-        lines.append('                <StackPanel Margin="25,40,23,20">')
-
-        texts = note.get("texts", [])
-
-        if texts:
-            for t in texts:
-                escaped_t = escape_xaml_attr(t)
-                # 中文短标题 → 加粗
-                has_chinese = any("\u4e00" <= ch <= "\u9fff" for ch in t)
-                if has_chinese and len(t) < 30 and not t.startswith("·"):
-                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" FontWeight="Bold" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,8,0,4" />')
-                else:
-                    lines.append('                    <TextBlock Text="' + escaped_t + '" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />')
-        else:
-            lines.append('                    <TextBlock Text="暂无详细内容，请点击下方「更新日志」查看。" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />')
-
-        lines.append('                </StackPanel>')
-        lines.append('            </local:MyCard>')
+    if wiki_changelog["ok"]:
+        for sec in wiki_changelog["sections"]:
+            escaped_heading = escape_xaml_attr(sec["heading"])
+            lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
+            lines.append('                <StackPanel>')
+            lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">')
+            lines.append('                        <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+            lines.append('                        <TextBlock Text="' + escaped_heading + '" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />')
+            lines.append('                    </StackPanel>')
+            for item in sec["items"]:
+                escaped_item = escape_xaml_attr(item)
+                lines.append('                    <TextBlock Text="· ' + escaped_item + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
+            lines.append('                </StackPanel>')
+            lines.append('            </Border>')
+    else:
+        lines.append('            <local:MyLoading Margin="0,8,0,14" Text="翻译施工中" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
