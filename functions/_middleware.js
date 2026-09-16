@@ -1,10 +1,9 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP
+ * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP、访问统计
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
  *
- * 日期 / 幸运数字 / 每日一言 / 彩蛋 / 随机挑战：每次请求随机
- * 人品分数 / 幸运颜色 / 今日运势 / 种子推荐 / 知识小测：用 IP + 北京时间日期 hash，同一 IP 同一天固定
+ * 访问统计：仅当 URL 带 ?admin=密码 时才显示，且只在管理员访问时计数
  */
 
 // ============ 每日一言（80 条） ============
@@ -90,6 +89,7 @@ const QUOTES = [
   "你以为你能打败末影龙，其实你连床都没做。",
   "你以为你有附魔装备，其实你只有一把石剑。",
   "你以为你在深夜玩，其实天已经亮了。",
+  "你以为你在钓鱼，其实鱼在钓你。",
 ];
 
 // ============ 彩蛋（50 个） ============
@@ -184,43 +184,24 @@ const COLORS = [
 // ============ 今日运势 · 宜（100 条） ============
 
 const FORTUNE_GOOD = [
-  // ===== 基础 =====
   "挖矿", "砍树", "种田", "钓鱼", "建造",
   "探险", "合成", "附魔", "交易", "刷怪",
-
-  // ===== 战斗 =====
   "打怪", "打僵尸", "打骷髅", "打蜘蛛", "打苦力怕",
   "打末影人", "打女巫", "打劫掠者", "打幻翼", "打溺尸",
-
-  // ===== 探索 =====
   "找村庄", "找要塞", "找丛林神庙", "找沙漠神殿", "找废弃矿井",
   "找海底神殿", "找林地府邸", "找远古城市", "找废弃传送门", "找冰屋",
-
-  // ===== 下界 / 末地 =====
   "下界探险", "挖远古残骸", "末地挑战", "打末影龙", "打凋灵",
   "通关末地城", "找堡垒遗迹", "找下界要塞", "找猪灵堡垒", "找下界荒地",
-
-  // ===== 动物 =====
   "驯狼", "驯猫", "驯马", "驯鹦鹉", "驯狐狸",
   "养动物", "养鸡", "养牛", "养羊", "养美西螈",
-
-  // ===== 农业 =====
   "种小麦", "种胡萝卜", "种土豆", "种甘蔗", "种南瓜",
   "种西瓜", "种竹子", "种仙人掌", "养蜜蜂", "种蘑菇",
-
-  // ===== 建筑 =====
   "修路", "造桥", "造房子", "造城堡", "造农场",
   "造刷怪塔", "造红石", "造自动门", "造刷石机", "造全物品分类",
-
-  // ===== 生活 =====
   "整理箱子", "采花", "放烟花", "睡午觉", "晒日光",
   "煮药水", "炼金", "造地图", "烤面包", "做蛋糕",
-
-  // ===== 社交 =====
   "和村民交易", "和猪灵交易", "和流浪商人交易", "和好友联机", "和宠物玩耍",
   "教新手玩", "看实况", "看教学", "看攻略", "看 Wiki",
-
-  // ===== 其他 =====
   "备份存档", "截图留念", "录视频", "写日记", "听音乐",
   "吃点东西", "喝杯水", "伸个懒腰", "休息一会儿", "闭眼养神",
 ];
@@ -228,40 +209,23 @@ const FORTUNE_GOOD = [
 // ============ 今日运势 · 忌（100 条） ============
 
 const FORTUNE_BAD = [
-  // ===== 挖矿 =====
   "垂直挖矿", "潜行挖矿", "深夜挖矿", "水下挖矿", "洞穴深处挖矿",
   "不带火把挖矿", "不带水桶挖矿", "不带食物挖矿", "不记坐标挖矿", "在沙子上挖矿",
-
-  // ===== 岩浆 / 火 =====
   "靠近岩浆", "在岩浆边建家", "TNT 玩火", "玩打火石", "在树林里放火",
   "带木头进下界", "空手摸岩浆", "在熔岩湖游泳", "在火里跳", "抱着 TNT 睡觉",
-
-  // ===== 夜晚 =====
   "夜晚出门", "深夜赶路", "不带床出门", "不点火把过夜", "在野外睡觉",
   "深夜下矿", "在黑暗中摸索", "不带剑出门", "空手打僵尸", "在夜里建房子",
-
-  // ===== 战斗 =====
   "单人挑凋灵", "空手打劫掠", "空手打末影龙", "惹苦力怕", "惹蜜蜂",
   "惹监守者", "惹猪灵", "打末影人", "打高压苦力怕", "在末地乱跑",
   "在村庄里打掠夺者", "在下界惹猪灵", "在深海惹守卫者", "在林地惹唤魔者", "在远古城市惹监守者",
-
-  // ===== 下界 / 末地 =====
   "进下界", "打末影龙", "把床放下界", "用地狱门回家", "在下界搭桥",
   "在末地摔下去", "在末地建高塔", "在下界乱走", "在末地乱挖", "在虚空边建家",
-
-  // ===== 地形 =====
   "从高处跳下", "在悬崖边建家", "在沙子上建家", "在水边建家", "在雷区建家",
   "在山顶建家", "在海底建家", "在岩浆湖上建家", "在虚空边建家", "在爆炸区建家",
-
-  // ===== 操作 =====
   "看末影人", "带金锭见猪灵", "在灵魂沙上走", "在蜂蜜块上跳", "在冰上跑",
   "在末影螨附近走", "在潜影贝旁边走", "在蜜蜂旁边跑", "在羊驼旁边吐口水", "在熊猫旁边吵闹",
-
-  // ===== 风险行为 =====
   "不备份存档", "不开死亡不掉落", "不开和平模式", "不带金苹果", "不带末影箱",
   "不带地图探索", "不带指南针", "不带钟", "不带食物", "不带工具",
-
-  // ===== 玄学 =====
   "看 Herobrine 传说", "念末影人名字", "在午夜玩游戏", "在 3 点起床", "在满月出门",
   "在雷雨天挖矿", "在日食时探险", "在星期五 13 号下矿", "在半夜打末影龙", "在凌晨看恐怖片",
 ];
@@ -269,7 +233,6 @@ const FORTUNE_BAD = [
 // ============ 今日运势 · 小贴士（70 条） ============
 
 const FORTUNE_TIPS = [
-  // ===== 出门准备 =====
   "带上足够的火把再出发。",
   "别忘了带水桶，能救命。",
   "多准备点食物，饥饿很致命。",
@@ -280,8 +243,6 @@ const FORTUNE_TIPS = [
   "出门前检查一遍背包。",
   "带一把备用剑，工具会坏。",
   "带上工作台，随时能合成。",
-
-  // ===== 挖矿 =====
   "下矿前先记好坐标。",
   "在岩浆边放个水桶。",
   "挖矿别垂直往下挖。",
@@ -292,8 +253,6 @@ const FORTUNE_TIPS = [
   "挖到 Y=-59 最容易找到钻石。",
   "下矿带一桶水，能灭火也能防摔。",
   "挖矿时注意脚下，别掉进洞穴。",
-
-  // ===== 战斗 =====
   "遇到苦力怕别慌，往后退。",
   "打末影龙前准备好床。",
   "附魔装备别乱扔。",
@@ -304,8 +263,6 @@ const FORTUNE_TIPS = [
   "打凋灵前先建好掩体。",
   "打劫掠前先建好防线。",
   "打监守者要潜行，别发出声音。",
-
-  // ===== 生存 =====
   "把家附近点亮，防止刷怪。",
   "留一个末影箱放贵重物品。",
   "把重要物品放末影箱。",
@@ -316,8 +273,6 @@ const FORTUNE_TIPS = [
   "养一群羊，羊毛能做床。",
   "建一个自动农场，省时省力。",
   "建一个刷石机，石头永远够用。",
-
-  // ===== 存档安全 =====
   "定期备份存档。",
   "探索前先标记基地位置。",
   "重要建筑先截图，防止丢失。",
@@ -328,8 +283,6 @@ const FORTUNE_TIPS = [
   "存档定期压缩，防止损坏。",
   "不要把存档放在桌面，会被清理。",
   "换电脑前先备份存档。",
-
-  // ===== 探索 =====
   "探索前带好地图和指南针。",
   "带一匹马来赶路。",
   "带一只狼来做保镖。",
@@ -340,8 +293,6 @@ const FORTUNE_TIPS = [
   "找远古城市带羊毛，能隔音。",
   "找海底神殿带水肺药水。",
   "找林地府邸带好装备。",
-
-  // ===== 下界 / 末地 =====
   "进下界前带一桶水（虽然会蒸发）。",
   "下界搭桥用圆石，不会被恶魂炸掉。",
   "末地建桥用黑曜石，不会被末影龙炸掉。",
@@ -352,8 +303,6 @@ const FORTUNE_TIPS = [
   "下界要塞带防火药水。",
   "猪灵交易用金锭，别用金块。",
   "下界挖远古残骸用床，能快速挖。",
-
-  // ===== 其他 =====
   "多看 Wiki，很多机制需要查。",
   "多和朋友联机，更有趣。",
   "多录视频，记录游戏时光。",
@@ -369,7 +318,6 @@ const FORTUNE_TIPS = [
 // ============ MC 知识小测（80 题 · 困难） ============
 
 const QUIZ = [
-  // ===== 数值 / 计算 =====
   { q: "附魔「锋利 V」+「横扫之刃 III」的剑，横扫伤害是多少？", a: "普通攻击的 50%（横扫之刃 III 提升到 75%）" },
   { q: "信标的最大作用范围（六级）是多少格？", a: "50 格" },
   { q: "全套下界合金盔甲的护甲值和韧性分别是多少？", a: "护甲 20 点，韧性 12 点" },
@@ -390,8 +338,6 @@ const QUIZ = [
   { q: "「多重射击」弩一次能射几支箭？", a: "3 支（消耗 1 支箭）" },
   { q: "满附魔钻石剑的最大攻击伤害是多少？", a: "约 13 点（6.5 颗心，锋利 V + 力量药水等）" },
   { q: "全套保护 IV 下界合金甲能减少多少伤害？", a: "约 80%（护甲 20 + 保护 20%）" },
-
-  // ===== 冷门机制 =====
   { q: "什么方块能让活塞推动但不能被粘性活塞拉回？", a: "黑曜石、哭泣的黑曜石、重生锚、远古残骸" },
   { q: "雪傀儡走过什么方块会受伤？", a: "任何暖色生物群系（沙漠、下界、恶地等）" },
   { q: "什么条件下末影人会主动攻击玩家？", a: "玩家看向它的头部（距离 64 格内）" },
@@ -417,8 +363,6 @@ const QUIZ = [
   { q: "什么条件下山羊会撞击玩家？", a: "玩家靠近山羊，山羊有几率发起撞击" },
   { q: "什么条件下蜜蜂会主动攻击玩家？", a: "玩家破坏蜂巢、攻击蜜蜂、踩到蜂巢" },
   { q: "什么条件下美西螈会装死？", a: "血量低于 50% 时，装死 10 秒" },
-
-  // ===== 版本 / 历史 =====
   { q: "Minecraft Java 版 1.0 正式版是哪一年发布的？", a: "2011 年 11 月 18 日" },
   { q: "「下界合金」是在哪个版本加入的？", a: "1.16（下界更新）" },
   { q: "「美西螈」是在哪个版本加入的？", a: "1.17（洞穴与山崖第一部分）" },
@@ -439,8 +383,6 @@ const QUIZ = [
   { q: "「Herobrine」是官方加入的生物吗？", a: "不是，是社区传说" },
   { q: "「Notch 苹果」是官方物品吗？", a: "不是，是 Mod 内容" },
   { q: "「HIM」是谁的缩写？", a: "Herobrine in Minecraft（社区传说人物）" },
-
-  // ===== 极限 / 计算 =====
   { q: "在 1 tick 内最多能破坏多少个方块？", a: "理论上 1 个（每个方块至少 1 tick）" },
   { q: "从 Y=320 自由落体到 Y=-64，需要多少秒？", a: "约 12 秒（约 384 格）" },
   { q: "满速鞘翅滑翔的极限速度是多少格/秒？", a: "约 67.5 格/秒（约 243 km/h）" },
@@ -466,7 +408,6 @@ const QUIZ = [
 // ============ 随机挑战（100 个） ============
 
 const CHALLENGES = [
-  // ===== 简单（25） =====
   { text: "驯服一只猫",           diff: "简单" },
   { text: "养 20 只鸡",           diff: "简单" },
   { text: "种一片小麦田",         diff: "简单" },
@@ -492,8 +433,6 @@ const CHALLENGES = [
   { text: "在村庄睡一觉",         diff: "简单" },
   { text: "做一把石剑",           diff: "简单" },
   { text: "挖一组煤炭",           diff: "简单" },
-
-  // ===== 普通（30） =====
   { text: "在生存模式下建一座城堡", diff: "普通" },
   { text: "驯服 10 只狼",         diff: "普通" },
   { text: "建一个自动农场",       diff: "普通" },
@@ -524,8 +463,6 @@ const CHALLENGES = [
   { text: "做一瓶夜视药水",       diff: "普通" },
   { text: "找到一座废弃矿井",     diff: "普通" },
   { text: "驯服一只骆驼",         diff: "普通" },
-
-  // ===== 困难（25） =====
   { text: "不用床通关末地",       diff: "困难" },
   { text: "不挖钻石通关末地",     diff: "困难" },
   { text: "不用附魔打通末地",     diff: "困难" },
@@ -551,8 +488,6 @@ const CHALLENGES = [
   { text: "在 1 小时内通关末地",  diff: "困难" },
   { text: "不用弓打末影龙",       diff: "困难" },
   { text: "不用金苹果打凋灵",     diff: "困难" },
-
-  // ===== 噩梦（20） =====
   { text: "只用木制工具打末影龙", diff: "噩梦" },
   { text: "一条命通关末地",       diff: "噩梦" },
   { text: "不用床炸末影龙",       diff: "噩梦" },
@@ -578,7 +513,6 @@ const CHALLENGES = [
 // ============ MC 种子推荐（100 个） ============
 
 const SEEDS = [
-  // ===== 村庄 / 城镇开局 =====
   { seed: "1",            desc: "经典种子，出生点旁边有村庄" },
   { seed: "1400",         desc: "出生点附近有两个村庄，适合开局" },
   { seed: "777",          desc: "出生点附近有两个村庄和一个要塞" },
@@ -591,8 +525,6 @@ const SEEDS = [
   { seed: "-887553494",   desc: "附近有 6 个村庄和 2 个要塞" },
   { seed: "888888",       desc: "出生点旁边有两个村庄和一座要塞" },
   { seed: "5201314",      desc: "出生点旁边是村庄和樱花树林" },
-
-  // ===== 特殊地形 =====
   { seed: "0",            desc: "出生点旁边就是冰刺之地" },
   { seed: "42",           desc: "出生点旁边就是繁花森林" },
   { seed: "2024",         desc: "出生点旁边就是樱花树林" },
@@ -605,8 +537,6 @@ const SEEDS = [
   { seed: "31415",        desc: "出生点旁边是黑森林" },
   { seed: "-1024",        desc: "出生点旁边是恶地" },
   { seed: "-2048",        desc: "出生点旁边是蘑菇岛和丛林" },
-
-  // ===== 遗迹 / 结构 =====
   { seed: "999",          desc: "出生点旁边就是掠夺者前哨站" },
   { seed: "-1158469226",  desc: "出生点旁边就是远古城市" },
   { seed: "-888",         desc: "出生点旁边就是废弃矿井" },
@@ -623,8 +553,6 @@ const SEEDS = [
   { seed: "222222",       desc: "出生点附近有 5 座海底神殿" },
   { seed: "333333",       desc: "出生点附近有 2 座远古城市" },
   { seed: "444444",       desc: "出生点附近有 4 座丛林神庙" },
-
-  // ===== 稀有 =====
   { seed: "-3141592",     desc: "出生点旁边是繁花森林和蘑菇岛相邻" },
   { seed: "3141592",      desc: "出生点附近有 10 个村庄" },
   { seed: "1618033",      desc: "出生点旁边是樱花树林和竹林" },
@@ -637,8 +565,6 @@ const SEEDS = [
   { seed: "-1732050",     desc: "出生点旁边是热带草原和村庄" },
   { seed: "2236067",      desc: "出生点附近有 2 座林地府邸" },
   { seed: "-2236067",     desc: "出生点旁边是繁花森林和樱花树林" },
-
-  // ===== 中文社区 =====
   { seed: "666666",       desc: "中文玩家最爱的种子之一，村庄+要塞" },
   { seed: "88888888",     desc: "出生点旁边是村庄和远古城市" },
   { seed: "123456789",    desc: "数字顺序种子，出生点有村庄" },
@@ -651,18 +577,13 @@ const SEEDS = [
   { seed: "pcl",          desc: "PCL 启动器彩蛋种子" },
   { seed: "mcbbs",        desc: "MCBBS 彩蛋种子" },
   { seed: "klpbbs",       desc: "苦力怕论坛彩蛋种子" },
-
-  // ===== 极端地形 =====
   { seed: "-999999999",   desc: "出生点旁边是超大蘑菇岛" },
   { seed: "999999999",    desc: "出生点旁边是超大冰刺之地" },
   { seed: "-1000000000",  desc: "出生点旁边是超大面积繁花森林" },
   { seed: "1000000000",   desc: "出生点旁边是超大恶地" },
   { seed: "-2147483648",  desc: "最小整数种子，出生点地形极端" },
   { seed: "2147483647",   desc: "最大整数种子，出生点地形极端" },
-  { seed: "42",           desc: "生命宇宙终极答案种子，繁花森林" },
   { seed: "-42",          desc: "负数 42，出生点旁边是冰原村庄" },
-
-  // ===== 综合推荐 =====
   { seed: "233",          desc: "出生点旁边是村庄和废弃传送门" },
   { seed: "-233",         desc: "出生点旁边是蘑菇岛和远古城市" },
   { seed: "520",          desc: "出生点旁边是樱花树林和村庄" },
@@ -955,6 +876,88 @@ export async function onRequest(context) {
     const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
 
+    // ========== 访问统计（仅管理员可见）==========
+    let visitBlock = "";
+
+    const adminPwd = env.ADMIN_PASSWORD || "";
+    const providedPwd = url.searchParams.get("admin") || "";
+    const isAdmin = adminPwd && providedPwd === adminPwd;
+
+    if (isAdmin) {
+      try {
+        // 总计
+        const totalKey = "visit:total";
+        let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
+        total += 1;
+        await env.HOMEPAGE_KV.put(totalKey, String(total));
+
+        // 每 IP 次数
+        const ipMapKey = "visit:ipmap";
+        let ipMap = {};
+        try {
+          ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
+        } catch { ipMap = {}; }
+        ipMap[ip] = (ipMap[ip] || 0) + 1;
+        const entries = Object.entries(ipMap).sort((a, b) => b[1] - a[1]);
+        if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
+        await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
+
+        // 今日
+        const todayKey = "visit:today:" + today;
+        let todaySet = [];
+        try {
+          todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
+        } catch { todaySet = []; }
+        if (!todaySet.includes(ip)) {
+          todaySet.push(ip);
+          if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
+          await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 172800 });
+        }
+
+        // 生成 IP 列表 XAML
+        const top = entries.slice(0, 10);
+        const ipLines = [];
+        for (const [ipStr, cnt] of top) {
+          const safeIp = String(ipStr).replace(/[<>&"]/g, "");
+          ipLines.push(
+            '<StackPanel Orientation="Horizontal" Margin="0,0,0,4">' +
+            '<TextBlock Text="' + safeIp + '" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Width="180" />' +
+            '<TextBlock Text="' + cnt + ' 次" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
+            '</StackPanel>'
+          );
+        }
+        if (ipLines.length === 0) {
+          ipLines.push('<TextBlock Text="暂无记录" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />');
+        }
+
+        visitBlock =
+          '<Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">' +
+          '<StackPanel>' +
+          '<StackPanel Orientation="Horizontal" Margin="0,0,0,12">' +
+          '<local:MyImage Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Emerald.png" />' +
+          '<StackPanel VerticalAlignment="Center">' +
+          '<TextBlock Text="访问统计（仅管理员可见）" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />' +
+          '<StackPanel Orientation="Horizontal" Margin="0,2,0,0">' +
+          '<TextBlock Text="今日 " FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
+          '<TextBlock Text="' + todaySet.length + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
+          '<TextBlock Text=" 人  ·  总计 " FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
+          '<TextBlock Text="' + total + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
+          '<TextBlock Text=" 次" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
+          '</StackPanel>' +
+          '</StackPanel>' +
+          '</StackPanel>' +
+          '<Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />' +
+          '<TextBlock Text="IP 访问记录（前 10）" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />' +
+          ipLines.join("") +
+          '</StackPanel>' +
+          '</Border>';
+
+      } catch (e) {
+        console.error("[Visit] 统计失败：", e);
+        visitBlock = "";
+      }
+    }
+
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
       .replace(/__DATE_MONTH__/g, date.month)
@@ -979,7 +982,8 @@ export async function onRequest(context) {
       .replace(/__SEED__/g, seed.seed)
       .replace(/__SEED_DESC__/g, seed.desc)
       .replace(/__QUIZ_Q__/g, quiz.q)
-      .replace(/__QUIZ_A__/g, quiz.a);
+      .replace(/__QUIZ_A__/g, quiz.a)
+      .replace(/__VISIT_BLOCK__/g, visitBlock);
 
     return new Response(xaml, {
       headers: {
