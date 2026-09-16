@@ -197,7 +197,6 @@
                     </Grid>
                 </StackPanel>
             </Border>
-            __VISIT_BLOCK__
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
