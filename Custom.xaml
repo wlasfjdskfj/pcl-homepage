@@ -46,7 +46,7 @@
                         <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="1194 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1167 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
@@ -63,7 +63,7 @@
                         <TextBlock Text="Mineplex" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="182 / 183" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="233 / 234" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
