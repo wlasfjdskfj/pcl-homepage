@@ -1,10 +1,19 @@
 /**
- * 访问统计管理页面（方案 B + 视觉动画升级）
+ * 访问统计管理页面（方案 B + 深浅主题 + 动画）
  * 访问：https://www.mkejga.de5.net/admin
+ *
+ * 环境变量：
+ *   ADMIN_PASSWORD   后台登录密码
+ *   HOMEPAGE_KV      KV 绑定（已有）
+ *   CF_API_TOKEN     Cloudflare API Token（Account Analytics: Read）
+ *   CF_ACCOUNT_ID    Cloudflare Account ID
+ *   QUOTA_LIMIT      每日请求配额（免费版 100000）
  */
 
 const COOKIE_NAME = "admin_session";
 const SESSION_TTL = 60 * 60 * 8; // 8 小时
+
+/* ---------------- 工具函数 ---------------- */
 
 function escapeHtml(str) {
   return String(str)
@@ -47,27 +56,109 @@ function securityHeaders(extra = {}) {
   };
 }
 
+/* ---------------- 主题脚本（内联，最先执行，避免闪屏） ---------------- */
+
+const THEME_SCRIPT = `
+(function(){
+  try {
+    var saved = localStorage.getItem('admin-theme');
+    var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    document.documentElement.setAttribute('data-theme', saved || (prefersLight ? 'light' : 'dark'));
+  } catch(e) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+  window.__toggleTheme = function(btn){
+    var cur = document.documentElement.getAttribute('data-theme');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('admin-theme', next); } catch(e){}
+    if (btn) btn.textContent = next === 'dark' ? '🌙' : '☀️';
+  };
+  window.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    var cur = document.documentElement.getAttribute('data-theme');
+    btn.textContent = cur === 'dark' ? '🌙' : '☀️';
+    btn.addEventListener('click', function(){ window.__toggleTheme(btn); });
+  });
+})();
+`;
+
+/* ---------------- 主题 CSS 变量（共用） ---------------- */
+
+const THEME_CSS = `
+:root {
+  --bg: #0d0d0f;
+  --bg-glow1: rgba(255,68,68,.10);
+  --bg-glow2: rgba(80,120,255,.08);
+  --card: rgba(37,37,37,.7);
+  --card-strong: #252525;
+  --card-border: rgba(255,255,255,.06);
+  --text: #eee;
+  --text-dim: #888;
+  --text-strong: #fff;
+  --table-head: rgba(255,255,255,.03);
+  --row-border: rgba(255,255,255,.03);
+  --quota-bg: #151515;
+  --accent: #FF4444;
+  --accent-2: #ff6b6b;
+  --warn-bg: rgba(255,176,32,.06);
+  --warn-border: rgba(255,176,32,.18);
+  --warn-text: #d99419;
+  --btn-ghost-bg: rgba(255,255,255,.05);
+  --btn-ghost-hover: rgba(255,68,68,.12);
+  --shadow-card: 0 12px 32px rgba(0,0,0,.4);
+}
+html[data-theme="light"] {
+  --bg: #f4f5f7;
+  --bg-glow1: rgba(255,68,68,.08);
+  --bg-glow2: rgba(80,120,255,.06);
+  --card: rgba(255,255,255,.85);
+  --card-strong: #ffffff;
+  --card-border: rgba(0,0,0,.07);
+  --text: #1f2328;
+  --text-dim: #6a737d;
+  --text-strong: #111;
+  --table-head: rgba(0,0,0,.03);
+  --row-border: rgba(0,0,0,.05);
+  --quota-bg: #e9ebee;
+  --accent: #e63946;
+  --accent-2: #ff5555;
+  --warn-bg: rgba(217,148,25,.08);
+  --warn-border: rgba(217,148,25,.2);
+  --warn-text: #a9741a;
+  --btn-ghost-bg: rgba(0,0,0,.04);
+  --btn-ghost-hover: rgba(255,68,68,.1);
+  --shadow-card: 0 12px 32px rgba(0,0,0,.08);
+}
+`;
+
+/* ---------------- 登录页 ---------------- */
+
 function loginPage(hasTried) {
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script>${THEME_SCRIPT}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>管理员登录</title>
 <style>
+  ${THEME_CSS}
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    margin:0; background:#0d0d0f; color:#eee;
+    margin:0; background:var(--bg); color:var(--text);
     font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
     display:flex; align-items:center; justify-content:center;
     overflow:hidden;
+    transition: background .4s, color .4s;
   }
   body::before {
     content:""; position:fixed; inset:-20%;
     background:
-      radial-gradient(circle at 20% 30%, rgba(255,68,68,.15), transparent 40%),
-      radial-gradient(circle at 80% 70%, rgba(80,120,255,.12), transparent 45%);
+      radial-gradient(circle at 20% 30%, var(--bg-glow1), transparent 40%),
+      radial-gradient(circle at 80% 70%, var(--bg-glow2), transparent 45%);
     animation: floatBg 12s ease-in-out infinite alternate;
     z-index:0;
   }
@@ -77,38 +168,39 @@ function loginPage(hasTried) {
   }
   .box {
     position:relative; z-index:1;
-    background:rgba(37,37,37,.75);
+    background:var(--card);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     padding:40px; border-radius:16px; width:340px;
-    border:1px solid rgba(255,255,255,.06);
-    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    border:1px solid var(--card-border);
+    box-shadow: 0 20px 60px rgba(0,0,0,.35);
     animation: popIn .5s cubic-bezier(.2,.8,.2,1) both;
+    transition: background .4s, border-color .4s, box-shadow .4s;
   }
   @keyframes popIn {
     from { opacity:0; transform: translateY(20px) scale(.96); }
     to   { opacity:1; transform: translateY(0) scale(1); }
   }
-  h1 { font-size:20px; margin:0 0 24px; text-align:center; color:#FF4444; letter-spacing:.5px; }
+  h1 { font-size:20px; margin:0 0 24px; text-align:center; color:var(--accent); letter-spacing:.5px; }
   input {
-    width:100%; padding:13px 14px; border:1px solid #3a3a3a; border-radius:10px;
-    background:rgba(20,20,20,.8); color:#eee; font-size:14px;
+    width:100%; padding:13px 14px; border:1px solid var(--card-border); border-radius:10px;
+    background:var(--card-strong); color:var(--text); font-size:14px;
     transition: border-color .25s, box-shadow .25s, background .25s;
   }
   input:focus {
-    outline:none; border-color:#FF4444; background:#151515;
+    outline:none; border-color:var(--accent);
     box-shadow:0 0 0 3px rgba(255,68,68,.15), 0 0 20px rgba(255,68,68,.25);
   }
   button {
     width:100%; margin-top:18px; padding:13px; border:none; border-radius:10px;
-    background:linear-gradient(135deg,#FF4444,#ff6b6b); color:white;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:white;
     font-size:14px; font-weight:bold; cursor:pointer; letter-spacing:.5px;
     transition: transform .15s, box-shadow .25s, filter .25s;
   }
   button:hover { filter:brightness(1.1); box-shadow:0 8px 24px rgba(255,68,68,.4); }
   button:active { transform: scale(.97); }
   .err {
-    color:#FF5555; font-size:12px; margin-top:10px; text-align:center;
+    color:var(--accent-2); font-size:12px; margin-top:10px; text-align:center;
     animation: shake .4s;
     ${hasTried ? "" : "display:none;"}
   }
@@ -117,9 +209,19 @@ function loginPage(hasTried) {
     25% { transform: translateX(-5px); }
     75% { transform: translateX(5px); }
   }
+  .theme-toggle {
+    position: fixed; top: 20px; right: 20px; z-index: 10;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--card); border:1px solid var(--card-border);
+    color: var(--text); font-size: 16px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: transform .2s, background .3s;
+  }
+  .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
 </style>
 </head>
 <body>
+  <button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
   <div class="box">
     <h1>管理员登录</h1>
     <form method="post">
@@ -132,10 +234,11 @@ function loginPage(hasTried) {
 </html>`;
 }
 
-/** 调用 Cloudflare GraphQL Analytics API 获取指定日期请求量 */
+/* ---------------- Cloudflare GraphQL API ---------------- */
+
 async function fetchWorkersRequests(env, dateStr) {
   if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID) {
-    return { requests: 0, error: "未配置 CF_API_TOKEN / CF_ACCOUNT_ID" };
+    return { requests: 0, error: "missing_config" };
   }
 
   const query = `
@@ -163,20 +266,20 @@ async function fetchWorkersRequests(env, dateStr) {
       body: JSON.stringify({ query }),
     });
 
-    if (!res.ok) return { requests: 0, error: `API ${res.status}` };
+    if (!res.ok) return { requests: 0, error: "api_" + res.status };
 
     const json = await res.json();
-    if (json.errors) {
-      return { requests: 0, error: json.errors.map((e) => e.message).join("; ") };
-    }
+    if (json.errors) return { requests: 0, error: "api_error" };
 
     const nodes =
       json.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive || [];
     return { requests: nodes[0]?.sum?.requests || 0, error: null };
   } catch (e) {
-    return { requests: 0, error: String(e) };
+    return { requests: 0, error: "network" };
   }
 }
+
+/* ---------------- 主入口 ---------------- */
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -205,7 +308,7 @@ export async function onRequest(context) {
     });
   }
 
-  // ---- 登录处理 ----
+  // ---- 登录 POST ----
   if (request.method === "POST") {
     const form = await request.formData();
     const providedPwd = String(form.get("pwd") || "");
@@ -237,7 +340,7 @@ export async function onRequest(context) {
     });
   }
 
-  // ---- 已登录：读取数据 ----
+  /* ---------------- 已登录：读取数据 ---------------- */
   try {
     const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
 
@@ -270,7 +373,7 @@ export async function onRequest(context) {
       })
     );
 
-    // 真实 Workers 请求量（今日）
+    // 真实请求量
     const todayStr = dates[0];
     const { requests: apiRequests, error: apiError } = await fetchWorkersRequests(
       env,
@@ -301,27 +404,34 @@ export async function onRequest(context) {
       .map((d) => `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`)
       .join("");
 
+    // API 异常时只显示中性提示
+    const warnHtml = apiError
+      ? `<div class="warn animate-in">ℹ Cloudflare 数据暂不可用，配额显示为 0</div>`
+      : "";
+
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script>${THEME_SCRIPT}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>访问统计</title>
 <style>
+  ${THEME_CSS}
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
     margin:0; padding:28px 20px 60px;
-    background:#0d0d0f; color:#eee;
+    background: var(--bg); color: var(--text);
     font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
     min-height:100vh; position:relative; overflow-x:hidden;
+    transition: background .4s, color .4s;
   }
-  /* 背景光晕 */
   body::before {
     content:""; position:fixed; inset:-20%; z-index:0; pointer-events:none;
     background:
-      radial-gradient(circle at 15% 10%, rgba(255,68,68,.10), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(80,120,255,.08), transparent 45%);
+      radial-gradient(circle at 15% 10%, var(--bg-glow1), transparent 40%),
+      radial-gradient(circle at 85% 90%, var(--bg-glow2), transparent 45%);
     animation: floatBg 15s ease-in-out infinite alternate;
   }
   @keyframes floatBg {
@@ -331,40 +441,47 @@ export async function onRequest(context) {
   .container { max-width:960px; margin:0 auto; position:relative; z-index:1; }
 
   h1 {
-    font-size:26px; color:#fff; margin:0 0 28px;
+    font-size:26px; color: var(--text-strong); margin:0 0 28px;
     display:flex; align-items:center; justify-content:space-between;
     font-weight:600; letter-spacing:.3px;
   }
   h1 .title-dot {
     display:inline-block; width:10px; height:10px; border-radius:50%;
-    background:#FF4444; margin-right:12px;
-    box-shadow:0 0 12px #FF4444;
+    background: var(--accent); margin-right:12px;
+    box-shadow: 0 0 12px var(--accent);
     animation: pulse 2s ease-in-out infinite;
   }
   @keyframes pulse {
     0%,100% { opacity:1; transform:scale(1); }
     50% { opacity:.5; transform:scale(1.3); }
   }
-  .actions { display:flex; gap:10px; }
+  .actions { display:flex; gap:10px; align-items:center; }
   .btn {
-    padding:9px 18px; border-radius:9px; font-size:13px; font-weight:500;
+    padding:9px 16px; border-radius:9px; font-size:13px; font-weight:500;
     text-decoration:none; cursor:pointer; border:none;
-    transition: transform .15s, box-shadow .25s, filter .25s, background .25s;
-    display:inline-flex; align-items:center; gap:6px;
+    transition: transform .15s, box-shadow .25s, filter .25s, background .25s, color .25s, border-color .25s;
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
   }
   .btn-primary {
-    background:linear-gradient(135deg,#FF4444,#ff6b6b); color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:#fff;
     box-shadow:0 4px 14px rgba(255,68,68,.3);
   }
   .btn-primary:hover { filter:brightness(1.1); box-shadow:0 8px 24px rgba(255,68,68,.45); }
   .btn-ghost {
-    background:rgba(255,255,255,.05); color:#aaa;
-    border:1px solid rgba(255,255,255,.08);
+    background: var(--btn-ghost-bg); color: var(--text-dim);
+    border:1px solid var(--card-border);
   }
-  .btn-ghost:hover { background:rgba(255,68,68,.12); color:#FF5555; border-color:rgba(255,68,68,.3); }
+  .btn-ghost:hover {
+    background: var(--btn-ghost-hover); color: var(--accent);
+    border-color: rgba(255,68,68,.3);
+  }
   .btn:active { transform: scale(.96); }
+  .theme-toggle-btn {
+    width: 38px; padding: 0; height: 36px;
+    font-size: 15px; line-height: 1;
+  }
+  .theme-toggle-btn:hover { transform: rotate(20deg) scale(1.08); }
 
-  /* 卡片入场动画 */
   .animate-in { animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both; }
   @keyframes fadeUp {
     from { opacity:0; transform: translateY(18px); }
@@ -377,12 +494,12 @@ export async function onRequest(context) {
     gap:16px; margin-bottom:24px;
   }
   .card {
-    background:rgba(37,37,37,.7);
+    background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     padding:22px; border-radius:14px;
-    border:1px solid rgba(255,255,255,.06);
+    border:1px solid var(--card-border);
     position:relative; overflow:hidden;
-    transition: transform .3s, border-color .3s, box-shadow .3s;
+    transition: transform .3s, border-color .3s, box-shadow .3s, background .4s;
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
   }
   .card:nth-child(1) { animation-delay:.05s; }
@@ -391,19 +508,22 @@ export async function onRequest(context) {
   .card:hover {
     transform: translateY(-4px);
     border-color: rgba(255,68,68,.3);
-    box-shadow: 0 12px 32px rgba(0,0,0,.4), 0 0 0 1px rgba(255,68,68,.1);
+    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255,68,68,.1);
   }
   .card::after {
     content:""; position:absolute; top:0; left:0; right:0; height:2px;
-    background: linear-gradient(90deg, transparent, #FF4444, transparent);
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity:0; transition: opacity .3s;
   }
   .card:hover::after { opacity:1; }
-  .card .label { font-size:12px; color:#888; margin-bottom:10px; letter-spacing:.5px; text-transform:uppercase; }
+  .card .label {
+    font-size:12px; color: var(--text-dim); margin-bottom:10px;
+    letter-spacing:.5px; text-transform:uppercase;
+  }
   .card .value {
-    font-size:36px; font-weight:700; color:#fff;
+    font-size:36px; font-weight:700;
     font-variant-numeric: tabular-nums;
-    background: linear-gradient(135deg, #fff, #ff8a8a);
+    background: linear-gradient(135deg, var(--text-strong), var(--accent-2));
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height:1.1;
@@ -411,23 +531,25 @@ export async function onRequest(context) {
 
   /* 配额进度条 */
   .quota {
-    background:rgba(37,37,37,.7);
+    background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     padding:22px; border-radius:14px; margin-bottom:28px;
-    border:1px solid rgba(255,255,255,.06);
+    border:1px solid var(--card-border);
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.26s;
+    transition: background .4s, border-color .4s;
   }
   .quota-head {
     display:flex; align-items:center; justify-content:space-between;
     margin-bottom:16px;
   }
-  .quota-title { font-size:15px; color:#eee; font-weight:600; }
-  .quota-sub { font-size:12px; color:#777; }
+  .quota-title { font-size:15px; color: var(--text); font-weight:600; }
+  .quota-sub { font-size:12px; color: var(--text-dim); }
   .quota-bar {
     position:relative; height:26px;
-    background:#151515; border-radius:13px; overflow:hidden;
-    border:1px solid rgba(255,255,255,.04);
+    background: var(--quota-bg); border-radius:13px; overflow:hidden;
+    border:1px solid var(--card-border);
+    transition: background .4s;
   }
   .quota-fill {
     height:100%; border-radius:13px;
@@ -454,46 +576,50 @@ export async function onRequest(context) {
   }
 
   h2 {
-    font-size:15px; margin:36px 0 14px; color:#ccc; font-weight:600;
+    font-size:15px; margin:36px 0 14px; color: var(--text); font-weight:600;
     letter-spacing:.4px; display:flex; align-items:center; gap:8px;
   }
   h2::before {
     content:""; width:3px; height:14px; border-radius:2px;
-    background: linear-gradient(180deg,#FF4444,#ff6b6b);
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
     box-shadow: 0 0 8px rgba(255,68,68,.6);
   }
 
   /* 表格 */
   .table-wrap {
-    background:rgba(37,37,37,.7);
+    background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border-radius:14px; overflow:hidden;
-    border:1px solid rgba(255,255,255,.06);
+    border:1px solid var(--card-border);
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.32s;
+    transition: background .4s, border-color .4s;
   }
   table { width:100%; border-collapse:collapse; }
   th, td { padding:12px 18px; text-align:left; font-size:13px; }
   th {
-    background:rgba(255,255,255,.03); color:#888;
+    background: var(--table-head); color: var(--text-dim);
     font-weight:500; letter-spacing:.4px; text-transform:uppercase; font-size:11px;
   }
   tbody tr {
     transition: background .2s, transform .2s;
-    border-bottom:1px solid rgba(255,255,255,.03);
+    border-bottom:1px solid var(--row-border);
   }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover {
-    background:rgba(255,68,68,.06);
+    background: rgba(255,68,68,.06);
     transform: translateX(3px);
   }
   td:nth-child(3) { color:#17DD62; font-weight:600; font-variant-numeric: tabular-nums; }
   tbody tr:hover td:nth-child(3) { color:#22ff7a; text-shadow: 0 0 10px rgba(23,221,98,.5); }
-  .empty { text-align:center; color:#666; padding:28px; font-size:13px; }
+  .empty { text-align:center; color: var(--text-dim); padding:28px; font-size:13px; }
   .warn {
-    background:rgba(255,176,32,.1); border:1px solid rgba(255,176,32,.3);
-    color:#FFB020; padding:10px 16px; border-radius:10px;
+    background: var(--warn-bg);
+    border:1px solid var(--warn-border);
+    color: var(--warn-text);
+    padding:10px 16px; border-radius:10px;
     font-size:12px; margin-bottom:20px;
+    transition: background .4s, border-color .4s, color .4s;
   }
 </style>
 </head>
@@ -502,16 +628,13 @@ export async function onRequest(context) {
     <h1 class="animate-in">
       <span><span class="title-dot"></span>访问统计</span>
       <span class="actions">
+        <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
         <a href="/admin" class="btn btn-primary">↻ 刷新</a>
         <a href="/admin/logout" class="btn btn-ghost">退出</a>
       </span>
     </h1>
 
-    ${
-      apiError
-        ? `<div class="warn animate-in">⚠ Cloudflare 数据获取失败：${escapeHtml(apiError)}</div>`
-        : ""
-    }
+    ${warnHtml}
 
     <div class="cards">
       <div class="card">
@@ -534,7 +657,9 @@ export async function onRequest(context) {
         <span class="quota-sub">今日 · 上限 ${quotaLimit.toLocaleString()}</span>
       </div>
       <div class="quota-bar">
-        <div class="quota-fill" style="width:0%;background:${quotaColor};color:${quotaColor};" data-width="${quotaPct.toFixed(2)}%"></div>
+        <div class="quota-fill"
+             style="width:0%;background:${quotaColor};color:${quotaColor};"
+             data-width="${quotaPct.toFixed(2)}%"></div>
         <div class="quota-text">请求使用进度: ${quotaUsed.toLocaleString()} (${quotaPct.toFixed(2)}%)</div>
       </div>
     </div>
