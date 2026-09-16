@@ -1,14 +1,13 @@
 /**
- * 访问统计管理页面（request.cf 版 · 无 IP 详情 · Hero 排版优化）
+ * 访问统计管理页面
  * 访问：https://www.mkejga.de5.net/admin
+ * 退出：GET /admin?action=logout
  *
  * 环境变量：
  *   ADMIN_PASSWORD   后台登录密码
- *   HOMEPAGE_KV      KV 绑定（已有）
+ *   HOMEPAGE_KV      KV 绑定
  *   CF_API_TOKEN     Cloudflare API Token（Account Analytics: Read）
  *   CF_ACCOUNT_ID    Cloudflare Account ID
- *
- * 退出：GET /admin?action=logout
  */
 
 const COOKIE_NAME = "admin_session";
@@ -337,12 +336,10 @@ export async function onRequest(context) {
     if (session === "1") isAdmin = true;
   }
 
-  // 兼容旧链接
   if (url.pathname === "/admin/logout") {
     return Response.redirect(new URL("/admin?action=logout", url).toString(), 302);
   }
 
-  // 退出
   if (url.searchParams.get("action") === "logout") {
     if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
     return new Response(null, {
@@ -354,7 +351,6 @@ export async function onRequest(context) {
     });
   }
 
-  // 登录 POST
   if (request.method === "POST") {
     const form = await request.formData();
     const providedPwd = String(form.get("pwd") || "");
@@ -375,7 +371,6 @@ export async function onRequest(context) {
     });
   }
 
-  // 未登录
   if (!isAdmin) {
     const hasTried = url.searchParams.has("pwd");
     return new Response(loginPage(hasTried), {
@@ -384,7 +379,6 @@ export async function onRequest(context) {
     });
   }
 
-  /* ---------------- 已登录：读取数据 ---------------- */
   try {
     const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
 
@@ -512,7 +506,6 @@ export async function onRequest(context) {
   }
   .container { max-width:960px; margin:0 auto; position:relative; z-index:1; }
 
-  /* ---------- Hero ---------- */
   .hero {
     position:relative;
     display:flex; align-items:center; justify-content:space-between;
@@ -558,9 +551,7 @@ export async function onRequest(context) {
     display:flex; align-items:center; flex-wrap:wrap; gap:8px;
     font-size:12.5px; color: var(--text-dim); letter-spacing:.2px;
   }
-  .hero-date, .hero-time {
-    display:inline-flex; align-items:center; gap:5px;
-  }
+  .hero-date, .hero-time { display:inline-flex; align-items:center; gap:5px; }
   .hero-date-icon, .hero-time-icon { font-size:12px; opacity:.9; }
   .hero-date { color: var(--text); font-weight:500; }
   .hero-time b {
@@ -569,17 +560,11 @@ export async function onRequest(context) {
     font-weight:600;
   }
   .hero-tz {
-    font-size:11px;
-    padding:1px 6px;
-    border-radius:6px;
-    background: var(--btn-ghost-bg);
-    color: var(--text-dim);
-    border:1px solid var(--card-border);
-    margin-left:2px;
+    font-size:11px; padding:1px 6px; border-radius:6px;
+    background: var(--btn-ghost-bg); color: var(--text-dim);
+    border:1px solid var(--card-border); margin-left:2px;
   }
-  .hero-divider {
-    width:1px; height:12px; background: var(--card-border);
-  }
+  .hero-divider { width:1px; height:12px; background: var(--card-border); }
 
   .actions { display:flex; gap:10px; align-items:center; }
   .btn {
@@ -966,7 +951,7 @@ export async function onRequest(context) {
     })();
   })();
 
-  // 北京时间：年月日 + 星期 + 时:分:秒（每秒刷新）
+  // 北京时间：年月日 + 星期 + 时:分:秒
   (function(){
     const dateEl = document.getElementById('bjDate');
     const timeEl = document.getElementById('bjTime');
@@ -976,7 +961,7 @@ export async function onRequest(context) {
     const pad = (n) => String(n).padStart(2, '0');
 
     function tick(){
-      const now = new Date(Date.now() + 8 * 3600 * 1000); // 转北京时间
+      const now = new Date(Date.now() + 8 * 3600 * 1000);
       if (dateEl) {
         const y = now.getUTCFullYear();
         const m = now.getUTCMonth() + 1;
