@@ -45,8 +45,9 @@
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
                         <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="离线" FontSize="10" Foreground="#FF5555" VerticalAlignment="Center" />
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
+                            <TextBlock Text="1112 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
                     <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="connect.2b2t.org" />
@@ -62,7 +63,7 @@
                         <TextBlock Text="Mineplex" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="231 / 232" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="44 / 45" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
@@ -291,7 +292,7 @@
                     <TextBlock Text="· 具有一定的弹性，类似于床。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <TextBlock Text="· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <TextBlock Text="· 只能使用一次，使用后会被摧毁。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉会被摧毁。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉会被摧毁，不会爆炸。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                 </StackPanel>
             </Border>
             <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
