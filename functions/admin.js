@@ -1,21 +1,61 @@
 /**
  * 访问统计管理页面
  * 访问：https://www.mkejga.de5.net/admin
- * 或：https://www.mkejga.de5.net/admin?pwd=你的密码
+ * 登录后通过 HttpOnly Cookie 维持会话，不再把密码暴露在 URL 中。
  */
 
-export async function onRequest(context) {
-  const { request, env } = context;
-  const url = new URL(request.url);
+const COOKIE_NAME = "admin_session";
+const SESSION_TTL = 60 * 60 * 8; // 8 小时
 
-  const adminPwd = env.ADMIN_PASSWORD || "";
-  const providedPwd = url.searchParams.get("pwd") || "";
-  const isAdmin = adminPwd && providedPwd === adminPwd;
+/** HTML 转义，防止 XSS */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
-  // ---- 未登录：显示密码输入框 ----
-  if (!isAdmin) {
-    const hasTried = url.searchParams.has("pwd");
-    const html = `<!DOCTYPE html>
+/** 恒定时间字符串比较，避免时序攻击 */
+function safeEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const len = Math.max(a.length, b.length);
+  let diff = a.length ^ b.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);
+  }
+  return diff === 0;
+}
+
+/** 生成随机会话 token */
+function randomToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** 读取 Cookie */
+function getCookie(request, name) {
+  const header = request.headers.get("Cookie") || "";
+  const match = header.match(new RegExp(`(?:^|;\\s*)${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+/** 统一的安全响应头 */
+function securityHeaders(extra = {}) {
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Cache-Control": "no-store",
+    ...extra,
+  };
+}
+
+/** 登录页 HTML */
+function loginPage(hasTried) {
+  return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
@@ -36,7 +76,7 @@ export async function onRequest(context) {
 <body>
   <div class="box">
     <h1>管理员登录</h1>
-    <form method="get">
+    <form method="post">
       <input type="password" name="pwd" placeholder="请输入密码" autofocus autocomplete="current-password">
       <button type="submit">登录</button>
       <div class="err">${hasTried ? "密码错误" : ""}</div>
@@ -44,46 +84,121 @@ export async function onRequest(context) {
   </div>
 </body>
 </html>`;
-    return new Response(html, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+}
+
+export async function onRequest(context) {
+  const { request, env } = context;
+  const url = new URL(request.url);
+
+  const adminPwd = env.ADMIN_PASSWORD || "";
+  const cookieToken = getCookie(request, COOKIE_NAME);
+
+  // 已登录：Cookie 中的 token 是本次会话生成并存于 KV 的
+  let isAdmin = false;
+  if (adminPwd && cookieToken) {
+    const session = await env.HOMEPAGE_KV.get(`admin:session:${cookieToken}`);
+    if (session === "1") isAdmin = true;
+  }
+
+  // ---- 登出 ----
+  if (url.pathname === "/admin/logout") {
+    if (cookieToken) {
+      await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
+    }
+    return new Response(null, {
+      status: 302,
+      headers: securityHeaders({
+        "Set-Cookie": `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`,
+        Location: "/admin",
+      }),
+    });
+  }
+
+  // ---- 登录处理 ----
+  if (request.method === "POST") {
+    const form = await request.formData();
+    const providedPwd = String(form.get("pwd") || "");
+    if (adminPwd && safeEqual(providedPwd, adminPwd)) {
+      const token = randomToken();
+      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", {
+        expirationTtl: SESSION_TTL,
+      });
+      return new Response(null, {
+        status: 302,
+        headers: securityHeaders({
+          "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
+          Location: "/admin",
+        }),
+      });
+    }
+    return new Response(loginPage(true), {
+      status: 401,
+      headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
+    });
+  }
+
+  // ---- 未登录：显示密码输入框 ----
+  if (!isAdmin) {
+    return new Response(loginPage(url.searchParams.has("pwd")), {
+      status: url.searchParams.has("pwd") ? 401 : 200,
+      headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
     });
   }
 
   // ---- 已登录：读 KV 显示统计 ----
   try {
-    const total = await env.HOMEPAGE_KV.get("visit:total") || "0";
+    const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
 
     let ipMap = {};
     try {
-      ipMap = JSON.parse(await env.HOMEPAGE_KV.get("visit:ipmap") || "{}");
-    } catch { ipMap = {}; }
-
-    // 最近 7 天
-    const days = [];
-    const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(now.getTime() - i * 86400000);
-      const key = "visit:today:" + d.toISOString().slice(0, 10);
-      let set = [];
-      try {
-        set = JSON.parse(await env.HOMEPAGE_KV.get(key) || "[]");
-      } catch { set = []; }
-      days.push({ date: d.toISOString().slice(0, 10), count: set.length });
+      ipMap = JSON.parse((await env.HOMEPAGE_KV.get("visit:ipmap")) || "{}");
+    } catch {
+      ipMap = {};
     }
 
-    // 排序 IP
-    const entries = Object.entries(ipMap).sort((a, b) => b[1] - a[1]);
+    // 最近 7 天（并行读取）
+    const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(now.getTime() - i * 86400000);
+      dates.push(d.toISOString().slice(0, 10));
+    }
 
-    const ipRows = entries.slice(0, 100).map(([ipAddr, cnt], i) => {
-      const safeIp = String(ipAddr).replace(/[<>&"]/g, "");
-      return `<tr><td>${i + 1}</td><td>${safeIp}</td><td>${cnt}</td></tr>`;
-    }).join("");
+    const days = await Promise.all(
+      dates.map(async (date) => {
+        let set = [];
+        try {
+          set = JSON.parse(
+            (await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]"
+          );
+        } catch {
+          set = [];
+        }
+        return { date, count: Array.isArray(set) ? set.length : 0 };
+      })
+    );
 
-    const dayRows = days.map(d =>
-      `<tr><td>${d.date}</td><td>${d.count}</td></tr>`
-    ).join("");
+    // 排序 IP，并做安全转义
+    const entries = Object.entries(ipMap)
+      .filter(([, cnt]) => Number.isFinite(Number(cnt)))
+      .sort((a, b) => Number(b[1]) - Number(a[1]));
 
-    const pwdParam = encodeURIComponent(providedPwd);
+    const ipRows = entries
+      .slice(0, 100)
+      .map(
+        ([ipAddr, cnt], i) =>
+          `<tr><td>${i + 1}</td><td>${escapeHtml(ipAddr)}</td><td>${escapeHtml(
+            cnt
+          )}</td></tr>`
+      )
+      .join("");
+
+    const dayRows = days
+      .map(
+        (d) =>
+          `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`
+      )
+      .join("");
 
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -118,13 +233,13 @@ export async function onRequest(context) {
     <h1>
       访问统计
       <span>
-        <a href="?pwd=${pwdParam}" class="refresh">刷新</a>
-        <a href="/admin" class="logout">退出</a>
+        <a href="/admin" class="refresh">刷新</a>
+        <a href="/admin/logout" class="logout">退出</a>
       </span>
     </h1>
 
     <div class="cards">
-      <div class="card"><div class="label">总计访问</div><div class="value">${total}</div></div>
+      <div class="card"><div class="label">总计访问</div><div class="value">${escapeHtml(total)}</div></div>
       <div class="card"><div class="label">今日人数</div><div class="value">${days[0]?.count || 0}</div></div>
       <div class="card"><div class="label">独立 IP 数</div><div class="value">${entries.length}</div></div>
     </div>
@@ -145,12 +260,12 @@ export async function onRequest(context) {
 </html>`;
 
     return new Response(html, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+      headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
     });
-
   } catch (e) {
-    return new Response("<h1>读取失败</h1><pre>" + String(e) + "</pre>", {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    return new Response("<h1>读取失败</h1><p>请稍后重试</p>", {
+      status: 500,
+      headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
     });
   }
 }
