@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 PCL 主页生成脚本
+由 GitHub Actions 每 12 小时定时运行，生成带动态数据的 Custom.xaml。
+日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
+玩家 ID 由 PCL 的 {user} 替换标记自动填充。
+版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
+日期卡片背景使用必应每日壁纸。
+更新内容从 Minecraft Wiki 抓取，抓不到时显示 PCL 原生加载动画。
+服务器列表不再查询在线状态。
 """
 
 import time
@@ -16,7 +23,6 @@ WIKI_API = "https://zh.minecraft.wiki/api.php"
 WIKI_PAGE_BASE = "https://zh.minecraft.wiki/w/"
 BING_API = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN"
 LAUNCHER_NEWS_API = "https://launchercontent.mojang.com/v2/javaPatchNotes.json"
-MC_SRV_API = "https://api.mcsrvstat.us/3/"
 
 REQUEST_TIMEOUT = 30
 MAX_RETRIES = 3
@@ -30,8 +36,10 @@ KEEP_FILES = ["version.png", "kkange.png"]
 FEEDBACK_URL = "https://github.com/wlasfjdskfj/pcl-homepage/issues"
 SOURCE_URL = "https://github.com/wlasfjdskfj/pcl-homepage"
 
+# 主推服务器
 SERVER_ADDRESS = "mc.hypixel.net"
 
+# 服务器列表（第一个是主推）
 SERVER_LIST = [
     ("Hypixel", SERVER_ADDRESS),
     ("2B2T", "connect.2b2t.org"),
@@ -43,7 +51,7 @@ HEADERS = {
 }
 
 
-# ============ 版本信息 ============
+# ============ 版本信息获取 ============
 
 def fetch_latest_version():
     default = {
@@ -55,13 +63,16 @@ def fetch_latest_version():
         "wiki_url": "https://zh.minecraft.wiki/",
         "changelog_url": "https://www.minecraft.net/zh-hans/download",
     }
+
     try:
         resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
         data = resp.json()
+
         latest = data.get("latest", {})
         default["release"] = latest.get("release", default["release"])
         default["snapshot"] = latest.get("snapshot", "")
+
         versions = data.get("versions", [])
         for v in versions:
             vid = v.get("id", "")
@@ -70,19 +81,25 @@ def fetch_latest_version():
                 default["release_date"] = rt
             if vid == default["snapshot"]:
                 default["snapshot_date"] = rt
+
         print("[Version] 正式版：" + default["release"] + "，快照版：" + default["snapshot"])
         return default
+
     except Exception as e:
         print("[Version] 请求失败：" + str(e) + "，使用默认数据。")
         return default
 
 
+# ============ 最近 5 个正式版 ============
+
 def fetch_recent_releases(count=5):
+    """获取最近 N 个正式版（release），返回 [{version, date, days_ago}, ...]"""
     try:
         resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
         data = resp.json()
         versions = data.get("versions", [])
+
         today = datetime.now().date()
         result = []
         for v in versions:
@@ -97,17 +114,23 @@ def fetch_recent_releases(count=5):
                 days_ago = (today - release_date).days
             except Exception:
                 days_ago = 0
-            result.append({"version": vid, "date": rt, "days_ago": days_ago})
+            result.append({
+                "version": vid,
+                "date": rt,
+                "days_ago": days_ago,
+            })
             if len(result) >= count:
                 break
+
         print("[Releases] 最近 " + str(len(result)) + " 个正式版")
         return result
+
     except Exception as e:
         print("[Releases] 获取失败：" + str(e))
         return []
 
 
-# ============ Wiki 更新内容 ============
+# ============ Wiki 更新内容抓取 ============
 
 def _clean_wiki_text(s):
     if not s:
@@ -166,51 +189,32 @@ def fetch_wiki_changelog(version):
             return {"ok": False, "sections": [], "url": url}
         total = sum(len(s["items"]) for s in sections)
         print("[Wiki-Changelog] " + page_title + " 提取 " + str(len(sections)) + " 章节，" + str(total) + " 条")
+        for s in sections[:3]:
+            print("  章节：" + s["heading"] + "（" + str(len(s["items"])) + " 条）")
         return {"ok": True, "sections": sections, "url": url}
     except Exception as e:
         print("[Wiki-Changelog] 请求失败：" + str(e))
         return {"ok": False, "sections": [], "url": url}
 
 
-# ============ 服务器状态 ============
-
-def fetch_server_status(address):
-    try:
-        api = MC_SRV_API + address
-        resp = requests.get(api, timeout=REQUEST_TIMEOUT, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
-        if not data.get("online"):
-            print("[ServerStatus] " + address + " 离线")
-            return None
-        players = data.get("players", {})
-        version = data.get("version", "")
-        result = {
-            "address": address,
-            "online": True,
-            "players_online": players.get("online", 0),
-            "players_max": players.get("max", 0),
-            "version": version,
-        }
-        print("[ServerStatus] " + address + " 在线：" + str(result["players_online"]) + "/" + str(result["players_max"]) + " 版本 " + version)
-        return result
-    except Exception as e:
-        print("[ServerStatus] " + address + " 请求失败：" + str(e))
-        return None
-
+# ============ 服务器列表（不查询状态） ============
 
 def fetch_server_list():
+    """返回服务器列表，不查询状态。"""
     result = []
     for name, address in SERVER_LIST:
-        status = fetch_server_status(address)
-        result.append({"name": name, "address": address, "status": status})
-    print("[ServerList] 共 " + str(len(result)) + " 个服务器")
+        result.append({
+            "name": name,
+            "address": address,
+        })
+    print("[ServerList] 共 " + str(len(result)) + " 个服务器（不查询状态）")
     return result
 
 
 # ============ 官方启动器新闻封面 ============
 
 def fetch_official_version_image(version):
+    """从 Mojang 官方启动器新闻接口获取版本封面图。返回图片 URL 或 None。"""
     try:
         resp = requests.get(LAUNCHER_NEWS_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
@@ -219,6 +223,7 @@ def fetch_official_version_image(version):
         if not entries:
             print("[Official-Image] 新闻接口无内容")
             return None
+
         for entry in entries:
             if entry.get("version") == version:
                 img = entry.get("image", {})
@@ -227,6 +232,7 @@ def fetch_official_version_image(version):
                     full_url = "https://launchercontent.mojang.com" + url
                     print("[Official-Image] 精确匹配：" + version + " → " + full_url)
                     return full_url
+
         for entry in entries:
             if entry.get("type") == "release":
                 img = entry.get("image", {})
@@ -235,6 +241,7 @@ def fetch_official_version_image(version):
                     full_url = "https://launchercontent.mojang.com" + url
                     print("[Official-Image] 无精确匹配，用最新正式版：" + entry.get("version", "?") + " → " + full_url)
                     return full_url
+
         first = entries[0]
         img = first.get("image", {})
         url = img.get("url", "")
@@ -242,14 +249,16 @@ def fetch_official_version_image(version):
             full_url = "https://launchercontent.mojang.com" + url
             print("[Official-Image] 兜底用最新：" + first.get("version", "?") + " → " + full_url)
             return full_url
+
         print("[Official-Image] 未找到任何图片")
         return None
+
     except Exception as e:
         print("[Official-Image] 请求失败：" + str(e))
         return None
 
 
-# ============ Wiki 版本封面图 ============
+# ============ Wiki 版本封面图获取 ============
 
 def pick_version_image(images, version):
     base_version = version
@@ -259,21 +268,29 @@ def pick_version_image(images, version):
         if base_version.endswith(suffix):
             base_version = base_version[:-len(suffix)]
             break
+
     exact_names = [
-        version + ".jpg", version + ".png", version + ".gif",
-        version.replace("-", "_") + ".jpg", version.replace("-", "_") + ".png",
+        version + ".jpg",
+        version + ".png",
+        version + ".gif",
+        version.replace("-", "_") + ".jpg",
+        version.replace("-", "_") + ".png",
     ]
+
     priority_exact = []
     priority_version = []
     priority_base = []
     priority_other = []
+
     for img in images:
         t = img.get("title", "")
         if not t.lower().endswith((".png", ".jpg", ".gif")):
             continue
         if "Sprite" in t or "Disambig" in t or "Logo" in t or "Icon" in t:
             continue
+
         file_name = t.replace("File:", "")
+
         if file_name in exact_names:
             priority_exact.append(t)
         elif version in t:
@@ -282,6 +299,7 @@ def pick_version_image(images, version):
             priority_base.append(t)
         else:
             priority_other.append(t)
+
     if priority_exact:
         return priority_exact[0]
     if priority_version:
@@ -313,7 +331,9 @@ def fetch_version_image(version, filename="version.png"):
         except Exception:
             pass
 
-    page_titles = ["Java版" + version]
+    page_titles = []
+    page_titles.append("Java版" + version)
+
     base_version = version
     for suffix in ["-rc-1", "-rc-2", "-rc-3", "-rc-4", "-rc-5",
                    "-pre1", "-pre2", "-pre3", "-pre4", "-pre5",
@@ -329,10 +349,16 @@ def fetch_version_image(version, filename="version.png"):
 
     for page_title in page_titles:
         try:
-            params = {"action": "query", "titles": page_title, "prop": "images", "format": "json"}
+            params = {
+                "action": "query",
+                "titles": page_title,
+                "prop": "images",
+                "format": "json",
+            }
             resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
             resp.raise_for_status()
             data = resp.json()
+
             pages = data.get("query", {}).get("pages", {})
             for page_id, page_info in pages.items():
                 if "missing" in page_info:
@@ -340,12 +366,15 @@ def fetch_version_image(version, filename="version.png"):
                     continue
                 images = page_info.get("images", [])
                 print("[Version-Image] " + page_title + " 包含 " + str(len(images)) + " 张图片")
+                for i, img in enumerate(images[:10]):
+                    print("  " + str(i + 1) + ". " + img.get("title", ""))
                 image_title = pick_version_image(images, version)
                 if image_title:
                     used_title = page_title
                     break
             if image_title:
                 break
+
         except Exception as e:
             print("[Version-Image] 请求 " + page_title + " 失败：" + str(e))
             continue
@@ -357,10 +386,18 @@ def fetch_version_image(version, filename="version.png"):
     print("[Version-Image] 选中：" + used_title + " → " + image_title)
 
     try:
-        params = {"action": "query", "titles": image_title, "prop": "imageinfo", "iiprop": "url", "iiurlwidth": "1200", "format": "json"}
+        params = {
+            "action": "query",
+            "titles": image_title,
+            "prop": "imageinfo",
+            "iiprop": "url",
+            "iiurlwidth": "1200",
+            "format": "json",
+        }
         resp = requests.get(WIKI_API, params=params, headers=HEADERS, timeout=REQUEST_TIMEOUT)
         resp.raise_for_status()
         data = resp.json()
+
         pages = data.get("query", {}).get("pages", {})
         thumb_url = None
         for page_id, page_info in pages.items():
@@ -368,29 +405,43 @@ def fetch_version_image(version, filename="version.png"):
             if info_list:
                 thumb_url = info_list[0].get("thumburl") or info_list[0].get("url")
                 break
+
         if not thumb_url:
             print("[Version-Image] 未获取到 " + image_title + " 的 URL")
             return False
-        img_headers = {"User-Agent": HEADERS["User-Agent"], "Referer": "https://zh.minecraft.wiki/"}
+
+        img_headers = {
+            "User-Agent": HEADERS["User-Agent"],
+            "Referer": "https://zh.minecraft.wiki/",
+        }
+
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 img_resp = requests.get(thumb_url, headers=img_headers, timeout=REQUEST_TIMEOUT)
                 if img_resp.status_code != 200:
+                    print("[Version-Image] 第 " + str(attempt) + " 次下载失败：" + str(img_resp.status_code))
                     if attempt < MAX_RETRIES:
                         time.sleep(3)
                         continue
                     return False
+
                 with open(local_path, "wb") as f:
                     f.write(img_resp.content)
+
                 marker.write_text(version, encoding="utf-8")
+
                 print("[Version-Image] 已下载：" + filename + "（" + str(len(img_resp.content)) + " 字节）")
                 return True
+
             except requests.exceptions.Timeout:
+                print("[Version-Image] 第 " + str(attempt) + " 次超时")
                 if attempt < MAX_RETRIES:
                     time.sleep(3)
                 else:
                     return False
+
         return False
+
     except Exception as e:
         print("[Version-Image] 获取封面图失败：" + str(e))
         return False
@@ -400,13 +451,18 @@ def clean_old_images():
     images_dir = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME
     if not images_dir.exists():
         return
+
     print("[Clean] 开始清理 images/ 目录")
+
     removed_count = 0
     for f in images_dir.iterdir():
         if not f.is_file():
             continue
+
         if f.name.endswith(".version"):
+            print("[Clean] 保留标记文件：" + f.name)
             continue
+
         if f.suffix.lower() in (".png", ".jpg", ".gif") and f.name not in KEEP_FILES:
             try:
                 f.unlink()
@@ -414,20 +470,23 @@ def clean_old_images():
                 removed_count += 1
             except Exception as e:
                 print("[Clean] 删除失败：" + f.name + "（" + str(e) + "）")
+
     if removed_count == 0:
         print("[Clean] 无需清理")
     else:
         print("[Clean] 共清理 " + str(removed_count) + " 个文件")
 
 
-# ============ 必应壁纸 ============
+# ============ 必应每日壁纸 ============
 
 def fetch_bing_wallpaper():
+    """从必应获取今日壁纸 URL，失败时回退到 kkange.png，再回退到内置图片"""
     local_fallback = Path(__file__).resolve().parent.parent / IMAGES_DIR_NAME / "kkange.png"
     if local_fallback.exists():
         fallback = BASE_URL + "/" + IMAGES_DIR_NAME + "/kkange.png"
     else:
         fallback = "pack://application:,,,/images/Blocks/GrassPath.png"
+
     try:
         resp = requests.get(BING_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
         resp.raise_for_status()
@@ -444,7 +503,7 @@ def fetch_bing_wallpaper():
     return fallback
 
 
-# ============ 指令数据 ============
+# ============ 指令分组数据 ============
 
 CMD_GROUPS = [
     ("基础模式", [
@@ -491,8 +550,11 @@ CMD_GROUPS = [
 
 
 def escape_xaml_attr(text):
-    return (text.replace("&", "&amp;").replace('"', "&quot;")
-            .replace("<", "&lt;").replace(">", "&gt;"))
+    return (text
+            .replace("&", "&amp;")
+            .replace('"', "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;"))
 
 
 # ============ XAML 生成 ============
@@ -528,6 +590,7 @@ def build_xaml():
     server_address = SERVER_ADDRESS
 
     clean_old_images()
+
     wallpaper_url = fetch_bing_wallpaper()
 
     ver = fetch_latest_version()
@@ -566,7 +629,9 @@ def build_xaml():
     server_list = fetch_server_list()
 
     news_title = "当前最新版本 · " + main_version
+
     wiki_version_url = "https://zh.minecraft.wiki/w/Java版" + main_version
+
     server_url = ver["server_url"]
     wiki_url = ver["wiki_url"]
     changelog_url = ver["changelog_url"]
@@ -577,33 +642,22 @@ def build_xaml():
     # ========== 卡片 1：服务器推荐 ==========
     lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
+
+    # 主推服务器大卡
     lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
     lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
     lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
     lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />')
-
-    if server_list and len(server_list) > 0 and server_list[0]["status"]:
-        s0 = server_list[0]["status"]
-        lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
-        lines.append('                        <Border Width="8" Height="8" CornerRadius="4" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />')
-        lines.append('                        <TextBlock Text="在线" FontSize="11" Foreground="#17DD62" VerticalAlignment="Center" Margin="0,0,12,0" />')
-        lines.append('                        <TextBlock Text="' + str(s0["players_online"]) + " / " + str(s0["players_max"]) + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Margin="0,0,12,0" />')
-        lines.append('                        <TextBlock Text="' + s0["version"] + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-        lines.append('                    </StackPanel>')
-    else:
-        lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
-        lines.append('                        <Border Width="8" Height="8" CornerRadius="4" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,8,0" />')
-        lines.append('                        <TextBlock Text="离线 / 查询失败" FontSize="11" Foreground="#FF5555" VerticalAlignment="Center" />')
-        lines.append('                    </StackPanel>')
-
+    lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />')
     lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + server_address + '" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
+    # 其他服务器列表
     lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
     lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
     lines.append('                <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
@@ -612,31 +666,22 @@ def build_xaml():
     for srv in server_list:
         srv_name = srv["name"]
         srv_addr = srv["address"]
-        srv_status = srv["status"]
-        lines.append('            <Border CornerRadius="10" Padding="14,10" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
+
+        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
         lines.append('                <Grid>')
         lines.append('                    <Grid.ColumnDefinitions>')
         lines.append('                        <ColumnDefinition Width="*" />')
         lines.append('                        <ColumnDefinition Width="Auto" />')
         lines.append('                    </Grid.ColumnDefinitions>')
         lines.append('                    <StackPanel Grid.Column="0" VerticalAlignment="Center">')
-        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-        if srv_status:
-            lines.append('                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">')
-            lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />')
-            lines.append('                            <TextBlock Text="' + str(srv_status["players_online"]) + " / " + str(srv_status["players_max"]) + '" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />')
-            lines.append('                            <TextBlock Text="' + srv_status["version"] + '" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-            lines.append('                        </StackPanel>')
-        else:
-            lines.append('                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">')
-            lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#FF5555" VerticalAlignment="Center" Margin="0,0,6,0" />')
-            lines.append('                            <TextBlock Text="离线" FontSize="10" Foreground="#FF5555" VerticalAlignment="Center" />')
-            lines.append('                        </StackPanel>')
+        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+        lines.append('                        <TextBlock Text="' + srv_addr + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />')
         lines.append('                    </StackPanel>')
         lines.append('                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + srv_addr + '" />')
         lines.append('                </Grid>')
         lines.append('            </Border>')
 
+    # 推荐按钮
     lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
@@ -644,14 +689,15 @@ def build_xaml():
     lines.append('                    </local:CustomEventCollection>')
     lines.append('                </local:CustomEventService.Events>')
     lines.append('            </local:MyIconTextButton>')
+
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,0" Text="服务器状态来源：api.mcsrvstat.us，每次更新主页时重新查询。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
     # ========== 卡片 2：今日概览 ==========
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
@@ -664,13 +710,16 @@ def build_xaml():
     lines.append('                            </LinearGradientBrush>')
     lines.append('                        </Border.Background>')
     lines.append('                    </Border>')
+
     lines.append('                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,18,0,0" Background="#66000000" CornerRadius="12" Padding="12,5,12,5">')
     lines.append('                        <StackPanel Orientation="Horizontal">')
     lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#FFD166" VerticalAlignment="Center" Margin="0,0,7,0" />')
     lines.append('                            <TextBlock Text="' + greeting + '" FontSize="11" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
+
     lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="' + year + ' · ' + month + ' / ' + day + '" />')
+
     lines.append('                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
     lines.append('                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />')
@@ -707,6 +756,7 @@ def build_xaml():
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                    <ColumnDefinition Width="1*" />')
     lines.append('                </Grid.ColumnDefinitions>')
+
     lines.append('                <Border Grid.Column="0" CornerRadius="10" Padding="16,14" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">')
     lines.append('                    <Grid>')
     lines.append('                        <TextBlock Text="' + str(lucky_number) + '" FontSize="80" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,-12,0" Opacity="0.06" />')
@@ -719,6 +769,7 @@ def build_xaml():
     lines.append('                        </StackPanel>')
     lines.append('                    </Grid>')
     lines.append('                </Border>')
+
     lines.append('                <Border Grid.Column="1" CornerRadius="10" Padding="16,14" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">')
     lines.append('                    <StackPanel>')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">')
@@ -736,12 +787,14 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
     lines.append('            </Grid>')
+
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
     # ========== 卡片 3：你的信息 ==========
     lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
     lines.append('                    <Grid Margin="0,0,0,12">')
@@ -779,6 +832,7 @@ def build_xaml():
     lines.append('                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M128 192h768v192H128z M128 448h768v192H128z M256 224v128 M256 480v128" EventType="内存优化" EventData="-" />')
     lines.append('                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="清理垃圾" EventData="-" />')
     lines.append('            </Grid>')
+
     lines.append('            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
@@ -786,6 +840,7 @@ def build_xaml():
     # ========== 卡片 4：随机挑战 ==========
     lines.append('    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <Border>')
@@ -808,6 +863,7 @@ def build_xaml():
     lines.append('                    <TextBlock Text="' + challenge + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />')
     lines.append('                </Grid>')
     lines.append('            </Border>')
+
     lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />')
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />')
     lines.append('        </StackPanel>')
@@ -816,6 +872,7 @@ def build_xaml():
     # ========== 卡片 5：当前最新版本 ==========
     lines.append('    <local:MyCard Title="' + news_title + '" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + version_image_source + '" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />')
@@ -833,8 +890,11 @@ def build_xaml():
     else:
         version_info = main_label + "：" + main_version
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
+
     lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
+
     lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+
     lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
     lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
     lines.append('                <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
@@ -869,15 +929,15 @@ def build_xaml():
     if wiki_changelog["ok"]:
         for sec in wiki_changelog["sections"]:
             escaped_heading = escape_xaml_attr(sec["heading"])
-            lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
+            lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
             lines.append('                <StackPanel>')
-            lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">')
-            lines.append('                        <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
-            lines.append('                        <TextBlock Text="' + escaped_heading + '" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />')
+            lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+            lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />')
+            lines.append('                        <TextBlock Text="' + escaped_heading + '" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />')
             lines.append('                    </StackPanel>')
             for item in sec["items"]:
                 escaped_item = escape_xaml_attr(item)
-                lines.append('                    <TextBlock Text="· ' + escaped_item + '" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
+                lines.append('                    <TextBlock Text="· ' + escaped_item + '" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />')
             lines.append('                </StackPanel>')
             lines.append('            </Border>')
     else:
@@ -895,6 +955,7 @@ def build_xaml():
     lines.append('                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="' + wiki_url + '" />')
     lines.append('                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="' + wiki_version_url + '" />')
     lines.append('            </Grid>')
+
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -914,15 +975,19 @@ def build_xaml():
     # ========== 卡片 7：游戏指令速查 ==========
     lines.append('    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
+
         lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
         lines.append('                <StackPanel>')
+
         lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
         lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
         lines.append('                        <TextBlock Text="' + group_title + '" FontSize="12" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
         lines.append('                    </StackPanel>')
+
         lines.append('                    <Grid>')
         lines.append('                        <Grid.ColumnDefinitions>')
         lines.append('                            <ColumnDefinition Width="1*" />')
@@ -935,8 +1000,10 @@ def build_xaml():
             escaped_tip = escape_xaml_attr(tip)
             lines.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
         lines.append('                    </Grid>')
+
         lines.append('                </StackPanel>')
         lines.append('            </Border>')
+
     lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />')
     lines.append('            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />')
     lines.append('        </StackPanel>')
@@ -972,6 +1039,7 @@ def build_xaml():
     # ========== 卡片 9：今日运势 ==========
     lines.append('    <local:MyCard Title="今日运势" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
+
     lines.append('            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />')
     lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">')
     lines.append('                <TextBlock Text="' + str(score) + '" FontSize="56" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
@@ -982,6 +1050,7 @@ def build_xaml():
     lines.append('                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />')
     lines.append('                <TextBlock Text="' + grade + '" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
     lines.append('            </StackPanel>')
+
     lines.append('            <Grid Margin="0,0,0,12">')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -1004,8 +1073,10 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </Border>')
     lines.append('            </Grid>')
+
     lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="' + comment + '" />')
     lines.append('            <local:MyHint Theme="Yellow" Text="小贴士：' + fortune_tip + '" />')
+
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
@@ -1027,7 +1098,7 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
-    # ========== 卡片 11：MC 知识小测 ==========
+    # ========== 卡片 11：MC 知识小测（默认折叠） ==========
     lines.append('    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
     lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
@@ -1066,18 +1137,22 @@ def build_xaml():
     lines.append('    </local:MyCard>')
 
     lines.append('</StackPanel>')
+
     return "\n".join(lines) + "\n"
 
 
 def main():
     base_dir = Path(__file__).resolve().parent.parent
     output = base_dir / "Custom.xaml"
+
     xaml = build_xaml()
     output.write_text(xaml, encoding="utf-8")
     print("已生成：" + str(output))
+
     version_file = base_dir / "Custom.xaml.version"
-    version_file.write_text("0", encoding="utf-8")
-    print("已写入版本号占位：0")
+    version_str = "0"
+    version_file.write_text(version_str, encoding="utf-8")
+    print("已写入版本号占位：" + version_str)
 
 
 if __name__ == "__main__":
