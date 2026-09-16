@@ -960,22 +960,22 @@ export async function onRequest(context) {
     const 周 = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
     const pad = (n) => String(n).padStart(2, '0');
 
-    function tick(){
-      const now = new Date(Date.now() + 8 * 3600 * 1000);
-      if (dateEl) {
-        const y = now.getUTCFullYear();
-        const m = now.getUTCMonth() + 1;
-        const d = now.getUTCDate();
-        const w = 周[now.getUTCDay()];
-        dateEl.textContent = `${y}年${m}月${d}日 ${w}`;
-      }
-      if (timeEl) {
-        const hh = pad(now.getUTCHours());
-        const mm = pad(now.getUTCMinutes());
-        const ss = pad(now.getUTCSeconds());
-        timeEl.textContent = `${hh}:${mm}:${ss}`;
-      }
-    }
+function tick(){
+  const now = new Date(Date.now() + 8 * 3600 * 1000);
+  if (dateEl) {
+    const y = now.getUTCFullYear();
+    const m = now.getUTCMonth() + 1;
+    const d = now.getUTCDate();
+    const w = 周[now.getUTCDay()];
+    dateEl.textContent = y + '年' + m + '月' + d + '日 ' + w;
+  }
+  if (timeEl) {
+    const hh = pad(now.getUTCHours());
+    const mm = pad(now.getUTCMinutes());
+    const ss = pad(now.getUTCSeconds());
+    timeEl.textContent = hh + ':' + mm + ':' + ss;
+  }
+}
 
     tick();
     setInterval(tick, 1000);
