@@ -1,5 +1,5 @@
 /**
- * 访问统计管理页面（完整版 + IP 详情弹窗）
+ * 访问统计管理页面（request.cf 版）
  * 访问：https://www.mkejga.de5.net/admin
  *
  * 环境变量：
@@ -7,7 +7,8 @@
  *   HOMEPAGE_KV      KV 绑定（已有）
  *   CF_API_TOKEN     Cloudflare API Token（Account Analytics: Read）
  *   CF_ACCOUNT_ID    Cloudflare Account ID
- *   IPAPI_TOKEN      （可选）ipapi.is 的 token，用于提升速率限制
+ *
+ * 退出：GET /admin?action=logout
  */
 
 const COOKIE_NAME = "admin_session";
@@ -177,8 +178,7 @@ function loginPage(hasTried) {
     margin:0; background:var(--bg); color:var(--text);
     font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
     display:flex; align-items:center; justify-content:center;
-    overflow:hidden;
-    transition: background .4s, color .4s;
+    overflow:hidden; transition: background .4s, color .4s;
   }
   body::before {
     content:""; position:fixed; inset:-20%;
@@ -192,6 +192,16 @@ function loginPage(hasTried) {
     from { transform: translate(0,0) scale(1); }
     to   { transform: translate(3%, -3%) scale(1.05); }
   }
+  .top-band {
+    position: fixed; top:0; left:0; right:0; height:3px; z-index: 100;
+    background: linear-gradient(90deg, #FF4444, #3b82f6, #FFB020, #FF4444);
+    background-size: 300% 100%;
+    animation: bandFlow 6s linear infinite;
+  }
+  @keyframes bandFlow {
+    0% { background-position: 0% 0; }
+    100% { background-position: 300% 0; }
+  }
   .box {
     position:relative; z-index:1;
     background:var(--card);
@@ -200,7 +210,7 @@ function loginPage(hasTried) {
     border:1px solid var(--card-border);
     box-shadow: 0 20px 60px rgba(0,0,0,.35);
     animation: popIn .5s cubic-bezier(.2,.8,.2,1) both;
-    transition: background .4s, border-color .4s, box-shadow .4s;
+    transition: background .4s, border-color .4s;
   }
   @keyframes popIn {
     from { opacity:0; transform: translateY(20px) scale(.96); }
@@ -210,7 +220,7 @@ function loginPage(hasTried) {
   input {
     width:100%; padding:13px 14px; border:1px solid var(--card-border); border-radius:10px;
     background:var(--card-strong); color:var(--text); font-size:14px;
-    transition: border-color .25s, box-shadow .25s, background .25s;
+    transition: border-color .25s, box-shadow .25s;
   }
   input:focus {
     outline:none; border-color:var(--accent);
@@ -219,15 +229,14 @@ function loginPage(hasTried) {
   button[type=submit] {
     width:100%; margin-top:18px; padding:13px; border:none; border-radius:10px;
     background:linear-gradient(135deg,var(--accent),var(--accent-2)); color:white;
-    font-size:14px; font-weight:bold; cursor:pointer; letter-spacing:.5px;
+    font-size:14px; font-weight:bold; cursor:pointer;
     transition: transform .15s, box-shadow .25s, filter .25s;
   }
   button[type=submit]:hover { filter:brightness(1.1); box-shadow:0 8px 24px rgba(255,68,68,.4); }
   button[type=submit]:active { transform: scale(.97); }
   .err {
     color:var(--accent-2); font-size:12px; margin-top:10px; text-align:center;
-    animation: shake .4s;
-    ${hasTried ? "" : "display:none;"}
+    animation: shake .4s; ${hasTried ? "" : "display:none;"}
   }
   @keyframes shake {
     0%,100% { transform: translateX(0); }
@@ -243,16 +252,6 @@ function loginPage(hasTried) {
     transition: transform .2s, background .3s;
   }
   .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
-  .top-band {
-    position: fixed; top:0; left:0; right:0; height:3px; z-index: 100;
-    background: linear-gradient(90deg, #FF4444, #3b82f6, #FFB020, #FF4444);
-    background-size: 300% 100%;
-    animation: bandFlow 6s linear infinite;
-  }
-  @keyframes bandFlow {
-    0% { background-position: 0% 0; }
-    100% { background-position: 300% 0; }
-  }
 </style>
 </head>
 <body>
@@ -303,15 +302,15 @@ async function fetchUsageSplit(env, dateStr) {
       },
       body: JSON.stringify({ query }),
     });
-
     if (!res.ok) return { workers: 0, pages: 0, error: "api_" + res.status };
     const json = await res.json();
     if (json.errors) return { workers: 0, pages: 0, error: "api_error" };
-
     const acc = json.data?.viewer?.accounts?.[0] || {};
-    const workers = acc.workers?.[0]?.sum?.requests || 0;
-    const pages = acc.pages?.[0]?.sum?.requests || 0;
-    return { workers, pages, error: null };
+    return {
+      workers: acc.workers?.[0]?.sum?.requests || 0,
+      pages: acc.pages?.[0]?.sum?.requests || 0,
+      error: null,
+    };
   } catch {
     return { workers: 0, pages: 0, error: "network" };
   }
@@ -342,7 +341,13 @@ export async function onRequest(context) {
     if (session === "1") isAdmin = true;
   }
 
+  // 兼容旧链接：/admin/logout 自动跳转到新退出入口
   if (url.pathname === "/admin/logout") {
+    return Response.redirect(new URL("/admin?action=logout", url).toString(), 302);
+  }
+
+  // 退出（方案 A：?action=logout）
+  if (url.searchParams.get("action") === "logout") {
     if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
     return new Response(null, {
       status: 302,
@@ -353,6 +358,7 @@ export async function onRequest(context) {
     });
   }
 
+  // 登录 POST
   if (request.method === "POST") {
     const form = await request.formData();
     const providedPwd = String(form.get("pwd") || "");
@@ -373,6 +379,7 @@ export async function onRequest(context) {
     });
   }
 
+  // 未登录
   if (!isAdmin) {
     const hasTried = url.searchParams.has("pwd");
     return new Response(loginPage(hasTried), {
@@ -381,6 +388,7 @@ export async function onRequest(context) {
     });
   }
 
+  /* ---------------- 已登录：读取数据 ---------------- */
   try {
     const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
 
@@ -427,22 +435,28 @@ export async function onRequest(context) {
 
     const resetInfo = getResetCountdown();
 
+    // 归一化：兼容旧数字格式、新 {c,cc}、新 {c,cf} 三种结构
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
-        if (typeof val === "number") return [ip, { c: val, cc: "XX" }];
-        return [ip, { c: Number(val?.c) || 0, cc: val?.cc || "XX" }];
+        if (typeof val === "number") return [ip, { c: val, cc: "XX", cf: null }];
+        const cc = val.cc || val.cf?.country || "XX";
+        return [ip, { c: Number(val.c) || 0, cc, cf: val.cf || null }];
       })
       .filter(([, v]) => Number.isFinite(v.c))
       .sort((a, b) => b[1].c - a[1].c);
 
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);
+      const cfJson = escapeHtml(JSON.stringify(v.cf || {}));
       return `<tr>
         <td>${i + 1}</td>
         <td>
-          <span class="ip-flag" title="${escapeHtml(v.cc)}">${flag}</span>
+          <span class="ip-flag">${flag}</span>
           <span class="ip-text">${escapeHtml(ipAddr)}</span>
-          <button class="ip-detail-btn" data-ip="${escapeHtml(ipAddr)}" title="查看详情">ℹ</button>
+          <button class="ip-detail-btn"
+                  data-ip="${escapeHtml(ipAddr)}"
+                  data-cf="${cfJson}"
+                  title="查看详情">ℹ</button>
         </td>
         <td>${escapeHtml(v.c)}</td>
       </tr>`;
@@ -453,7 +467,7 @@ export async function onRequest(context) {
       .join("");
 
     const warnHtml = apiError
-      ? `<div class="warn animate-in">ℹ Cloudflare 数据暂不可用，配额显示为 0</div>`
+      ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用，配额显示为 0</div>`
       : "";
 
     const updatedAt = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(11, 19);
@@ -552,7 +566,7 @@ export async function onRequest(context) {
     0%,100% { transform: translateY(0); box-shadow:0 6px 18px rgba(255,68,68,.35); }
     50% { transform: translateY(-2px); box-shadow:0 10px 24px rgba(255,68,68,.5); }
   }
-  .hero-sub { font-size:12px; color: var(--text-dim); margin-top:6px; letter-spacing:.3px; }
+  .hero-sub { font-size:12px; color: var(--text-dim); margin-top:6px; }
 
   .actions { display:flex; gap:10px; align-items:center; }
   .btn {
@@ -655,7 +669,6 @@ export async function onRequest(context) {
     display:flex; align-items:center; justify-content:center;
     font-size:12px; color:#fff; font-weight:600;
     text-shadow:0 1px 3px rgba(0,0,0,.8);
-    letter-spacing:.3px;
   }
 
   .split-card {
@@ -692,7 +705,6 @@ export async function onRequest(context) {
     font-size:13px; margin-bottom:28px;
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.34s;
-    transition: background .4s, border-color .4s, color .4s;
   }
   .reset-tip b { color: var(--tip-highlight); font-weight:700; }
   .reset-icon {
@@ -727,7 +739,7 @@ export async function onRequest(context) {
     font-weight:500; letter-spacing:.4px; text-transform:uppercase; font-size:11px;
   }
   tbody tr {
-    transition: background .2s, transform .2s;
+    transition: background .2s;
     border-bottom:1px solid var(--row-border);
   }
   tbody tr:last-child { border-bottom:none; }
@@ -771,11 +783,12 @@ export async function onRequest(context) {
   .footer-dot { opacity:.4; margin:0 2px; }
   .footer a {
     color: var(--text-dim); text-decoration:none; margin-left:16px;
-    transition: color .2s, transform .2s; display:inline-block;
+    transition: color .2s;
+    display:inline-block;
   }
-  .footer a:hover { color: var(--accent); transform: translateX(2px); }
+  .footer a:hover { color: var(--accent); }
 
-  /* ---------- IP 详情弹窗 ---------- */
+  /* IP 详情弹窗 */
   .ip-modal {
     position: fixed; inset: 0; z-index: 200;
     display: none; align-items: center; justify-content: center;
@@ -811,6 +824,11 @@ export async function onRequest(context) {
   }
   .ip-modal-close:hover { background: var(--btn-ghost-hover); transform: rotate(90deg); }
   .ip-map { height: 340px; background: var(--card-strong); }
+  .ip-map-empty {
+    display:flex; align-items:center; justify-content:center;
+    height: 340px; color: var(--text-dim); font-size:13px;
+    border-bottom: 1px solid var(--card-border);
+  }
   .ip-cards {
     display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
     padding: 18px 22px 24px;
@@ -864,7 +882,7 @@ export async function onRequest(context) {
       <div class="actions">
         <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
         <a href="/admin" class="btn btn-primary">↻ 刷新</a>
-        <a href="/admin/logout" class="btn btn-ghost">退出</a>
+        <a href="/admin?action=logout" class="btn btn-ghost">退出</a>
       </div>
     </div>
 
@@ -941,21 +959,20 @@ export async function onRequest(context) {
     <div class="footer-left">
       <span>访问统计后台</span>
       <span class="footer-dot">·</span>
-      <span>数据源：KV + Cloudflare Analytics</span>
+      <span>数据源：KV + request.cf</span>
     </div>
     <div class="footer-right">
       <a href="/admin">刷新</a>
-      <a href="/admin/logout">退出</a>
+      <a href="/admin?action=logout">退出</a>
     </div>
   </footer>
 
-  <!-- IP 详情弹窗 -->
   <div class="ip-modal" id="ipModal">
     <div class="ip-modal-backdrop" data-close></div>
     <div class="ip-modal-panel">
       <div class="ip-modal-head">
         <span class="ip-modal-title">🔍 IP 详细信息</span>
-        <span class="ip-modal-source" id="ipModalSource">数据来源：ipapi.is</span>
+        <span class="ip-modal-source">数据来源：request.cf</span>
         <button class="ip-modal-close" id="ipModalClose">✕</button>
       </div>
       <div id="ipModalBody">
@@ -1031,81 +1048,60 @@ export async function onRequest(context) {
       .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
       .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
+  function kvRow(k, v) { return '<span>' + esc(k) + '</span><span>' + v + '</span>'; }
 
-  function kvRow(k, v) {
-    return '<span>' + esc(k) + '</span><span>' + v + '</span>';
-  }
-
-  function badge(flag) {
-    if (flag === true)  return '<span class="ip-badge-ok">是</span>';
-    if (flag === false) return '<span class="ip-badge-no">否</span>';
-    return '—';
-  }
-
-  async function openIpDetail(ip) {
+  function openIpDetail(ip, cf) {
     ipModal.classList.add('show');
-    ipModalBody.innerHTML = '<div class="ip-loading">加载中…</div>';
 
-    try {
-      const res = await fetch('/admin/ipinfo?ip=' + encodeURIComponent(ip));
-      const d = await res.json();
+    const hasGeo = cf && cf.lat && cf.lon && Number(cf.lat) !== 0 && Number(cf.lon) !== 0;
 
-      if (!res.ok || d.error) {
-        ipModalBody.innerHTML = '<div class="ip-loading">获取失败：' + esc(d.error || res.status) + '</div>';
-        return;
+    const location = [
+      cf && cf.country ? '[' + cf.country + ']' : '',
+      (cf && cf.region) || '',
+      (cf && cf.city) || ''
+    ].filter(Boolean).join(' ');
+
+    const asnText = cf && cf.asn
+      ? ('AS' + cf.asn + ' ' + (cf.asOrg || '')).trim()
+      : '—';
+
+    const basic = [
+      kvRow('IP 地址', esc(ip)),
+      kvRow('国家 / 地区', esc(location || '未知')),
+      kvRow('时区', esc((cf && cf.timezone) || '—')),
+      kvRow('运营商 / ASN', esc(asnText)),
+      kvRow('边缘节点', esc((cf && cf.colo) || '—')),
+    ].join('');
+
+    const safety =
+      '<div style="grid-column:1 / -1; text-align:center; color:var(--text-dim); font-size:12px; padding:6px 0;">' +
+      'ℹ Cloudflare 网络元数据不含 VPN / Tor / 爬虫检测' +
+      '</div>';
+
+    const mapHtml = hasGeo
+      ? '<div id="ipMap" class="ip-map"></div>'
+      : '<div class="ip-map ip-map-empty">该 IP 无位置信息（Cloudflare 未提供经纬度）</div>';
+
+    ipModalBody.innerHTML =
+      mapHtml +
+      '<div class="ip-cards">' +
+        '<div class="ip-card"><h4>📍 基本信息</h4><div class="ip-kv">' + basic + '</div></div>' +
+        '<div class="ip-card"><h4>🛡 安全检测</h4><div class="ip-kv">' + safety + '</div></div>' +
+      '</div>';
+
+    if (hasGeo) {
+      const lat = Number(cf.lat), lng = Number(cf.lon);
+      if (!leafletMap) {
+        leafletMap = L.map('ipMap').setView([lat, lng], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(leafletMap);
+      } else {
+        leafletMap.setView([lat, lng], 4);
       }
-
-      const loc = d.location || {};
-      const asn = d.asn || {};
-      const comp = d.company || {};
-      const score = typeof comp.abuser_score === 'number'
-        ? (comp.abuser_score * 100).toFixed(2) + '% ' + (comp.abuser_score < 0.01 ? '纯净' : '可疑')
-        : '—';
-
-      const basic = [
-        kvRow('IP 地址', esc(d.ip || ip)),
-        kvRow('地理位置', esc([loc.country_code ? '[' + loc.country_code + ']' : '', loc.country || '', loc.city || ''].filter(Boolean).join(' '))),
-        kvRow('时区', esc(loc.timezone || '-')),
-        kvRow('运营商 / ASN', esc((asn.org || '-') + ' / ' + (asn.asn != null ? asn.asn : '-'))),
-        kvRow('网络类型', esc(asn.type || '-')),
-        kvRow('风控评级', esc(score)),
-      ].join('');
-
-      const safety = [
-        kvRow('数据中心', badge(d.is_datacenter)),
-        kvRow('代理服务器', badge(d.is_proxy)),
-        kvRow('VPN 连线', badge(d.is_vpn)),
-        kvRow('Tor 网络', badge(d.is_tor)),
-        kvRow('网络爬虫', badge(d.is_crawler)),
-        kvRow('移动网络', badge(d.is_mobile)),
-        kvRow('卫星网络', badge(d.is_satellite)),
-        kvRow('已知滥用', badge(d.is_abuser)),
-      ].join('');
-
-      ipModalBody.innerHTML =
-        '<div id="ipMap" class="ip-map"></div>' +
-        '<div class="ip-cards">' +
-          '<div class="ip-card"><h4>📍 基本信息</h4><div class="ip-kv">' + basic + '</div></div>' +
-          '<div class="ip-card"><h4>🛡 安全检测</h4><div class="ip-kv">' + safety + '</div></div>' +
-        '</div>';
-
-      // 渲染地图
-      const lat = Number(loc.latitude), lng = Number(loc.longitude);
-      if (isFinite(lat) && isFinite(lng) && lat !== 0 && lng !== 0) {
-        if (!leafletMap) {
-          leafletMap = L.map('ipMap').setView([lat, lng], 6);
-          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-          }).addTo(leafletMap);
-        } else {
-          leafletMap.setView([lat, lng], 6);
-        }
-        if (leafletMarker) leafletMap.removeLayer(leafletMarker);
-        leafletMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(ip).openPopup();
-        setTimeout(() => leafletMap.invalidateSize(), 100);
-      }
-    } catch (e) {
-      ipModalBody.innerHTML = '<div class="ip-loading">网络错误</div>';
+      if (leafletMarker) leafletMap.removeLayer(leafletMarker);
+      leafletMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(esc(ip)).openPopup();
+      setTimeout(() => leafletMap.invalidateSize(), 100);
     }
   }
 
@@ -1116,7 +1112,12 @@ export async function onRequest(context) {
 
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('.ip-detail-btn');
-    if (btn) { openIpDetail(btn.dataset.ip); return; }
+    if (btn) {
+      let cf = {};
+      try { cf = JSON.parse(btn.dataset.cf || '{}'); } catch {}
+      openIpDetail(btn.dataset.ip, cf);
+      return;
+    }
     if (e.target.id === 'ipModalClose' || e.target.hasAttribute('data-close')) {
       closeIpModal();
     }
