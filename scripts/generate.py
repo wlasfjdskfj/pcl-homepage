@@ -2,12 +2,13 @@
 """
 PCL 主页生成脚本
 由 GitHub Actions 每 12 小时定时运行，生成带动态数据的 Custom.xaml。
-日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP 均由 Cloudflare Functions 动态替换。
+日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP、访问统计 均由 Cloudflare Functions 动态替换。
 玩家 ID 由 PCL 的 {user} 替换标记自动填充。
 版本封面图优先从 Minecraft Wiki 抓取，失败时回退官方启动器新闻图。
 日期卡片背景使用必应每日壁纸。
 服务器状态从 api.mcsrvstat.us 查询。
 更新内容从 Minecraft Wiki 抓取，抓不到时显示 PCL 原生加载动画。
+访问统计仅管理员可见，由中间件动态生成整块 XAML。
 """
 
 import time
@@ -616,6 +617,9 @@ def build_xaml():
     quiz_q = "__QUIZ_Q__"
     quiz_a = "__QUIZ_A__"
 
+    # 访问统计整块 XAML，由中间件按管理员身份动态生成
+    visit_block = "__VISIT_BLOCK__"
+
     server_address = SERVER_ADDRESS
 
     clean_old_images()
@@ -883,6 +887,9 @@ def build_xaml():
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
 
+    # ========== 访问统计（仅管理员，整块由中间件生成）==========
+    lines.append('            ' + visit_block)
+
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
@@ -1026,6 +1033,7 @@ def build_xaml():
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/GoldBlock.png" Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器" EventType="打开网页" EventData="https://hypixel.net/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
