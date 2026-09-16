@@ -1,5 +1,5 @@
 /**
- * 访问统计管理页面（request.cf 版）
+ * 访问统计管理页面（request.cf 版 · 无 IP 详情 · Hero 排版优化）
  * 访问：https://www.mkejga.de5.net/admin
  *
  * 环境变量：
@@ -126,8 +126,6 @@ const THEME_CSS = `
   --color-pages: #3b82f6;
   --color-quota: #FFB020;
   --tip-highlight: #d97706;
-  --modal-bg: #1e1e20;
-  --modal-card: rgba(255,255,255,.03);
 }
 html[data-theme="light"] {
   --bg: #f4f5f7;
@@ -155,8 +153,6 @@ html[data-theme="light"] {
   --color-pages: #2563eb;
   --color-quota: #d97706;
   --tip-highlight: #b45309;
-  --modal-bg: #ffffff;
-  --modal-card: #fafafa;
 }
 `;
 
@@ -341,12 +337,12 @@ export async function onRequest(context) {
     if (session === "1") isAdmin = true;
   }
 
-  // 兼容旧链接：/admin/logout 自动跳转到新退出入口
+  // 兼容旧链接
   if (url.pathname === "/admin/logout") {
     return Response.redirect(new URL("/admin?action=logout", url).toString(), 302);
   }
 
-  // 退出（方案 A：?action=logout）
+  // 退出
   if (url.searchParams.get("action") === "logout") {
     if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
     return new Response(null, {
@@ -435,29 +431,20 @@ export async function onRequest(context) {
 
     const resetInfo = getResetCountdown();
 
-    // 归一化：兼容旧数字格式、新 {c,cc}、新 {c,cf} 三种结构
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
-        if (typeof val === "number") return [ip, { c: val, cc: "XX", cf: null }];
+        if (typeof val === "number") return [ip, { c: val, cc: "XX" }];
         const cc = val.cc || val.cf?.country || "XX";
-        return [ip, { c: Number(val.c) || 0, cc, cf: val.cf || null }];
+        return [ip, { c: Number(val.c) || 0, cc }];
       })
       .filter(([, v]) => Number.isFinite(v.c))
       .sort((a, b) => b[1].c - a[1].c);
 
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);
-      const cfJson = escapeHtml(JSON.stringify(v.cf || {}));
       return `<tr>
         <td>${i + 1}</td>
-        <td>
-          <span class="ip-flag">${flag}</span>
-          <span class="ip-text">${escapeHtml(ipAddr)}</span>
-          <button class="ip-detail-btn"
-                  data-ip="${escapeHtml(ipAddr)}"
-                  data-cf="${cfJson}"
-                  title="查看详情">ℹ</button>
-        </td>
+        <td><span class="ip-flag">${flag}</span><span class="ip-text">${escapeHtml(ipAddr)}</span></td>
         <td>${escapeHtml(v.c)}</td>
       </tr>`;
     }).join("");
@@ -470,7 +457,7 @@ export async function onRequest(context) {
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用，配额显示为 0</div>`
       : "";
 
-    const updatedAt = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(11, 19);
+    const initialTime = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(11, 19);
 
     const html = `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -479,7 +466,6 @@ export async function onRequest(context) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>访问统计</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   ${THEME_CSS}
   * { box-sizing: border-box; }
@@ -526,6 +512,7 @@ export async function onRequest(context) {
   }
   .container { max-width:960px; margin:0 auto; position:relative; z-index:1; }
 
+  /* ---------- Hero ---------- */
   .hero {
     position:relative;
     display:flex; align-items:center; justify-content:space-between;
@@ -549,6 +536,7 @@ export async function onRequest(context) {
     0% { background-position: 0% 0; }
     100% { background-position: 200% 0; }
   }
+  .hero-left { display:flex; flex-direction:column; gap:6px; }
   .hero-title {
     display:flex; align-items:center; gap:12px;
     font-size:22px; font-weight:700; color: var(--text-strong);
@@ -566,7 +554,32 @@ export async function onRequest(context) {
     0%,100% { transform: translateY(0); box-shadow:0 6px 18px rgba(255,68,68,.35); }
     50% { transform: translateY(-2px); box-shadow:0 10px 24px rgba(255,68,68,.5); }
   }
-  .hero-sub { font-size:12px; color: var(--text-dim); margin-top:6px; }
+  .hero-sub {
+    display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+    font-size:12.5px; color: var(--text-dim); letter-spacing:.2px;
+  }
+  .hero-date, .hero-time {
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .hero-date-icon, .hero-time-icon { font-size:12px; opacity:.9; }
+  .hero-date { color: var(--text); font-weight:500; }
+  .hero-time b {
+    color: var(--text-strong);
+    font-variant-numeric: tabular-nums;
+    font-weight:600;
+  }
+  .hero-tz {
+    font-size:11px;
+    padding:1px 6px;
+    border-radius:6px;
+    background: var(--btn-ghost-bg);
+    color: var(--text-dim);
+    border:1px solid var(--card-border);
+    margin-left:2px;
+  }
+  .hero-divider {
+    width:1px; height:12px; background: var(--card-border);
+  }
 
   .actions { display:flex; gap:10px; align-items:center; }
   .btn {
@@ -749,17 +762,6 @@ export async function onRequest(context) {
 
   .ip-flag { display:inline-block; margin-right:8px; font-size:15px; vertical-align:-1px; }
   .ip-text { font-variant-numeric: tabular-nums; }
-  .ip-detail-btn {
-    margin-left:8px; padding:2px 8px; border-radius:6px; cursor:pointer;
-    border:1px solid var(--card-border); background: var(--btn-ghost-bg);
-    color: var(--text-dim); font-size:12px;
-    transition: background .2s, color .2s, border-color .2s, transform .15s;
-  }
-  .ip-detail-btn:hover {
-    background: var(--btn-ghost-hover); color: var(--accent);
-    border-color: rgba(255,68,68,.35);
-  }
-  .ip-detail-btn:active { transform: scale(.94); }
 
   .warn {
     background: var(--warn-bg);
@@ -788,81 +790,11 @@ export async function onRequest(context) {
   }
   .footer a:hover { color: var(--accent); }
 
-  /* IP 详情弹窗 */
-  .ip-modal {
-    position: fixed; inset: 0; z-index: 200;
-    display: none; align-items: center; justify-content: center;
-  }
-  .ip-modal.show { display: flex; }
-  .ip-modal-backdrop {
-    position: absolute; inset: 0;
-    background: rgba(0,0,0,.5);
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-    animation: fadeIn .3s ease both;
-  }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  .ip-modal-panel {
-    position: relative; width: min(920px, 92vw); max-height: 90vh;
-    overflow: auto; border-radius: 16px;
-    background: var(--modal-bg); color: var(--text);
-    box-shadow: 0 30px 80px rgba(0,0,0,.45);
-    border: 1px solid var(--card-border);
-    animation: popIn .3s cubic-bezier(.2,.8,.2,1) both;
-  }
-  .ip-modal-head {
-    display:flex; align-items:center; gap:10px;
-    padding: 16px 22px; border-bottom: 1px solid var(--card-border);
-    position: sticky; top: 0; background: var(--modal-bg); z-index: 2;
-  }
-  .ip-modal-title { font-weight: 700; color: var(--accent); font-size: 15px; }
-  .ip-modal-source { font-size: 12px; color: var(--text-dim); }
-  .ip-modal-close {
-    margin-left: auto; border: none;
-    background: var(--btn-ghost-bg); color: var(--text);
-    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
-    transition: background .2s, transform .2s;
-  }
-  .ip-modal-close:hover { background: var(--btn-ghost-hover); transform: rotate(90deg); }
-  .ip-map { height: 340px; background: var(--card-strong); }
-  .ip-map-empty {
-    display:flex; align-items:center; justify-content:center;
-    height: 340px; color: var(--text-dim); font-size:13px;
-    border-bottom: 1px solid var(--card-border);
-  }
-  .ip-cards {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
-    padding: 18px 22px 24px;
-  }
   @media (max-width: 640px) {
-    .ip-cards { grid-template-columns: 1fr; }
     .split-card { grid-template-columns:1fr; }
     .split-item { border-right:none; border-bottom:1px solid var(--card-border); }
     .split-item:last-child { border-bottom:none; }
     .hero { flex-direction: column; align-items: flex-start; }
-  }
-  .ip-card {
-    background: var(--modal-card); border-radius: 12px;
-    padding: 16px 18px; border: 1px solid var(--card-border);
-  }
-  .ip-card h4 { margin: 0 0 12px; font-size: 13px; color: var(--accent); }
-  .ip-kv {
-    display: grid; grid-template-columns: 1fr auto; gap: 8px 12px;
-    font-size: 13px;
-  }
-  .ip-kv span:nth-child(odd) { color: var(--text-dim); }
-  .ip-kv span:nth-child(even) { color: var(--text); font-weight: 600; text-align: right; }
-  .ip-loading { text-align: center; padding: 40px; color: var(--text-dim); font-size: 13px; }
-  .ip-badge-ok {
-    display:inline-block; padding:1px 8px; border-radius: 999px;
-    font-size: 11px; font-weight:700;
-    background: rgba(23,221,98,.12); color:#17DD62;
-    border: 1px solid rgba(23,221,98,.35);
-  }
-  .ip-badge-no {
-    display:inline-block; padding:1px 8px; border-radius: 999px;
-    font-size: 11px; font-weight:700;
-    background: rgba(255,68,68,.12); color:#FF4444;
-    border: 1px solid rgba(255,68,68,.35);
   }
 </style>
 </head>
@@ -872,12 +804,23 @@ export async function onRequest(context) {
 
   <div class="container">
     <div class="hero">
-      <div>
+      <div class="hero-left">
         <div class="hero-title">
           <span class="hero-icon">📊</span>
           <span>访问统计</span>
         </div>
-        <div class="hero-sub">更新于 ${updatedAt} (UTC+8)</div>
+        <div class="hero-sub">
+          <span class="hero-date">
+            <span class="hero-date-icon">📅</span>
+            <span id="bjDate">--</span>
+          </span>
+          <span class="hero-divider"></span>
+          <span class="hero-time">
+            <span class="hero-time-icon">🕒</span>
+            更新于 <b id="bjTime">${initialTime}</b>
+            <span class="hero-tz">UTC+8</span>
+          </span>
+        </div>
       </div>
       <div class="actions">
         <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
@@ -967,21 +910,6 @@ export async function onRequest(context) {
     </div>
   </footer>
 
-  <div class="ip-modal" id="ipModal">
-    <div class="ip-modal-backdrop" data-close></div>
-    <div class="ip-modal-panel">
-      <div class="ip-modal-head">
-        <span class="ip-modal-title">🔍 IP 详细信息</span>
-        <span class="ip-modal-source">数据来源：request.cf</span>
-        <button class="ip-modal-close" id="ipModalClose">✕</button>
-      </div>
-      <div id="ipModalBody">
-        <div class="ip-loading">加载中…</div>
-      </div>
-    </div>
-  </div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   // 数字滚动
   document.querySelectorAll('[data-count]').forEach((el) => {
@@ -1004,7 +932,7 @@ export async function onRequest(context) {
     if (fill) fill.style.width = fill.dataset.width;
   });
 
-  // 倒计时
+  // 重置倒计时
   (function(){
     const tip = document.querySelector('.reset-tip');
     const el = document.getElementById('countdown');
@@ -1038,93 +966,35 @@ export async function onRequest(context) {
     })();
   })();
 
-  // ---------------- IP 详情弹窗 ----------------
-  const ipModal = document.getElementById('ipModal');
-  const ipModalBody = document.getElementById('ipModalBody');
-  let leafletMap = null, leafletMarker = null;
+  // 北京时间：年月日 + 星期 + 时:分:秒（每秒刷新）
+  (function(){
+    const dateEl = document.getElementById('bjDate');
+    const timeEl = document.getElementById('bjTime');
+    if (!dateEl && !timeEl) return;
 
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-  function kvRow(k, v) { return '<span>' + esc(k) + '</span><span>' + v + '</span>'; }
+    const 周 = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+    const pad = (n) => String(n).padStart(2, '0');
 
-  function openIpDetail(ip, cf) {
-    ipModal.classList.add('show');
-
-    const hasGeo = cf && cf.lat && cf.lon && Number(cf.lat) !== 0 && Number(cf.lon) !== 0;
-
-    const location = [
-      cf && cf.country ? '[' + cf.country + ']' : '',
-      (cf && cf.region) || '',
-      (cf && cf.city) || ''
-    ].filter(Boolean).join(' ');
-
-    const asnText = cf && cf.asn
-      ? ('AS' + cf.asn + ' ' + (cf.asOrg || '')).trim()
-      : '—';
-
-    const basic = [
-      kvRow('IP 地址', esc(ip)),
-      kvRow('国家 / 地区', esc(location || '未知')),
-      kvRow('时区', esc((cf && cf.timezone) || '—')),
-      kvRow('运营商 / ASN', esc(asnText)),
-      kvRow('边缘节点', esc((cf && cf.colo) || '—')),
-    ].join('');
-
-    const safety =
-      '<div style="grid-column:1 / -1; text-align:center; color:var(--text-dim); font-size:12px; padding:6px 0;">' +
-      'ℹ Cloudflare 网络元数据不含 VPN / Tor / 爬虫检测' +
-      '</div>';
-
-    const mapHtml = hasGeo
-      ? '<div id="ipMap" class="ip-map"></div>'
-      : '<div class="ip-map ip-map-empty">该 IP 无位置信息（Cloudflare 未提供经纬度）</div>';
-
-    ipModalBody.innerHTML =
-      mapHtml +
-      '<div class="ip-cards">' +
-        '<div class="ip-card"><h4>📍 基本信息</h4><div class="ip-kv">' + basic + '</div></div>' +
-        '<div class="ip-card"><h4>🛡 安全检测</h4><div class="ip-kv">' + safety + '</div></div>' +
-      '</div>';
-
-    if (hasGeo) {
-      const lat = Number(cf.lat), lng = Number(cf.lon);
-      if (!leafletMap) {
-        leafletMap = L.map('ipMap').setView([lat, lng], 4);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap'
-        }).addTo(leafletMap);
-      } else {
-        leafletMap.setView([lat, lng], 4);
+    function tick(){
+      const now = new Date(Date.now() + 8 * 3600 * 1000); // 转北京时间
+      if (dateEl) {
+        const y = now.getUTCFullYear();
+        const m = now.getUTCMonth() + 1;
+        const d = now.getUTCDate();
+        const w = 周[now.getUTCDay()];
+        dateEl.textContent = `${y}年${m}月${d}日 ${w}`;
       }
-      if (leafletMarker) leafletMap.removeLayer(leafletMarker);
-      leafletMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(esc(ip)).openPopup();
-      setTimeout(() => leafletMap.invalidateSize(), 100);
+      if (timeEl) {
+        const hh = pad(now.getUTCHours());
+        const mm = pad(now.getUTCMinutes());
+        const ss = pad(now.getUTCSeconds());
+        timeEl.textContent = `${hh}:${mm}:${ss}`;
+      }
     }
-  }
 
-  function closeIpModal() {
-    ipModal.classList.remove('show');
-    if (leafletMap) { leafletMap.remove(); leafletMap = null; leafletMarker = null; }
-  }
-
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('.ip-detail-btn');
-    if (btn) {
-      let cf = {};
-      try { cf = JSON.parse(btn.dataset.cf || '{}'); } catch {}
-      openIpDetail(btn.dataset.ip, cf);
-      return;
-    }
-    if (e.target.id === 'ipModalClose' || e.target.hasAttribute('data-close')) {
-      closeIpModal();
-    }
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && ipModal.classList.contains('show')) closeIpModal();
-  });
+    tick();
+    setInterval(tick, 1000);
+  })();
 </script>
 </body>
 </html>`;
