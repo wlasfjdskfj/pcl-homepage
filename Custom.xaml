@@ -46,7 +46,7 @@
                         <TextBlock Text="2B2T" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="1112 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="1194 / 1" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.7.2-26.2" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
@@ -63,7 +63,7 @@
                         <TextBlock Text="Mineplex" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                         <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,6,0" />
-                            <TextBlock Text="44 / 45" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="182 / 183" FontSize="10" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" Margin="0,0,8,0" />
                             <TextBlock Text="1.8.9 / 1.21.11 / 26" FontSize="9" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                     </StackPanel>
@@ -85,7 +85,7 @@
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#FF4444" BorderThickness="6">
                 <Grid>
-                    <local:MyImage Source="https://www.bing.com/th?id=OHR.IcyCubs_ZH-CN5287408951_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <local:MyImage Source="https://www.bing.com/th?id=OHR.Santenay_ZH-CN5676942384_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -292,7 +292,7 @@
                     <TextBlock Text="· 具有一定的弹性，类似于床。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <TextBlock Text="· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                     <TextBlock Text="· 只能使用一次，使用后会被摧毁。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉会被摧毁，不会爆炸。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉，则麦秆床会被破坏而不掉落自身，不会爆炸或生成火。" FontSize="12" LineHeight="20" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
                 </StackPanel>
             </Border>
             <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
