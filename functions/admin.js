@@ -1,5 +1,5 @@
 /**
- * 访问统计管理页面（方案 B + 深浅主题 + 动画）
+ * 访问统计管理页面（方案 B + Workers/Pages 拆分 + 深浅主题 + 动画 + KV 读取压缩）
  * 访问：https://www.mkejga.de5.net/admin
  *
  * 环境变量：
@@ -109,6 +109,11 @@ const THEME_CSS = `
   --btn-ghost-bg: rgba(255,255,255,.05);
   --btn-ghost-hover: rgba(255,68,68,.12);
   --shadow-card: 0 12px 32px rgba(0,0,0,.4);
+  --split-border: #3b82f6;
+  --color-workers: #17DD62;
+  --color-pages: #3b82f6;
+  --color-quota: #FFB020;
+  --tip-highlight: #d97706;
 }
 html[data-theme="light"] {
   --bg: #f4f5f7;
@@ -131,6 +136,11 @@ html[data-theme="light"] {
   --btn-ghost-bg: rgba(0,0,0,.04);
   --btn-ghost-hover: rgba(255,68,68,.1);
   --shadow-card: 0 12px 32px rgba(0,0,0,.08);
+  --split-border: #2563eb;
+  --color-workers: #16a34a;
+  --color-pages: #2563eb;
+  --color-quota: #d97706;
+  --tip-highlight: #b45309;
 }
 `;
 
@@ -235,23 +245,25 @@ function loginPage(hasTried) {
 </html>`;
 }
 
-/* ---------------- Cloudflare GraphQL API ---------------- */
+/* ---------------- Cloudflare GraphQL API（Workers + Pages 拆分） ---------------- */
 
-async function fetchWorkersRequests(env, dateStr) {
+async function fetchUsageSplit(env, dateStr) {
   if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID) {
-    return { requests: 0, error: "missing_config" };
+    return { workers: 0, pages: 0, error: "missing_config" };
   }
 
   const query = `
     query {
       viewer {
         accounts(filter: {accountTag: "${env.CF_ACCOUNT_ID}"}) {
-          workersInvocationsAdaptive(
+          workers: workersInvocationsAdaptive(
             limit: 1,
             filter: { date_geq: "${dateStr}", date_leq: "${dateStr}" }
-          ) {
-            sum { requests }
-          }
+          ) { sum { requests } }
+          pages: pagesFunctionsInvocationsAdaptiveGroups(
+            limit: 1,
+            filter: { date_geq: "${dateStr}", date_leq: "${dateStr}" }
+          ) { sum { requests } }
         }
       }
     }
@@ -267,17 +279,34 @@ async function fetchWorkersRequests(env, dateStr) {
       body: JSON.stringify({ query }),
     });
 
-    if (!res.ok) return { requests: 0, error: "api_" + res.status };
+    if (!res.ok) return { workers: 0, pages: 0, error: "api_" + res.status };
 
     const json = await res.json();
-    if (json.errors) return { requests: 0, error: "api_error" };
+    if (json.errors) return { workers: 0, pages: 0, error: "api_error" };
 
-    const nodes =
-      json.data?.viewer?.accounts?.[0]?.workersInvocationsAdaptive || [];
-    return { requests: nodes[0]?.sum?.requests || 0, error: null };
+    const acc = json.data?.viewer?.accounts?.[0] || {};
+    const workers = acc.workers?.[0]?.sum?.requests || 0;
+    const pages = acc.pages?.[0]?.sum?.requests || 0;
+    return { workers, pages, error: null };
   } catch (e) {
-    return { requests: 0, error: "network" };
+    return { workers: 0, pages: 0, error: "network" };
   }
+}
+
+/* ---------------- 重置倒计时 ---------------- */
+
+function getResetCountdown() {
+  const now = Date.now();
+  // 转北京时间
+  const bj = new Date(now + 8 * 3600 * 1000);
+  const y = bj.getUTCFullYear();
+  const m = bj.getUTCMonth();
+  const d = bj.getUTCDate();
+  // 北京时间今天 08:00 对应的 UTC 时间戳
+  const today8 = Date.UTC(y, m, d, 8, 0, 0) - 8 * 3600 * 1000;
+  let target = today8;
+  if (now >= today8) target = today8 + 24 * 3600 * 1000;
+  return { resetAt: target, diffMs: target - now };
 }
 
 /* ---------------- 主入口 ---------------- */
@@ -352,7 +381,7 @@ export async function onRequest(context) {
       ipMap = {};
     }
 
-    // 最近 7 天（并行）
+    // 最近 7 天日期
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -360,32 +389,51 @@ export async function onRequest(context) {
       dates.push(d.toISOString().slice(0, 10));
     }
 
-    const days = await Promise.all(
-      dates.map(async (date) => {
-        let set = [];
-        try {
-          set = JSON.parse(
-            (await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]"
-          );
-        } catch {
-          set = [];
-        }
-        return { date, count: Array.isArray(set) ? set.length : 0 };
-      })
-    );
+    // 优先读 7 天汇总 key，缺失则降级为逐天读
+    let days7Map = null;
+    try {
+      const raw = await env.HOMEPAGE_KV.get("visit:days:7");
+      if (raw) days7Map = JSON.parse(raw);
+    } catch {
+      days7Map = null;
+    }
 
-    // 真实请求量
+    let days;
+    if (days7Map && typeof days7Map === "object" && !Array.isArray(days7Map)) {
+      days = dates.map((date) => ({
+        date,
+        count: Number(days7Map[date]) || 0,
+      }));
+    } else {
+      days = await Promise.all(
+        dates.map(async (date) => {
+          let set = [];
+          try {
+            set = JSON.parse(
+              (await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]"
+            );
+          } catch {
+            set = [];
+          }
+          return { date, count: Array.isArray(set) ? set.length : 0 };
+        })
+      );
+    }
+
+    // Cloudflare 真实请求量（Workers + Pages 拆分）
     const todayStr = dates[0];
-    const { requests: apiRequests, error: apiError } = await fetchWorkersRequests(
+    const { workers, pages, error: apiError } = await fetchUsageSplit(
       env,
       todayStr
     );
 
     const quotaLimit = QUOTA_LIMIT;
-    const quotaUsed = apiRequests;
+    const quotaUsed = workers + pages;
     const quotaPct = Math.min(100, (quotaUsed / quotaLimit) * 100);
     const quotaColor =
       quotaPct >= 80 ? "#FF4444" : quotaPct >= 60 ? "#FFB020" : "#17DD62";
+
+    const resetInfo = getResetCountdown();
 
     const entries = Object.entries(ipMap)
       .filter(([, cnt]) => Number.isFinite(Number(cnt)))
@@ -405,7 +453,6 @@ export async function onRequest(context) {
       .map((d) => `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`)
       .join("");
 
-    // API 异常时只显示中性提示
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 数据暂不可用，配额显示为 0</div>`
       : "";
@@ -534,7 +581,7 @@ export async function onRequest(context) {
   .quota {
     background: var(--card);
     backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    padding:22px; border-radius:14px; margin-bottom:28px;
+    padding:22px; border-radius:14px; margin-bottom:20px;
     border:1px solid var(--card-border);
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
     animation-delay:.26s;
@@ -576,6 +623,56 @@ export async function onRequest(context) {
     letter-spacing:.3px;
   }
 
+  /* 拆分卡片 */
+  .split-card {
+    display:grid; grid-template-columns:1fr 1fr 1fr;
+    gap:0; margin-bottom:16px;
+    background: var(--card);
+    border:1px solid var(--card-border);
+    border-left:4px solid var(--split-border);
+    border-radius:12px;
+    overflow:hidden;
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:.3s;
+    transition: background .4s, border-color .4s;
+  }
+  .split-item {
+    padding:18px 22px;
+    border-right:1px solid var(--card-border);
+  }
+  .split-item:last-child { border-right:none; }
+  .split-label {
+    font-size:11px; color: var(--text-dim);
+    letter-spacing:.6px; text-transform:uppercase; margin-bottom:8px;
+  }
+  .split-value {
+    font-size:26px; font-weight:700; font-variant-numeric: tabular-nums;
+    line-height:1.1;
+  }
+  .split-value.workers { color: var(--color-workers); }
+  .split-value.pages   { color: var(--color-pages); }
+  .split-value.quota   { color: var(--color-quota); }
+
+  /* 重置提示条 */
+  .reset-tip {
+    display:flex; align-items:center; gap:8px;
+    background: var(--warn-bg);
+    border:1px solid var(--warn-border);
+    color: var(--warn-text);
+    padding:12px 16px; border-radius:10px;
+    font-size:13px; margin-bottom:28px;
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:.34s;
+    transition: background .4s, border-color .4s, color .4s;
+    flex-wrap: wrap;
+  }
+  .reset-tip b { color: var(--tip-highlight); font-weight:700; }
+  .reset-icon {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:5px;
+    background: var(--split-border); color:#fff; font-size:12px; flex-shrink:0;
+  }
+
   h2 {
     font-size:15px; margin:36px 0 14px; color: var(--text); font-weight:600;
     letter-spacing:.4px; display:flex; align-items:center; gap:8px;
@@ -593,7 +690,7 @@ export async function onRequest(context) {
     border-radius:14px; overflow:hidden;
     border:1px solid var(--card-border);
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
-    animation-delay:.32s;
+    animation-delay:.38s;
     transition: background .4s, border-color .4s;
   }
   table { width:100%; border-collapse:collapse; }
@@ -621,6 +718,13 @@ export async function onRequest(context) {
     padding:10px 16px; border-radius:10px;
     font-size:12px; margin-bottom:20px;
     transition: background .4s, border-color .4s, color .4s;
+  }
+
+  @media (max-width: 640px) {
+    .split-card { grid-template-columns:1fr; }
+    .split-item { border-right:none; border-bottom:1px solid var(--card-border); }
+    .split-item:last-child { border-bottom:none; }
+    h1 { flex-direction: column; align-items: flex-start; gap:12px; }
   }
 </style>
 </head>
@@ -665,6 +769,29 @@ export async function onRequest(context) {
       </div>
     </div>
 
+    <div class="split-card">
+      <div class="split-item">
+        <div class="split-label">Workers 请求</div>
+        <div class="split-value workers">${workers.toLocaleString()}</div>
+      </div>
+      <div class="split-item">
+        <div class="split-label">Pages 请求</div>
+        <div class="split-value pages">${pages.toLocaleString()}</div>
+      </div>
+      <div class="split-item">
+        <div class="split-label">日配额</div>
+        <div class="split-value quota">${quotaLimit.toLocaleString()}</div>
+      </div>
+    </div>
+
+    <div class="reset-tip" data-reset-at="${resetInfo.resetAt}">
+      <span class="reset-icon">⏱</span>
+      每日请求数重置清零：距离重置还有
+      <b id="countdown">--</b>，
+      北京时间（UTC+8）<b>8:00</b> 重置，
+      今日使用情况总计：<b>${quotaUsed.toLocaleString()}</b>。
+    </div>
+
     <h2>最近 7 天</h2>
     <div class="table-wrap">
       <table>
@@ -674,7 +801,7 @@ export async function onRequest(context) {
     </div>
 
     <h2>IP 访问排行（前 100）</h2>
-    <div class="table-wrap" style="animation-delay:.4s;">
+    <div class="table-wrap" style="animation-delay:.44s;">
       <table>
         <thead><tr><th>#</th><th>IP</th><th>次数</th></tr></thead>
         <tbody>${ipRows || '<tr><td colspan="3" class="empty">暂无记录</td></tr>'}</tbody>
@@ -703,6 +830,24 @@ export async function onRequest(context) {
     const fill = document.querySelector('.quota-fill');
     if (fill) fill.style.width = fill.dataset.width;
   });
+
+  // 重置倒计时
+  (function(){
+    const tip = document.querySelector('.reset-tip');
+    const el = document.getElementById('countdown');
+    if (!tip || !el) return;
+    const resetAt = Number(tip.dataset.resetAt) || Date.now();
+    function tick() {
+      const diff = Math.max(0, resetAt - Date.now());
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      el.textContent = h + "小时" + String(m).padStart(2,'0') + "分" + String(s).padStart(2,'0') + "秒";
+      if (diff > 0) setTimeout(tick, 1000);
+      else el.textContent = "即将重置";
+    }
+    tick();
+  })();
 </script>
 </body>
 </html>`;
