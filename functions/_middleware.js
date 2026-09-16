@@ -1,15 +1,13 @@
 /**
  * Cloudflare Pages Functions 中间件
- * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP、访问统计
+ * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP
  * - /Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
- *
- * 访问统计：仅当 URL 带 ?admin=密码 时才显示，且只在管理员访问时计数
+ * - 访问统计：每次访问都 +1，写入 KV，数据在 /admin 页面查看
  */
 
 // ============ 每日一言（80 条） ============
 
 const QUOTES = [
-  // ===== 生存技巧 =====
   "钻石在 Y=-59，别挖太深。",
   "下界合金比钻石更耐用，但更难找。",
   "床在下界会爆炸，别试。",
@@ -35,8 +33,6 @@ const QUOTES = [
   "末影箱里放东西，全世界都能取。",
   "牛奶可以解除所有负面效果。",
   "红石火把可以做成反相器。",
-
-  // ===== 冷知识 =====
   "村民交易可以打折，只要你治好了僵尸村民。",
   "末影人不会主动攻击你，除非你盯着它看。",
   "睡觉可以跳过夜晚，但会让你失去刷怪的机会。",
@@ -62,8 +58,6 @@ const QUOTES = [
   "望远镜可以放大远处视野。",
   "发光鱿鱼会在黑暗中发光。",
   "深板岩比普通石头更硬，需要更久挖。",
-
-  // ===== 幽默吐槽 =====
   "今天也要好好挖矿。",
   "苦力怕从不敲门，但会给你惊喜。",
   "别在岩浆边挖矿，除非你想重生。",
@@ -95,7 +89,6 @@ const QUOTES = [
 // ============ 彩蛋（50 个） ============
 
 const EGGS = [
-  // ===== 经典彩蛋 =====
   { title: "神秘代码",         content: "检测到一段古老的代码……&#xA;&#xA;恭喜你获得成就：手贱达人！" },
   { title: "开发者留言",       content: "PCL 的作者说过：&#xA;「如果你倒腾这个文件把 PCL 玩炸了，把这个文件直接删除就行了。」" },
   { title: "钻石雨",           content: "天空下起了钻石雨！&#xA;&#xA;你捡到了：&#xA;钻石 × 64&#xA;绿宝石 × 64&#xA;&#xA;醒来后发现是做梦。" },
@@ -106,8 +99,6 @@ const EGGS = [
   { title: "末地传送门",       content: "你找到了一座末地传送门……&#xA;&#xA;但里面没有末影之眼。&#xA;你白高兴了一场。" },
   { title: "村民的祝福",       content: "一个村民朝你走了过来……&#xA;&#xA;「哼——」&#xA;&#xA;然后他要了你 3 个绿宝石。" },
   { title: "Herobrine 的注视", content: "你突然感觉有人在看着你……&#xA;&#xA;回头一看，什么也没有。&#xA;&#xA;但他一直都在。" },
-
-  // ===== 生物梗 =====
   { title: "凋灵的低语",       content: "你听到了一阵低沉的嗡鸣……&#xA;&#xA;抬头一看，天上什么都没有。&#xA;&#xA;但地面在震动。" },
   { title: "末影箱的秘密",     content: "你打开了一个末影箱……&#xA;&#xA;里面有你上次丢掉的钻石剑。&#xA;它一直都在这里。" },
   { title: "流浪商人的邀请",   content: "一个流浪商人向你走来……&#xA;&#xA;「要看看我的货吗？」&#xA;&#xA;你点开了交易界面，只有 1 个绿宝石和 2 个羊驼。" },
@@ -123,8 +114,6 @@ const EGGS = [
   { title: "下界要塞之旅",     content: "你进入了下界要塞……&#xA;&#xA;你看到了凋灵骷髅……&#xA;&#xA;你决定回家。" },
   { title: "牧场的烦恼",       content: "你养了 100 只鸡……&#xA;&#xA;现在你的电脑在哭泣。" },
   { title: "终极装备",         content: "你终于集齐了全套下界合金装备……&#xA;&#xA;然后掉进了虚空。" },
-
-  // ===== 新增彩蛋 =====
   { title: "美西螈的心事",     content: "一只美西螈在水里游来游去……&#xA;&#xA;「为什么他们只叫我粉红小可爱？」&#xA;&#xA;它叹了口气，装死。" },
   { title: "熊猫的烦恼",       content: "你遇到了一只熊猫……&#xA;&#xA;它正在吃竹子。&#xA;&#xA;你看了它一分钟。&#xA;&#xA;它还在吃。" },
   { title: "羊驼的鄙视",       content: "一只羊驼走到你面前……&#xA;&#xA;它吐了你一脸口水。&#xA;&#xA;这就是它对你时尚品味的评价。" },
@@ -857,7 +846,6 @@ export async function onRequest(context) {
     const colorIdx = deterministicIndex(ip, today, "color", COLORS.length);
     const color = COLORS[colorIdx];
 
-    // 今日运势（按 IP + 日期固定）
     const fortuneGoodIdx = deterministicIndex(ip, today, "fortune_good", FORTUNE_GOOD.length);
     const fortuneBadIdx = deterministicIndex(ip, today, "fortune_bad", FORTUNE_BAD.length);
     const fortuneTipIdx = deterministicIndex(ip, today, "fortune_tip", FORTUNE_TIPS.length);
@@ -865,97 +853,46 @@ export async function onRequest(context) {
     const fortuneBad = FORTUNE_BAD[fortuneBadIdx];
     const fortuneTip = FORTUNE_TIPS[fortuneTipIdx];
 
-    // 随机挑战（每次刷新随机）
     const challenge = pickRandom(CHALLENGES);
 
-    // 种子推荐（按 IP + 日期固定，每人每天不同）
     const seedIdx = deterministicIndex(ip, today, "seed", SEEDS.length);
     const seed = SEEDS[seedIdx];
 
-    // MC 知识小测（按 IP + 日期固定，每人每天不同）
     const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
 
-    // ========== 访问统计（仅管理员可见）==========
-    let visitBlock = "";
+    // ========== 访问统计：写入 KV，不生成 XAML ==========
+    try {
+      // 总计
+      const totalKey = "visit:total";
+      let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
+      total += 1;
+      await env.HOMEPAGE_KV.put(totalKey, String(total));
 
-    const adminPwd = env.ADMIN_PASSWORD || "";
-    const providedPwd = url.searchParams.get("admin") || "";
-    const isAdmin = adminPwd && providedPwd === adminPwd;
-
-    if (isAdmin) {
+      // 每 IP 次数
+      const ipMapKey = "visit:ipmap";
+      let ipMap = {};
       try {
-        // 总计
-        const totalKey = "visit:total";
-        let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
-        total += 1;
-        await env.HOMEPAGE_KV.put(totalKey, String(total));
+        ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
+      } catch { ipMap = {}; }
+      ipMap[ip] = (ipMap[ip] || 0) + 1;
+      const entries = Object.entries(ipMap).sort((a, b) => b[1] - a[1]);
+      if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
+      await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
 
-        // 每 IP 次数
-        const ipMapKey = "visit:ipmap";
-        let ipMap = {};
-        try {
-          ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
-        } catch { ipMap = {}; }
-        ipMap[ip] = (ipMap[ip] || 0) + 1;
-        const entries = Object.entries(ipMap).sort((a, b) => b[1] - a[1]);
-        if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
-        await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
-
-        // 今日
-        const todayKey = "visit:today:" + today;
-        let todaySet = [];
-        try {
-          todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
-        } catch { todaySet = []; }
-        if (!todaySet.includes(ip)) {
-          todaySet.push(ip);
-          if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
-          await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 172800 });
-        }
-
-        // 生成 IP 列表 XAML
-        const top = entries.slice(0, 10);
-        const ipLines = [];
-        for (const [ipStr, cnt] of top) {
-          const safeIp = String(ipStr).replace(/[<>&"]/g, "");
-          ipLines.push(
-            '<StackPanel Orientation="Horizontal" Margin="0,0,0,4">' +
-            '<TextBlock Text="' + safeIp + '" FontSize="12" Foreground="{DynamicResource ColorBrush3}" Width="180" />' +
-            '<TextBlock Text="' + cnt + ' 次" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
-            '</StackPanel>'
-          );
-        }
-        if (ipLines.length === 0) {
-          ipLines.push('<TextBlock Text="暂无记录" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />');
-        }
-
-        visitBlock =
-          '<Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">' +
-          '<StackPanel>' +
-          '<StackPanel Orientation="Horizontal" Margin="0,0,0,12">' +
-          '<local:MyImage Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Emerald.png" />' +
-          '<StackPanel VerticalAlignment="Center">' +
-          '<TextBlock Text="访问统计（仅管理员可见）" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />' +
-          '<StackPanel Orientation="Horizontal" Margin="0,2,0,0">' +
-          '<TextBlock Text="今日 " FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
-          '<TextBlock Text="' + todaySet.length + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
-          '<TextBlock Text=" 人  ·  总计 " FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
-          '<TextBlock Text="' + total + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />' +
-          '<TextBlock Text=" 次" FontSize="12" Foreground="{DynamicResource ColorBrush3}" />' +
-          '</StackPanel>' +
-          '</StackPanel>' +
-          '</StackPanel>' +
-          '<Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />' +
-          '<TextBlock Text="IP 访问记录（前 10）" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,8" />' +
-          ipLines.join("") +
-          '</StackPanel>' +
-          '</Border>';
-
-      } catch (e) {
-        console.error("[Visit] 统计失败：", e);
-        visitBlock = "";
+      // 今日（去重）
+      const todayKey = "visit:today:" + today;
+      let todaySet = [];
+      try {
+        todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
+      } catch { todaySet = []; }
+      if (!todaySet.includes(ip)) {
+        todaySet.push(ip);
+        if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
+        await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 2592000 });
       }
+    } catch (e) {
+      console.error("[Visit] 统计失败：", e);
     }
 
     xaml = xaml
@@ -982,8 +919,7 @@ export async function onRequest(context) {
       .replace(/__SEED__/g, seed.seed)
       .replace(/__SEED_DESC__/g, seed.desc)
       .replace(/__QUIZ_Q__/g, quiz.q)
-      .replace(/__QUIZ_A__/g, quiz.a)
-      .replace(/__VISIT_BLOCK__/g, visitBlock);
+      .replace(/__QUIZ_A__/g, quiz.a);
 
     return new Response(xaml, {
       headers: {
