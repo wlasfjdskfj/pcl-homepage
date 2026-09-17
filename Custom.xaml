@@ -1,1 +1,654 @@
-
+<StackPanel>
+    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <!-- __FESTIVAL_BANNER__ -->
+            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
+                <Grid>
+                    <local:MyImage Source="https://www.bing.com/th?id=OHR.Santenay_ZH-CN5676942384_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <Border>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#33000000" Offset="0" />
+                                <GradientStop Color="#88000000" Offset="0.55" />
+                                <GradientStop Color="#CC000000" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#59000000" CornerRadius="14" Padding="12,10,16,10">
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource ColorBrush1}" Margin="0,0,9,0" VerticalAlignment="Center">
+                                    <local:MyImage Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                                </Border>
+                                <TextBlock Text="__GREETING__，{user}！" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="欢迎回来，今天也一起去冒险吧。" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="__DATE_YEAR__ · __DATE_MONTH__ / __DATE_DAY__" />
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
+                            <TextBlock Text="  T O D A Y  " FontSize="10" FontWeight="Bold" Foreground="#AAFFFFFF" VerticalAlignment="Center" />
+                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text=" 月 " FontSize="14" VerticalAlignment="Bottom" Margin="0,0,6,18" Foreground="#CCFFFFFF" />
+                            <TextBlock Text="__DATE_DAY__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text=" 日" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,6,18" Foreground="#CCFFFFFF" />
+                        </StackPanel>
+                        <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <TextBlock Text="&quot;" FontSize="72" FontFamily="Georgia" FontWeight="Bold" Foreground="{DynamicResource ColorBrush6}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-4,-24,0,0" Opacity="0.7" />
+                    <StackPanel Margin="26,0,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" Text="__QUOTE__" />
+                        <local:MyIconTextButton Height="32" HorizontalAlignment="Right" Padding="16,0,16,0" Text="换一句" LogoScale="0.8" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="10" Padding="16,14" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                    <Grid>
+                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="80" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,-12,0" Opacity="0.06" />
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
+                                <TextBlock Text="幸运数字" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="__LUCKY_NUMBER__" FontSize="34" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="10" Padding="16,14" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                            <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneLampOn.png" />
+                            <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Grid Width="28" Height="28" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <Border CornerRadius="14" Background="__LUCKY_COLOR_HEX__" />
+                                <Border CornerRadius="14" BorderBrush="#44FFFFFF" BorderThickness="1" />
+                                <Ellipse Width="8" Height="8" Fill="#55FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,5,0,0" />
+                            </Grid>
+                            <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="每日签到" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <!-- __CHECKIN_HINT__ -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="10" Padding="10,12" Margin="0,0,4,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="连续签到" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__CHECKIN_STREAK__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                        <TextBlock Text="天" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="10" Padding="10,12" Margin="4,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="累计签到" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__CHECKIN_TOTAL__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                        <TextBlock Text="天" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" CornerRadius="10" Padding="10,12" Margin="4,0,0,0" Background="{DynamicResource ColorBrush7}">
+                    <StackPanel>
+                        <TextBlock Text="今日已签" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__CHECKIN_TODAY__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                        <TextBlock Text="人" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <local:MyButton Height="40" HorizontalAlignment="Center" Padding="30,0,30,0" Margin="0,14,0,0" ColorType="Highlight" Text="立即签到">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="每日签到|__CHECKIN_MSG__" />
+                        <local:CustomEvent Type="刷新页面" Data="-" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyButton>
+            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="打开主页即自动签到，点击按钮可查看签到结果。" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,14,0,12" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="签到排行榜" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                <TextBlock Text="  ·  我的排名：__CHECKIN_RANK_TEXT__" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            </StackPanel>
+            <!-- __CHECKIN_BOARD__ -->
+            <local:MyHint Theme="Yellow" Margin="0,6,0,0" Text="排行榜按玩家 ID 统计累计签到天数，每天更新。你的 ID 会高亮显示。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />
+                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            </StackPanel>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Hypixel" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="mc.hypixel.net" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mc.hypixel.net" />
+                </Grid>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="2B2T" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="connect.2b2t.org" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="connect.2b2t.org" />
+                </Grid>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Mineplex" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="mineplex.com" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mineplex.com" />
+                </Grid>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyIconTextButton>
+            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                            <TextBlock Text="{user}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                            <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
+                        </StackPanel>
+                    </Grid>
+                    <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                            <TextBlock Text="__USER_IP__" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="42" Text="内存优化" LogoScale="0.9" ColorType="Highlight" Logo="M128 192h768v192H128z M128 448h768v192H128z M256 224v128 M256 480v128" EventType="内存优化" EventData="-" />
+                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="42" Text="清理垃圾" LogoScale="0.9" ColorType="Highlight" Logo="M384 128h256l32 64h192v64H160v-64h192z M224 320h576l-48 512H272z M384 384v384h64V384z M576 384v384h64V384z" EventType="清理垃圾" EventData="-" />
+            </Grid>
+            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用的内存，清理垃圾会删除 PCL 的临时文件。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True">
+                <Grid>
+                    <Border>
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="#4A1A2E" Offset="0" />
+                                <GradientStop Color="#2D1B4E" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66FFFFFF" CornerRadius="10" Padding="10,4,10,4">
+                        <StackPanel Orientation="Horizontal">
+                            <local:MyImage Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                            <TextBlock Text="本次挑战" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#CCFF5555" CornerRadius="10" Padding="10,4,10,4">
+                        <TextBlock Text="__CHALLENGE_DIFF__" FontSize="10" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="__CHALLENGE__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />
+                </Grid>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="12" Height="200" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                <Grid>
+                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
+                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="6" Height="6" CornerRadius="3" Background="#17DD62" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Text="26.3" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+            <TextBlock Text="最新快照：26.3" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />
+            <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            </StackPanel>
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.3" Info="2026-09-15 · 2 天前 · 最新" EventType="启动游戏" EventData="26.3" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.2" Info="2026-06-16 · 93 天前" EventType="启动游戏" EventData="26.2" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.2" Info="2026-04-09 · 161 天前" EventType="启动游戏" EventData="26.1.2" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.1" Info="2026-04-01 · 169 天前" EventType="启动游戏" EventData="26.1.1" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1" Info="2026-03-24 · 177 天前" EventType="启动游戏" EventData="26.1" />
+            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="更新内容" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            </StackPanel>
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="新内容" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="· 随杨树生成的自然方块。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有红色、橙色、黄色三种颜色。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 一种新的树苗，由杨树树叶掉落。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可以与流浪商人交易获得。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有对应的去皮变种。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 由4个杨木原木合成。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 一种新的木板。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可用于合成对应的按钮、门、栅栏、栅栏门、压力板、告示牌、台阶、楼梯、活板门、船和运输船。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 会生成在杨树和倒下的杨树的树干上。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 有小型和大型两种尺寸。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 大型层孔菇被破坏后会掉落两个层孔菇。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可用于合成蘑菇煲。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 摔落其上减免50%摔落高度的摔落伤害，类似于床。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 具有一定的弹性，类似于床。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 只能使用一次，使用后会被摧毁。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 无法在下界和末地中使用，如果试图在那里睡觉，则麦秆床会被破坏而不掉落自身，不会爆炸或生成火。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 使用3个干草捆合成4个麦秆床。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 合适的挖掘工具是锄。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 可用于堆肥，有85%的概率使堆肥层数增加一层。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="更改" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="· 现在村民升级时解锁的新交易能在交易界面中刷新。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在处于骑乘状态时会受到弹射物伤害。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 不再会传送到基岩上、危险的方块上和世界边界外。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在浸没在流体中的犰狳不会再尝试蜷缩。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 不再会传送到基岩上。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 移除了纹理中的多余像素。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在不再会产生落叶粒子。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了部分间歇泉粒子的纹理。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 食用紫颂果不再会传送到世界边界外。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在生物食用后传送时会产生一条指向传送后位置的粒子效果拖尾。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了合成配方，现在可任意搭配两个红色蘑菇、棕色蘑菇或层孔菇合成。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在可以使用层孔菇合成兔肉煲。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在空地图和部分探险家地图可以在废弃营地的箱子或氧化的铜箱子中找到。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了地图和已有探险家地图的物品纹理。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 更改了玩家指针的纹理，现在位于范围外的玩家指针也会指示方向。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 加入了5个新的地图图标。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 现在探险家地图各自使用独立的ID。" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 重命名了以下探险家地图：" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                    <TextBlock Text="· 沼泽探险家地图 → 沼泽小屋地图" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />
+                </StackPanel>
+            </Border>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
+                <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
+                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
+                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3" />
+            </Grid>
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/GoldBlock.png" Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器" EventType="打开网页" EventData="https://hypixel.net/" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
+            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="基础模式" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="创造模式" ToolTip="/gamemode creative" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode creative" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="生存模式" ToolTip="/gamemode survival" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode survival" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="冒险模式" ToolTip="/gamemode adventure" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamemode adventure" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="环境控制" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="设为白天" ToolTip="/time set day" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/time set day" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="晴天" ToolTip="/weather clear" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/weather clear" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="清除效果" ToolTip="/effect clear @s" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect clear @s" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="实用效果" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="夜视" ToolTip="夜视 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s night_vision 99999 1 true" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="抗性提升" ToolTip="抗性提升 V 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s resistance 99999 4 true" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="急迫" ToolTip="急迫 III 级 99999 秒" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/effect give @s haste 99999 2 true" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="物品获取" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="鞘翅" ToolTip="/give @s elytra" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s elytra" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="附魔金苹果" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s enchanted_golden_apple 64" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="经验瓶" ToolTip="一次给 64 个" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s experience_bottle 64" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="玩家头颅 · 1.20.5+" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.20.5 及以后。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Notch&quot;}]" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.20.5 及以后。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;@s&quot;}]" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.20.5 及以后。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s minecraft:player_head[profile={name:&quot;Steve&quot;}]" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="玩家头颅 · 1.13-1.20.4" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="Notch 头颅" ToolTip="1.13-1.20.4。直接获取 Notch 的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Notch&quot;}" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="自己的头颅" ToolTip="1.13-1.20.4。获取自己的头颅" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;@s&quot;}" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="自定义头颅" ToolTip="1.13-1.20.4。把 Steve 换成任意玩家 ID" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/give @s player_head{SkullOwner:&quot;Steve&quot;}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="传送定位" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="传送到坐标" ToolTip="把 0 64 0 换成目标坐标" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/tp @s 0 64 0" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="设置重生点" ToolTip="把当前位置设为重生点" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/spawnpoint @s ~ ~ ~" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="回到出生点" ToolTip="回到世界出生点附近" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/tp @s 0 64 0" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,0" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <Border Width="3" Height="14" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="世界规则" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyIconTextButton Grid.Column="0" Margin="0,0,8,0" Height="38" Text="关闭生物破坏" ToolTip="禁止苦力怕、末影人破坏方块" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule mobGriefing false" />
+                        <local:MyIconTextButton Grid.Column="1" Margin="0,0,8,0" Height="38" Text="死亡不掉落" ToolTip="死亡后保留物品" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule keepInventory true" />
+                        <local:MyIconTextButton Grid.Column="2" Height="38" Text="锁定白天" ToolTip="时间不再流动" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="/gamerule doDaylightCycle false" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <local:MyHint Theme="Yellow" Margin="0,14,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />
+            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel Orientation="Horizontal">
+                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="每次点开都不一样" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="看看你能抽到什么" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
+                    <local:CustomEventService.Events>
+                        <local:CustomEventCollection>
+                            <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                            <local:CustomEvent Type="刷新页面" Data="-" />
+                        </local:CustomEventCollection>
+                    </local:CustomEventService.Events>
+                </local:MyIconTextButton>
+                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+            </StackPanel>
+            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="今日运势" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <TextBlock Text="__SCORE__" FontSize="56" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,14" />
+            </StackPanel>
+            <!-- __SCORE_BAR__ -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
+                <TextBlock Text="__GRADE__" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+            </StackPanel>
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="10" Padding="14,12" Margin="0,0,6,0" Background="#1F17DD62">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#17DD62" />
+                        </StackPanel>
+                        <TextBlock Text="__FORTUNE_GOOD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#17DD62" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="10" Padding="14,12" Margin="6,0,0,0" Background="#1FFF5555">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#FF5555" />
+                        </StackPanel>
+                        <TextBlock Text="__FORTUNE_BAD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF5555" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="__COMMENT__" />
+            <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="今日种子推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel Orientation="Horizontal">
+                    <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
+            <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="__SEED__" />
+            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="创建新世界时，在「种子」栏粘贴即可。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />
+                        <TextBlock Text="每日一题" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Text="__QUIZ_Q__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" />
+                </StackPanel>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|__QUIZ_A__" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyIconTextButton>
+            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="每天更新一道 MC 知识题，看看你能答对几道。" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,14" FontSize="13" LineHeight="20" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,6,0" Height="40" Text="问题反馈" LogoScale="0.9" ColorType="Highlight" Logo="M512 0C229 0 0 229 0 512c0 226 147 418 351 486 26 5 35-11 35-25 0-12 0-44-1-86-143 31-173-69-173-69-23-59-57-75-57-75-47-32 4-31 4-31 52 4 79 53 79 53 46 79 121 56 150 43 5-33 18-56 33-69-114-13-234-57-234-254 0-56 20-102 53-138-5-13-23-65 5-136 0 0 43-14 141 53 41-11 85-17 129-17s88 6 129 17c98-67 141-53 141-53 28 71 10 123 5 136 33 36 53 82 53 138 0 198-120 241-235 254 18 16 35 47 35 95 0 69-1 124-1 141 0 14 9 30 35 25 204-68 351-260 351-486C1024 229 795 0 512 0z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage/issues" />
+                <local:MyIconTextButton Grid.Column="1" Margin="6,0,0,0" Height="40" Text="查看源码" LogoScale="0.9" Logo="M384 320l-192 192 192 192z M640 320v384l192-192z" EventType="打开网页" EventData="https://github.com/wlasfjdskfj/pcl-homepage" />
+            </Grid>
+        </StackPanel>
+    </local:MyCard>
+</StackPanel>
