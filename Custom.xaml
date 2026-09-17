@@ -248,11 +248,11 @@
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.3" Info="2026-09-15 · 3 天前 · 最新" EventType="启动游戏" EventData="26.3" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.2" Info="2026-06-16 · 94 天前" EventType="启动游戏" EventData="26.2" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.2" Info="2026-04-09 · 162 天前" EventType="启动游戏" EventData="26.1.2" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.1" Info="2026-04-01 · 170 天前" EventType="启动游戏" EventData="26.1.1" />
-            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1" Info="2026-03-24 · 178 天前" EventType="启动游戏" EventData="26.1" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.3" Info="2026-09-15 · 2 天前 · 最新" EventType="启动游戏" EventData="26.3" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.2" Info="2026-06-16 · 93 天前" EventType="启动游戏" EventData="26.2" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.2" Info="2026-04-09 · 161 天前" EventType="启动游戏" EventData="26.1.2" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1.1" Info="2026-04-01 · 169 天前" EventType="启动游戏" EventData="26.1.1" />
+            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 26.1" Info="2026-03-24 · 177 天前" EventType="启动游戏" EventData="26.1" />
             <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />
             <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
