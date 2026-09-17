@@ -1244,6 +1244,15 @@ export async function onRequest(context) {
           await env.STATS_DB.prepare(
             "INSERT INTO visits (ip, country, ts) VALUES (?, ?, ?)"
           ).bind(ip, country, Date.now()).run();
+
+          // 每天自动清理 7 天前的统计数据（用 KV 记上次清理时间，避免每次访问都清）
+          const lastCleanup = parseInt(await env.HOMEPAGE_KV.get('d1_last_cleanup') || '0', 10);
+          if (Date.now() - lastCleanup > 86400000) {
+            await env.STATS_DB.prepare(
+              "DELETE FROM visits WHERE ts < (unixepoch('now','-7 days') * 1000)"
+            ).run();
+            await env.HOMEPAGE_KV.put('d1_last_cleanup', String(Date.now()));
+          }
         }
       } catch (e) {
         console.error("[Visit] D1 统计失败：", e);
