@@ -824,20 +824,22 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
     + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="' + (source || "天气数据来自中国气象局") + '" />';
 }
 // 接口盒子 IP 天气 API：按访问者 IP 一步完成定位+天气（数据源中国气象局），免费无日调用上限
-const APIHZ_ID = "10021131";
-const APIHZ_KEY = "4952e475c4fb75ae3ee2f925a22db6ba";
+// 凭据从 Cloudflare Pages 环境变量 APIHZ_ID / APIHZ_KEY 读取，避免在公开仓库暴露
 async function fetchApihzWeather(env, ip) {
   try {
     const clean = String(ip || "").replace(/:\d+$/, "");
     if (!clean || clean === "unknown") return null;
+    const id = (env && env.APIHZ_ID) || "";
+    const key = (env && env.APIHZ_KEY) || "";
+    if (!id || !key) return null; // 未配置环境变量 → 走 Open-Meteo 兜底
     // 按 IP 缓存 10 分钟，减少接口调用（共享 key 频次 10 次/分钟）
     const cacheKey = "weather:" + clean;
     if (env && env.HOMEPAGE_KV) {
       const cached = await env.HOMEPAGE_KV.get(cacheKey);
       if (cached) return cached;
     }
-    const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(APIHZ_ID)
-      + "&key=" + encodeURIComponent(APIHZ_KEY) + "&ip=" + encodeURIComponent(clean);
+    const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
+      + "&key=" + encodeURIComponent(key) + "&ip=" + encodeURIComponent(clean);
     const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
     if (!r.ok) return null;
     const j = await r.json();
