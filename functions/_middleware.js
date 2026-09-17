@@ -649,6 +649,20 @@ const SCORE_COMMENTS = {
 // ============ 兜底页面 ============
 
 function buildFallbackXaml(title, message, eta) {
+  const showLoading = title === '服务器正在更新';
+  // 简单场景（如访问被拒绝）：仅提示 + 刷新按钮
+  if (!showLoading) {
+    return '<StackPanel>' +
+      '<local:MyCard Title="' + title + '" Margin="0,0,0,15">' +
+      '<StackPanel Margin="25,40,23,20">' +
+      '<local:MyHint Theme="Yellow" Text="' + message + '" />' +
+      '<local:MyIconTextButton Margin="0,16,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
+      '</StackPanel>' +
+      '</local:MyCard>' +
+      '</StackPanel>';
+  }
+
+  // ===== 服务器正在更新：精致加载页 =====
   // 敲稿动画（PCL Storyboard）：逐字敲出 + 弹性缩放弹入 + 尾部闪烁光标，不加百分比
   const loadingText = '正在加载中';
   const cycle = 3.5;  // 循环周期（秒）
@@ -665,17 +679,17 @@ function buildFallbackXaml(title, message, eta) {
       '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>' +
       '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>';
     chars +=
-      '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="16" Foreground="#FF8A8A8A" Margin="0,0,1,0" Opacity="0" RenderTransformOrigin="0.5,0.5">' +
+      '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="17" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,1,0" Opacity="0" RenderTransformOrigin="0.5,0.5">' +
       '<TextBlock.RenderTransform><ScaleTransform ScaleX="0.4" ScaleY="0.4"/></TextBlock.RenderTransform>' +
       '</TextBlock>';
   }
   // 尾部闪烁光标
   const curBegin = (loadingText.length * step).toFixed(2);
   anim += '<DoubleAnimation Storyboard.TargetName="CUR" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:' + curBegin + '"/>';
-  chars += '<TextBlock x:Name="CUR" Text="|" FontSize="16" FontWeight="Bold" Foreground="#FF5B9CFF" Margin="1,0,0,0" Opacity="0" />';
+  chars += '<TextBlock x:Name="CUR" Text="|" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource ColorBrush2}" Margin="1,0,0,0" Opacity="0" />';
 
   const typeLine =
-    '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,22,0,0">' +
+    '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">' +
     '<StackPanel.Triggers>' +
     '<EventTrigger RoutedEvent="StackPanel.Loaded">' +
     '<BeginStoryboard>' +
@@ -688,18 +702,32 @@ function buildFallbackXaml(title, message, eta) {
     chars +
     '</StackPanel>';
 
+  // 旋转加载圈（参考 PCL 动画语法）
+  const spinner =
+    '<Grid Width="64" Height="64" HorizontalAlignment="Center">' +
+    '<Ellipse Width="64" Height="64" Stroke="#22000000" StrokeThickness="5"/>' +
+    '<Ellipse Width="64" Height="64" Stroke="#FF4C8DFF" StrokeThickness="5" StrokeDashArray="1.4,100" StrokeDashCap="Round" RenderTransformOrigin="0.5,0.5">' +
+    '<Ellipse.RenderTransform><RotateTransform x:Name="spin" Angle="0"/></Ellipse.RenderTransform>' +
+    '<Ellipse.Triggers><EventTrigger RoutedEvent="Ellipse.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever">' +
+    '<DoubleAnimation Storyboard.TargetName="spin" Storyboard.TargetProperty="Angle" From="0" To="360" Duration="0:0:1.1"/>' +
+    '</Storyboard></BeginStoryboard></EventTrigger></Ellipse.Triggers>' +
+    '</Ellipse>' +
+    '</Grid>';
+
   let etaLine = '';
   if (eta && eta !== '0') {
-    etaLine = '<local:MyHint Theme="Blue" Margin="0,16,0,0" Text="预计 ' + eta + ' 更新完成。" />';
+    etaLine = '<TextBlock Text="预计 ' + eta + ' 更新完成" FontSize="14" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,16,0,0"/>';
   }
 
   return '<StackPanel>' +
-    '    <local:MyCard Title="' + title + '" Margin="0,0,0,15">' +
-    '        <StackPanel Margin="25,40,23,20">' +
+    '    <local:MyCard Title="" Margin="0,0,0,15">' +
+    '        <StackPanel Margin="30,42,30,34">' +
+    spinner +
+    '            <TextBlock Text="服务器正在更新" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,20,0,0"/>' +
     typeLine +
     etaLine +
-    '            <local:MyIconTextButton Margin="0,22,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
-    '            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="' + message + '" />' +
+    '            <local:MyIconTextButton Margin="0,24,0,0" Height="40" HorizontalAlignment="Center" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
+    '            <local:MyHint Theme="Yellow" Margin="0,18,0,0" Text="' + message + '" />' +
     '            <local:MyHint Theme="Blue" Margin="0,10,0,0" Text="如果一直看到这个页面，请去 GitHub 提 Issue。" />' +
     '        </StackPanel>' +
     '    </local:MyCard>' +
