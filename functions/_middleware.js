@@ -826,10 +826,16 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
 // 接口盒子 IP 天气 API：按访问者 IP 一步完成定位+天气（数据源中国气象局），免费无日调用上限
 const APIHZ_ID = "10021131";
 const APIHZ_KEY = "4952e475c4fb75ae3ee2f925a22db6ba";
-async function fetchApihzWeather(ip) {
+async function fetchApihzWeather(env, ip) {
   try {
     const clean = String(ip || "").replace(/:\d+$/, "");
     if (!clean || clean === "unknown") return null;
+    // 按 IP 缓存 10 分钟，减少接口调用（共享 key 频次 10 次/分钟）
+    const cacheKey = "weather:" + clean;
+    if (env && env.HOMEPAGE_KV) {
+      const cached = await env.HOMEPAGE_KV.get(cacheKey);
+      if (cached) return cached;
+    }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(APIHZ_ID)
       + "&key=" + encodeURIComponent(APIHZ_KEY) + "&ip=" + encodeURIComponent(clean);
     const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
@@ -840,7 +846,11 @@ async function fetchApihzWeather(ip) {
     const wind = Math.round(j.nowinfo.windSpeed);
     const desc = (j.weather1 && j.weather2 && j.weather1 !== j.weather2)
       ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
-    return buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
+    const xaml = buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
+    if (env && env.HOMEPAGE_KV) {
+      try { await env.HOMEPAGE_KV.put(cacheKey, xaml, { expirationTtl: 600 }); } catch (e) { /* 缓存失败忽略 */ }
+    }
+    return xaml;
   } catch (e) {
     console.error("[Weather] 接口盒子失败：", e);
     return null;
@@ -874,7 +884,7 @@ async function fetchGeo(ip) {
 }
 async function fetchWeather(env, ip) {
   // 优先：接口盒子 IP 天气（按访问者 IP 通用定位，数据源中国气象局）
-  const apihz = await fetchApihzWeather(ip);
+  const apihz = await fetchApihzWeather(env, ip);
   if (apihz) return apihz;
   // 降级：Open-Meteo（按 IP 定位经纬度取天气）
   try {
