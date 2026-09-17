@@ -60,7 +60,6 @@ function securityHeaders(extra = {}) {
 }
 
 function ccToFlag(cc) {
-  // ★ 正则校验，避免 "12" 这类非国家码产生乱码
   if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return "🌐";
   const OFFSET = 127397;
   try {
@@ -110,7 +109,6 @@ function ccToName(cc) {
 
 // 时间戳格式化为北京时间 MM-DD HH:MM
 function fmtTime(ms) {
-  // ★ 数值判断：0 / 负数 / NaN 都返回 —
   const n = Number(ms);
   if (!Number.isFinite(n) || n <= 0) return "—";
   const d = new Date(n + 8 * 3600 * 1000);
@@ -319,22 +317,50 @@ function loginPage(hasTried) {
 
 /* ---------------- Cloudflare API ---------------- */
 
+/**
+ * 执行一次 GraphQL 查询，带超时
+ */
+async function cfGraphQL(env, query) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5000);
+  try {
+    const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.CF_API_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query }),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) return { ok: false, error: "api_" + res.status };
+    const json = await res.json();
+    return { ok: true, json };
+  } catch (e) {
+    return {
+      ok: false,
+      error: e && e.name === "AbortError" ? "timeout" : "network",
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchUsageSplit(env, dateStr) {
   if (!env.CF_API_TOKEN || !env.CF_ACCOUNT_ID) {
     return { workers: 0, pages: 0, error: "missing_config" };
   }
 
-  // ★ 日期格式校验，防止 GraphQL 注入
   if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) {
     return { workers: 0, pages: 0, error: "bad_date" };
   }
 
-  // ★ Account ID 格式校验（32 位 hex）
   if (!/^[a-f0-9]{32}$/i.test(String(env.CF_ACCOUNT_ID))) {
     return { workers: 0, pages: 0, error: "bad_account" };
   }
 
-  const query = `
+  // 首选：Workers + Pages Functions 一起查
+  const fullQuery = `
     query {
       viewer {
         accounts(filter: {accountTag: "${env.CF_ACCOUNT_ID}"}) {
@@ -351,39 +377,63 @@ async function fetchUsageSplit(env, dateStr) {
     }
   `;
 
-  try {
-    // ★ 5 秒超时
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 5000);
+  let r = await cfGraphQL(env, fullQuery);
+  if (!r.ok) {
+    console.error("[fetchUsageSplit] primary", r.error);
+    return { workers: 0, pages: 0, error: r.error };
+  }
 
-    const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.CF_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query }),
-      signal: ctrl.signal,
-    }).finally(() => clearTimeout(timer));
+  // 检测 GraphQL 字段错误：如果 pages 字段不存在，降级为只查 workers
+  const hasFieldError =
+    r.json.errors &&
+    r.json.errors.some((e) =>
+      String(e.message || "").toLowerCase().includes("pagesfunctions") ||
+      String(e.message || "").toLowerCase().includes("cannot query field")
+    );
 
-    if (!res.ok) return { workers: 0, pages: 0, error: "api_" + res.status };
-    const json = await res.json();
-    if (json.errors) return { workers: 0, pages: 0, error: "api_error" };
-    const acc = json.data?.viewer?.accounts?.[0] || {};
+  if (hasFieldError) {
+    console.warn("[fetchUsageSplit] pages field missing, fallback to workers only");
+    const fallbackQuery = `
+      query {
+        viewer {
+          accounts(filter: {accountTag: "${env.CF_ACCOUNT_ID}"}) {
+            workers: workersInvocationsAdaptive(
+              limit: 1,
+              filter: { date_geq: "${dateStr}", date_leq: "${dateStr}" }
+            ) { sum { requests } }
+          }
+        }
+      }
+    `;
+    r = await cfGraphQL(env, fallbackQuery);
+    if (!r.ok) {
+      console.error("[fetchUsageSplit] fallback", r.error);
+      return { workers: 0, pages: 0, error: r.error };
+    }
+    if (r.json.errors) {
+      console.error("[fetchUsageSplit] fallback graphql errors", r.json.errors);
+      return { workers: 0, pages: 0, error: "api_error" };
+    }
+    const acc = r.json.data?.viewer?.accounts?.[0] || {};
     return {
       workers: acc.workers?.[0]?.sum?.requests || 0,
-      pages: acc.pages?.[0]?.sum?.requests || 0,
+      pages: 0,
       error: null,
     };
-  } catch (e) {
-    // ★ 不再静默
-    console.error("[fetchUsageSplit]", e && e.message);
-    return {
-      workers: 0,
-      pages: 0,
-      error: e && e.name === "AbortError" ? "timeout" : "network",
-    };
   }
+
+  // 其他 GraphQL 错误，直接报错
+  if (r.json.errors) {
+    console.error("[fetchUsageSplit] graphql errors", r.json.errors);
+    return { workers: 0, pages: 0, error: "api_error" };
+  }
+
+  const acc = r.json.data?.viewer?.accounts?.[0] || {};
+  return {
+    workers: acc.workers?.[0]?.sum?.requests || 0,
+    pages: acc.pages?.[0]?.sum?.requests || 0,
+    error: null,
+  };
 }
 
 /* ---------------- 倒计时 ---------------- */
@@ -405,7 +455,7 @@ export async function onRequest(context) {
   const adminPwd = env.ADMIN_PASSWORD || "";
   const cookieToken = getCookie(request, COOKIE_NAME);
 
-  // ★ 密码未配置时直接报错，避免后台静默锁死
+  // 密码未配置时直接报错，避免后台静默锁死
   if (!adminPwd) {
     return new Response(
       `<h1 style="font-family:sans-serif">后台未配置</h1>
@@ -423,8 +473,6 @@ export async function onRequest(context) {
     if (session === "1") isAdmin = true;
   }
 
-  // ★ 已删除 /admin/logout 死代码，统一走 ?action=logout
-
   if (url.searchParams.get("action") === "logout") {
     if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
     return new Response(null, {
@@ -437,7 +485,6 @@ export async function onRequest(context) {
   }
 
   if (request.method === "POST") {
-    // 用 text + URLSearchParams 手动解析，规避 Workers 环境下 formData() 可能抛异常
     let rawBody = "";
     try {
       rawBody = await request.text();
@@ -461,7 +508,6 @@ export async function onRequest(context) {
       });
     }
 
-    // 已登录管理员的管理动作
     if (isAdmin) {
       const action = String(form.get("action") || "");
       try {
@@ -497,7 +543,6 @@ export async function onRequest(context) {
           }
         }
       } catch (e) {
-        // ★ 不再完全静默
         console.error("[admin action]", action, e && e.message);
       }
       return new Response(null, {
@@ -521,7 +566,7 @@ export async function onRequest(context) {
   }
 
   try {
-    // ★ 并发读取全部 KV，8 次 RTT → 1 次
+    // 并发读取全部 KV
     const [
       totalRaw,
       ipmapRaw,
@@ -582,7 +627,6 @@ export async function onRequest(context) {
       );
     }
 
-    // GraphQL 按 UTC 日期统计，用 UTC 当天
     const utcToday = new Date().toISOString().slice(0, 10);
     const { workers, pages, error: apiError } = await fetchUsageSplit(env, utcToday);
 
@@ -592,18 +636,13 @@ export async function onRequest(context) {
     const quotaColor = quotaPct >= 80 ? "#FF4444" : quotaPct >= 60 ? "#FFB020" : "#17DD62";
 
     const resetInfo = getResetCountdown();
-
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
-    // 统一解析 IP 记录，兼容多种存储结构，按最近访问时间排序
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
-        // 旧格式：直接是数字
         if (typeof val === "number") {
           return [ip, { c: val, cc: "XX", t: 0 }];
         }
-
-        // 对象格式：兼容 c / count / visits，国家兼容 cc / country / cf.country
         const c = Number(val.c ?? val.count ?? val.visits ?? 0) || 0;
         const cc =
           val.cc ||
@@ -612,13 +651,11 @@ export async function onRequest(context) {
           val.cf?.countryCode ||
           "XX";
         const t = Number(val.t ?? val.lastTime ?? 0) || 0;
-
         return [ip, { c, cc: String(cc).toUpperCase(), t }];
       })
       .filter(([, v]) => Number.isFinite(v.c) && v.c > 0)
       .sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
 
-    // IP 表格：增加"国家/地区"列 和 "最近访问"列
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);
       const country = ccToName(v.cc);
@@ -635,7 +672,6 @@ export async function onRequest(context) {
       .map((d) => `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`)
       .join("");
 
-    // 封禁 IP 列表行 + 近7天柱状图
     const blockRows = blockCount
       ? Object.entries(blockList).map(([ip, t]) =>
           `<li class="block-item"><span class="block-ip">${escapeHtml(ip)}</span><span class="block-time">${escapeHtml(new Date(t).toLocaleString('zh-CN'))}</span><form method="post" class="inline-form"><input type="hidden" name="action" value="unblock"><input type="hidden" name="ip" value="${escapeHtml(ip)}"><button type="submit" class="btn btn-ghost btn-sm">解封</button></form></li>`
@@ -942,7 +978,6 @@ export async function onRequest(context) {
   }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background: rgba(255,68,68,.06); }
-  /* 第 3 列为国家/地区（弱化），第 4 列为次数（绿色强调） */
   td:nth-child(3) { color: var(--text-dim); }
   td:nth-child(4) { color:#17DD62; font-weight:600; font-variant-numeric: tabular-nums; }
   .empty { text-align:center; color: var(--text-dim); padding:28px; font-size:13px; }
@@ -977,7 +1012,6 @@ export async function onRequest(context) {
   }
   .footer a:hover { color: var(--accent); }
 
-  /* 近7天柱状图 */
   .chart {
     display:flex; align-items:flex-end; gap:10px; height:170px;
     background: var(--card); border:1px solid var(--card-border);
@@ -991,7 +1025,6 @@ export async function onRequest(context) {
   .chart-val { font-size:11px; color:var(--text); margin-top:5px; font-variant-numeric:tabular-nums; }
   .chart-date { font-size:10px; color:var(--text-dim); margin-top:2px; }
 
-  /* 管理面板 */
   .manage-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
   .manage-card {
     background: var(--card); border:1px solid var(--card-border); border-radius:14px; padding:20px;
@@ -1019,7 +1052,6 @@ export async function onRequest(context) {
   .manage-desc { font-size:12.5px; color:var(--text-dim); margin:0 0 14px; }
   .empty-block { text-align:center; color:var(--text-dim); padding:16px; font-size:13px; }
 
-  /* ===== 侧边导航控制台布局 ===== */
   .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
   .sidebar {
     width:214px; flex-shrink:0; position:sticky; top:0; height:100vh;
@@ -1262,7 +1294,6 @@ export async function onRequest(context) {
   </div>
 
 <script>
-  // 侧边导航切换
   (function(){
     const navs = document.querySelectorAll('.nav-item');
     const title = document.getElementById('tabTitle');
@@ -1280,14 +1311,11 @@ export async function onRequest(context) {
     });
   })();
 
-  // 服务器更新：快捷预计完成时间
   document.querySelectorAll('.eta-quick-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const input = btn.closest('.manage-card').querySelector('input[name=eta]');
       if (!input) return;
-      // 固定时间文本（如"明天 08:00"）直接填入
       if (btn.dataset.time) { input.value = btn.dataset.time; return; }
-      // 相对增量：按北京时间+分钟自动计算
       const mins = Number(btn.dataset.min) || 0;
       const now = new Date(Date.now() + 8 * 3600 * 1000);
       const t = new Date(now.getTime() + mins * 60000);
@@ -1297,7 +1325,6 @@ export async function onRequest(context) {
     });
   });
 
-  // 数字滚动
   document.querySelectorAll('[data-count]').forEach((el) => {
     const target = Number(el.dataset.count) || 0;
     const duration = 900;
@@ -1312,13 +1339,11 @@ export async function onRequest(context) {
     requestAnimationFrame(tick);
   });
 
-  // 进度条
   requestAnimationFrame(() => {
     const fill = document.querySelector('.quota-fill');
     if (fill) fill.style.width = fill.dataset.width;
   });
 
-  // 重置倒计时
   (function(){
     const tip = document.querySelector('.reset-tip');
     const el = document.getElementById('countdown');
@@ -1336,7 +1361,6 @@ export async function onRequest(context) {
     tick();
   })();
 
-  // 鼠标跟随光斑
   (function(){
     const g = document.getElementById('cursorGlow');
     if (!g) return;
@@ -1352,7 +1376,6 @@ export async function onRequest(context) {
     })();
   })();
 
-  // 北京时间：年月日 + 星期 + 时:分:秒
   (function(){
     const dateEl = document.getElementById('bjDate');
     const timeEl = document.getElementById('bjTime');
