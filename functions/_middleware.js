@@ -832,8 +832,10 @@ async function fetchApihzWeather(env, ip) {
     const id = (env && env.APIHZ_ID) || "";
     const key = (env && env.APIHZ_KEY) || "";
     if (!id || !key) return null; // 未配置环境变量 → 走 Open-Meteo 兜底
-    // 按 IP 缓存 10 分钟，减少接口调用（共享 key 频次 10 次/分钟）
-    const cacheKey = "weather:" + clean;
+    // 按 IP + 天气版本号缓存 10 分钟（版本号用于在线"重置天气缓存"）
+    let weatherVer = "0";
+    try { weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0"; } catch (e) {}
+    const cacheKey = "weather:" + weatherVer + ":" + clean;
     if (env && env.HOMEPAGE_KV) {
       const cached = await env.HOMEPAGE_KV.get(cacheKey);
       if (cached) return cached;
@@ -1046,6 +1048,21 @@ export async function onRequest(context) {
 
   // 2. 主页文件
   if (url.pathname === '/Custom.xaml' || url.pathname === '/') {
+    // 封禁 IP 检查：命中管理员封禁列表则拒绝访问
+    const reqIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+    if (reqIp && reqIp !== 'unknown') {
+      try {
+        const blockList = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}');
+        if (blockList[reqIp]) {
+          return new Response(buildFallbackXaml('访问被拒绝', '你的 IP 已被管理员禁止访问本主页。'), {
+            headers: {
+              'Content-Type': 'application/xml; charset=utf-8',
+              'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+            },
+          });
+        }
+      } catch (e) { /* 封禁列表读取失败则放行 */ }
+    }
     const assetUrl = new URL('/Custom.xaml', url.origin);
 
     let response;

@@ -404,6 +404,36 @@ export async function onRequest(context) {
         }),
       });
     }
+
+    // 已登录管理员的管理动作
+    if (isAdmin) {
+      const action = String(form.get("action") || "");
+      try {
+        if (action === "block") {
+          const ip = String(form.get("ip") || "").trim();
+          if (ip) {
+            const blk = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}');
+            blk[ip] = Date.now();
+            await env.HOMEPAGE_KV.put('block:list', JSON.stringify(blk));
+          }
+        } else if (action === "unblock") {
+          const ip = String(form.get("ip") || "").trim();
+          if (ip) {
+            const blk = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}');
+            delete blk[ip];
+            await env.HOMEPAGE_KV.put('block:list', JSON.stringify(blk));
+          }
+        } else if (action === "resetweather") {
+          const ver = parseInt((await env.HOMEPAGE_KV.get('weather_version')) || "0", 10) + 1;
+          await env.HOMEPAGE_KV.put('weather_version', String(ver));
+        }
+      } catch (e) { /* 忽略管理动作错误 */ }
+      return new Response(null, {
+        status: 302,
+        headers: securityHeaders({ Location: "/admin" }),
+      });
+    }
+
     return new Response(loginPage(true), {
       status: 401,
       headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
@@ -465,6 +495,13 @@ export async function onRequest(context) {
 
     const resetInfo = getResetCountdown();
 
+    // 封禁列表 + 天气缓存版本
+    let blockList = {};
+    try { blockList = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}'); } catch { blockList = {}; }
+    const blockCount = Object.keys(blockList).length;
+    const weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0";
+    const maxDay = Math.max(1, ...days.map((d) => d.count));
+
     // 统一解析 IP 记录，兼容多种存储结构
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
@@ -502,6 +539,18 @@ export async function onRequest(context) {
     const dayRows = days
       .map((d) => `<tr><td>${escapeHtml(d.date)}</td><td>${d.count}</td></tr>`)
       .join("");
+
+    // 封禁 IP 列表行 + 近7天柱状图
+    const blockRows = blockCount
+      ? Object.entries(blockList).map(([ip, t]) =>
+          `<li class="block-item"><span class="block-ip">${escapeHtml(ip)}</span><span class="block-time">${escapeHtml(new Date(t).toLocaleString('zh-CN'))}</span><form method="post" class="inline-form"><input type="hidden" name="action" value="unblock"><input type="hidden" name="ip" value="${escapeHtml(ip)}"><button type="submit" class="btn btn-ghost btn-sm">解封</button></form></li>`
+        ).join("")
+      : '<li class="empty-block">暂无封禁 IP</li>';
+
+    const chartHtml = days.map((d) => {
+      const h = Math.max(3, Math.round((d.count / maxDay) * 100));
+      return `<div class="chart-col"><div class="chart-bar" style="height:${h}%"></div><div class="chart-val">${d.count}</div><div class="chart-date">${escapeHtml(d.date.slice(5))}</div></div>`;
+    }).join("");
 
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用，配额显示为 0</div>`
@@ -833,7 +882,50 @@ export async function onRequest(context) {
   }
   .footer a:hover { color: var(--accent); }
 
+  /* 近7天柱状图 */
+  .chart {
+    display:flex; align-items:flex-end; gap:10px; height:170px;
+    background: var(--card); border:1px solid var(--card-border);
+    border-radius:14px; padding:18px 18px 12px; margin-bottom:24px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay:.42s;
+  }
+  .chart-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .chart-bar { width:72%; background:linear-gradient(180deg,var(--accent),var(--accent-2)); border-radius:6px 6px 0 0; min-height:3px; transition:height .8s; box-shadow:0 0 10px rgba(255,68,68,.25); }
+  .chart-val { font-size:11px; color:var(--text); margin-top:5px; font-variant-numeric:tabular-nums; }
+  .chart-date { font-size:10px; color:var(--text-dim); margin-top:2px; }
+
+  /* 管理面板 */
+  .manage-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px; }
+  .manage-card {
+    background: var(--card); border:1px solid var(--card-border); border-radius:14px; padding:20px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both; animation-delay:.46s;
+  }
+  .manage-title { font-size:15px; font-weight:600; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .manage-form { display:flex; gap:8px; margin-bottom:14px; }
+  .manage-form input {
+    flex:1; padding:10px 12px; border:1px solid var(--card-border); border-radius:9px;
+    background: var(--card-strong); color:var(--text); font-size:13px;
+  }
+  .manage-form input:focus { outline:none; border-color:var(--accent); }
+  .btn-danger { background:linear-gradient(135deg,#FF4444,#c0392b); color:#fff; box-shadow:0 4px 14px rgba(255,68,68,.3); }
+  .btn-danger:hover { filter:brightness(1.1); }
+  .btn-warn { background:linear-gradient(135deg,#FFB020,#e67e22); color:#fff; box-shadow:0 4px 14px rgba(255,68,68,.2); }
+  .btn-warn:hover { filter:brightness(1.08); }
+  .btn-sm { padding:6px 12px; font-size:12px; }
+  .inline-form { margin:0; display:inline-flex; }
+  .block-list { list-style:none; margin:0; padding:0; max-height:230px; overflow:auto; }
+  .block-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 2px; border-bottom:1px solid var(--row-border); font-size:13px; }
+  .block-item:last-child { border-bottom:none; }
+  .block-ip { font-variant-numeric:tabular-nums; font-weight:500; }
+  .block-time { font-size:11px; color:var(--text-dim); }
+  .manage-desc { font-size:12.5px; color:var(--text-dim); margin:0 0 14px; }
+  .empty-block { text-align:center; color:var(--text-dim); padding:16px; font-size:13px; }
+
   @media (max-width: 640px) {
+    .manage-grid { grid-template-columns:1fr; }
     .split-card { grid-template-columns:1fr; }
     .split-item { border-right:none; border-bottom:1px solid var(--card-border); }
     .split-item:last-child { border-bottom:none; }
@@ -887,6 +979,14 @@ export async function onRequest(context) {
         <div class="label">独立 IP 数</div>
         <div class="value" data-count="${entries.length}">0</div>
       </div>
+      <div class="card">
+        <div class="label">近7天峰值</div>
+        <div class="value" data-count="${maxDay}">0</div>
+      </div>
+      <div class="card">
+        <div class="label">封禁 IP 数</div>
+        <div class="value" data-count="${blockCount}">0</div>
+      </div>
     </div>
 
     <div class="quota">
@@ -924,6 +1024,11 @@ export async function onRequest(context) {
       今日使用情况总计：<b>${quotaUsed.toLocaleString()}</b>。
     </div>
 
+    <h2>近 7 天趋势</h2>
+    <div class="chart">
+      ${chartHtml}
+    </div>
+
     <h2>最近 7 天</h2>
     <div class="table-wrap">
       <table>
@@ -938,6 +1043,27 @@ export async function onRequest(context) {
         <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th></tr></thead>
         <tbody>${ipRows || '<tr><td colspan="4" class="empty">暂无记录</td></tr>'}</tbody>
       </table>
+    </div>
+
+    <h2>管理</h2>
+    <div class="manage-grid">
+      <div class="manage-card">
+        <div class="manage-title">🚫 IP 封禁</div>
+        <form method="post" class="manage-form">
+          <input type="hidden" name="action" value="block">
+          <input name="ip" placeholder="输入要封禁的 IP，如 1.2.3.4" required autocomplete="off">
+          <button type="submit" class="btn btn-danger">封禁</button>
+        </form>
+        <ul class="block-list">${blockRows}</ul>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">🌤 天气缓存</div>
+        <p class="manage-desc">当前缓存版本 v${weatherVer}。重置后所有已缓存天气失效，下次访问将重新从接口盒子拉取。</p>
+        <form method="post">
+          <input type="hidden" name="action" value="resetweather">
+          <button type="submit" class="btn btn-warn">重置天气缓存</button>
+        </form>
+      </div>
     </div>
   </div>
 
