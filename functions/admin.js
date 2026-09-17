@@ -540,13 +540,13 @@ export async function onRequest(context) {
           const eta = (form.get("eta") || "").trim();
           const reason = (form.get("reason") || "").trim();
           if (on) {
-            await env.HOMEPAGE_KV.put('maint_mode', String(Date.now()));
+            await env.HOMEPAGE_KV.put('maint_mode_live', String(Date.now()));
             if (eta) await env.HOMEPAGE_KV.put('maint_eta', eta);
             else await env.HOMEPAGE_KV.delete('maint_eta');
             if (reason) await env.HOMEPAGE_KV.put('maint_reason', reason);
             else await env.HOMEPAGE_KV.delete('maint_reason');
           } else {
-            await env.HOMEPAGE_KV.put('maint_mode', '0');
+            await env.HOMEPAGE_KV.put('maint_mode_live', '0');
           }
         }
       } catch (e) {
@@ -589,15 +589,16 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("visit:days:7"),
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
-      env.HOMEPAGE_KV.get("maint_mode"),
+      env.HOMEPAGE_KV.get("maint_mode_live"),
       env.HOMEPAGE_KV.get("maint_eta"),
       env.HOMEPAGE_KV.get("maint_reason"),
     ]);
 
-    const total = totalRaw || "0";
-
     let ipMap = {};
     try { ipMap = JSON.parse(ipmapRaw || "{}"); } catch { ipMap = {}; }
+
+    // 总访问数：优先取历史 total，否则从 IP 表求和（total 已不再写入 KV，省写入配额）
+    const total = totalRaw || String(Object.values(ipMap).reduce((s, v) => s + (typeof v === "number" ? v : Number(v && v.c) || 0), 0));
 
     let days7Map = null;
     try { if (days7Raw) days7Map = JSON.parse(days7Raw); } catch { days7Map = null; }

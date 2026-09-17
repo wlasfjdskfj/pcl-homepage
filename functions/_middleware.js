@@ -1112,7 +1112,7 @@ export async function onRequest(context) {
     try {
       [blockRaw, maintRaw, maintEta, maintReason] = await Promise.all([
         env.HOMEPAGE_KV.get('block:list'),
-        env.HOMEPAGE_KV.get('maint_mode'),
+        env.HOMEPAGE_KV.get('maint_mode_live'),
         env.HOMEPAGE_KV.get('maint_eta'),
         env.HOMEPAGE_KV.get('maint_reason'),
       ]);
@@ -1226,13 +1226,7 @@ export async function onRequest(context) {
     // ========== 访问统计：异步写入 KV（waitUntil），不阻塞主页返回 ==========
     context.waitUntil((async () => {
       try {
-        // 总计
-        const totalKey = "visit:total";
-        let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
-        total += 1;
-        await env.HOMEPAGE_KV.put(totalKey, String(total));
-
-        // 每 IP 次数 + 国家码 + 最后访问时间
+        // 每 IP 次数 + 国家码 + 最后访问时间（60 秒限流，防止耗尽 KV 每日写入配额）
         const ipMapKey = "visit:ipmap";
         let ipMap = {};
         try {
@@ -1247,6 +1241,9 @@ export async function onRequest(context) {
         const oldCc = (typeof oldVal === "object" && oldVal)
           ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
           : null;
+        const oldT = (typeof oldVal === "object" && oldVal) ? Number(oldVal.t) || 0 : 0;
+        if (Date.now() - oldT < 60000) return; // 同 IP 60 秒内已记录过，跳过写入省配额
+
         ipMap[ip] = {
           c: oldCount + 1,
           cc: oldCc || country,
