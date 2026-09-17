@@ -562,7 +562,9 @@ def escape_xaml_attr(text):
             .replace("&", "&amp;")
             .replace('"', "&quot;")
             .replace("<", "&lt;")
-            .replace(">", "&gt;"))
+            .replace(">", "&gt;")
+            .replace("{", "&#123;")
+            .replace("}", "&#125;"))
 
 
 # ============ XAML 生成 ============
