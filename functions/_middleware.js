@@ -760,115 +760,12 @@ function buildScoreBar(score) {
   return bar;
 }
 
-// ============ 签到与排行榜（玩家 ID） ============
-const CHECKIN_BOARD_SIZE = 50;   // 排行榜保留人数
-const CHECKIN_SHOW_TOP = 10;     // 主页展示前 N 名
-
-function shiftDate(dateStr, delta) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d) + delta * 86400000);
-  return dt.toISOString().slice(0, 10);
-}
-function checkinTitle(rank) {
-  if (rank === 1) return "签到之王";
-  if (rank <= 3) return "资深矿工";
-  if (rank <= 10) return "冒险家";
-  return "旅行者";
-}
 function escapeXaml(str) {
   return String(str)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
-// 每日签到：返回 { isNew, count, streak, todayCount }
-async function processCheckin(env, playerKey, displayName, today) {
-  const todayKey = "checkin:date:" + today;
-  let todayList = [];
-  try { todayList = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]"); } catch { todayList = []; }
-  const countKey = "checkin:count:" + playerKey;
-  const streakKey = "checkin:streak:" + playerKey;
-  const lastKey = "checkin:last:" + playerKey;
-  const count = parseInt(await env.HOMEPAGE_KV.get(countKey) || "0", 10);
-  const last = await env.HOMEPAGE_KV.get(lastKey);
-  if (!todayList.includes(playerKey)) {
-    todayList.push(playerKey);
-    await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todayList), { expirationTtl: 2592000 });
-    let streak = 1;
-    if (last === shiftDate(today, -1)) {
-      streak = parseInt(await env.HOMEPAGE_KV.get(streakKey) || "0", 10) + 1;
-    }
-    const newCount = count + 1;
-    await env.HOMEPAGE_KV.put(countKey, String(newCount));
-    await env.HOMEPAGE_KV.put(streakKey, String(streak));
-    await env.HOMEPAGE_KV.put(lastKey, today);
-    await updateCheckinBoard(env, playerKey, displayName, newCount);
-    return { isNew: true, count: newCount, streak, todayCount: todayList.length };
-  }
-  const streak = parseInt(await env.HOMEPAGE_KV.get(streakKey) || "1", 10);
-  return { isNew: false, count: Math.max(count, 1), streak, todayCount: todayList.length };
-}
-// 更新排行榜快照（存 { 玩家key: { name, count } }）
-async function updateCheckinBoard(env, playerKey, displayName, newCount) {
-  try {
-    const boardKey = "checkin:board";
-    let board = {};
-    try { board = JSON.parse(await env.HOMEPAGE_KV.get(boardKey) || "{}"); } catch { board = {}; }
-    board[playerKey] = { name: displayName, count: newCount };
-    const entries = Object.entries(board)
-      .map(([k, v]) => ({ key: k, count: Number((v && v.count) || v) || 0 }))
-      .sort((a, b) => b.count - a.count);
-    if (entries.length > CHECKIN_BOARD_SIZE) {
-      const keep = new Set(entries.slice(0, CHECKIN_BOARD_SIZE).map((e) => e.key));
-      for (const k of Object.keys(board)) if (!keep.has(k)) delete board[k];
-    }
-    await env.HOMEPAGE_KV.put(boardKey, JSON.stringify(board));
-  } catch (e) {
-    console.error("[Checkin] 更新排行榜失败：", e);
-  }
-}
-// 生成排行榜 XAML（Top N，玩家名）
-async function buildCheckinBoardXaml(env, myKey) {
-  let board = {};
-  try { board = JSON.parse(await env.HOMEPAGE_KV.get("checkin:board") || "{}"); } catch { board = {}; }
-  const entries = Object.entries(board)
-    .map(([k, v]) => ({ key: k, name: (v && v.name) || k, count: Number((v && v.count) || v) || 0 }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, CHECKIN_SHOW_TOP);
-  if (entries.length === 0) {
-    return '<local:MyListItem Margin="-5,0,-5,0" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="暂无签到记录" Info="快来抢第一名！" />';
-  }
-  let xaml = "";
-  entries.forEach((e, i) => {
-    const rank = i + 1;
-    const isMe = myKey && e.key === myKey;
-    const name = escapeXaml(e.name) + (isMe ? "（你）" : "");
-    const logo = rank === 1
-      ? "pack://application:,,,/images/Blocks/GoldBlock.png"
-      : rank <= 3
-        ? "pack://application:,,,/images/Blocks/Grass.png"
-        : "pack://application:,,,/images/Blocks/Cobblestone.png";
-    xaml += '<local:MyListItem Margin="-5,0,-5,6" Logo="' + logo + '"'
-      + ' Title="' + name + ' · ' + checkinTitle(rank) + '"'
-      + ' Info="累计签到 ' + e.count + ' 天 · 第 ' + rank + ' 名"'
-      + ' />';
-  });
-  return xaml;
-}
-// 我的排名文本
-async function getMyCheckinRank(env, myKey) {
-  if (!myKey) return "未上榜";
-  try {
-    const board = JSON.parse(await env.HOMEPAGE_KV.get("checkin:board") || "{}");
-    const sorted = Object.entries(board)
-      .map(([k, v]) => ({ key: k, count: Number((v && v.count) || v) || 0 }))
-      .sort((a, b) => b.count - a.count);
-    const idx = sorted.findIndex((e) => e.key === myKey);
-    if (idx >= 0) return "第 " + (idx + 1) + " 名";
-  } catch { /* ignore */ }
-  return "未上榜";
-}
-
 // ============ 节日与纪念日 ============
 const FESTIVALS = [
   { month: 1,  day: 1,  name: "元旦",                    msg: "新的一年，新的冒险开始啦！" },
@@ -1053,31 +950,6 @@ export async function onRequest(context) {
       console.error("[Visit] 统计失败：", e);
     }
 
-    // ========== 签到与排行榜（玩家 ID） ==========
-    const playerName = url.searchParams.get("user") || "";
-    const playerKey = playerName ? playerName.toLowerCase() : "";
-    let checkin = { isNew: false, count: 0, streak: 0, todayCount: 0 };
-    let checkinMsg = "";
-    let checkinRankText = "";
-    let checkinBoardXaml = "";
-    let checkinConfigHint = "";
-    try {
-      if (playerKey) {
-        checkin = await processCheckin(env, playerKey, playerName, today);
-        checkinMsg = checkin.isNew
-          ? "签到成功！&#xA;连续第 " + checkin.streak + " 天，累计 " + checkin.count + " 天。"
-          : "今天已经签到过啦，明天再来吧！&#xA;当前连续 " + checkin.streak + " 天。";
-        checkinRankText = await getMyCheckinRank(env, playerKey);
-      } else {
-        checkinMsg = "未识别玩家 ID，无法签到。&#xA;请在 PCL 联网主页的下载地址末尾加上 ?user={user}";
-        checkinRankText = "未上榜";
-        checkinConfigHint = '<local:MyHint Theme="Yellow" Margin="0,0,0,12" Text="未识别玩家 ID：请在 PCL 联网主页下载地址末尾加上 ?user={user} 即可参与签到与排行。" />';
-      }
-      checkinBoardXaml = await buildCheckinBoardXaml(env, playerKey);
-    } catch (e) {
-      console.error("[Checkin] 签到处理失败：", e);
-    }
-
     // ========== 节日与纪念日 ==========
     const festival = getFestival(date);
     const festivalBanner = buildFestivalBanner(festival);
@@ -1108,14 +980,7 @@ export async function onRequest(context) {
       .replace(/__SEED_DESC__/g, seed.desc)
       .replace(/__QUIZ_Q__/g, quiz.q)
       .replace(/__QUIZ_A__/g, quiz.a)
-      .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
-      .replace(/__CHECKIN_STREAK__/g, playerKey ? String(checkin.streak) : "—")
-      .replace(/__CHECKIN_TOTAL__/g, playerKey ? String(checkin.count) : "—")
-      .replace(/__CHECKIN_TODAY__/g, String(checkin.todayCount))
-      .replace(/__CHECKIN_RANK_TEXT__/g, checkinRankText)
-      .replace(/__CHECKIN_MSG__/g, checkinMsg)
-      .replace(/<!--\s*__CHECKIN_BOARD__\s*-->|__CHECKIN_BOARD__/g, checkinBoardXaml)
-      .replace(/<!--\s*__CHECKIN_HINT__\s*-->|__CHECKIN_HINT__/g, checkinConfigHint);
+      .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner);
 
     return new Response(xaml, {
       headers: {

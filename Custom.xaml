@@ -91,56 +91,6 @@
             </Grid>
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="每日签到" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <!-- __CHECKIN_HINT__ -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" CornerRadius="10" Padding="10,12" Margin="0,0,4,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <TextBlock Text="连续签到" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__CHECKIN_STREAK__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
-                        <TextBlock Text="天" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="1" CornerRadius="10" Padding="10,12" Margin="4,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <TextBlock Text="累计签到" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__CHECKIN_TOTAL__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
-                        <TextBlock Text="天" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="2" CornerRadius="10" Padding="10,12" Margin="4,0,0,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <TextBlock Text="今日已签" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__CHECKIN_TODAY__" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
-                        <TextBlock Text="人" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <local:MyButton Height="40" HorizontalAlignment="Center" Padding="30,0,30,0" Margin="0,14,0,0" ColorType="Highlight" Text="立即签到">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="每日签到|__CHECKIN_MSG__" />
-                        <local:CustomEvent Type="刷新页面" Data="-" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyButton>
-            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="打开主页即自动签到，点击按钮可查看签到结果。" />
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,14,0,12" />
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <TextBlock Text="签到排行榜" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                <TextBlock Text="  ·  我的排名：__CHECKIN_RANK_TEXT__" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-            </StackPanel>
-            <!-- __CHECKIN_BOARD__ -->
-            <local:MyHint Theme="Yellow" Margin="0,6,0,0" Text="排行榜按玩家 ID 统计累计签到天数，每天更新。你的 ID 会高亮显示。" />
-        </StackPanel>
-    </local:MyCard>
     <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
