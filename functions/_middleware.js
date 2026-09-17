@@ -820,26 +820,43 @@ function buildWeatherXaml(city, temp, desc, wind, isDay) {
     + '</Border>'
     + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="数据按公网 IP 自动定位，来自 Open-Meteo。" />';
 }
+// 定位：优先 ipwho.is（https 免费），降级 ip-api.com（http 免费）
+async function fetchGeo(ip) {
+  const clean = String(ip || "").replace(/:\d+$/, "");
+  const tryOne = async (url) => {
+    const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
+    if (!r.ok) return null;
+    return await r.json();
+  };
+  try {
+    const j = await tryOne("https://ipwho.is/" + (clean && clean !== "unknown" ? encodeURIComponent(clean) : ""));
+    if (j && j.success !== false && j.latitude != null) {
+      return { city: j.city || j.region || "未知地区", lat: j.latitude, lon: j.longitude };
+    }
+  } catch (e) { /* 忽略，尝试下一个 */ }
+  try {
+    const j = await tryOne("http://ip-api.com/json/" + encodeURIComponent(clean) + "?lang=zh-CN");
+    if (j && j.status === "success") {
+      return { city: j.city || j.regionName || "未知地区", lat: j.lat, lon: j.lon };
+    }
+  } catch (e) { /* 忽略 */ }
+  return null;
+}
 async function fetchWeather(env, ip) {
   try {
-    const geoUrl = "https://ip-api.com/json/" + encodeURIComponent(ip) + "?lang=zh-CN";
-    const geoRes = await fetch(geoUrl, { headers: { "User-Agent": "PCL-Homepage" } });
-    if (!geoRes.ok) return buildWeatherUnavailable();
-    const geo = await geoRes.json();
-    if (!geo || geo.status !== "success") return buildWeatherUnavailable();
-    const city = geo.city || geo.regionName || "未知地区";
-    const lat = geo.lat, lon = geo.lon;
-    const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
-      + "&current_weather=true&timezone=auto";
+    const geo = await fetchGeo(ip);
+    if (!geo) return buildWeatherUnavailable();
+    const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + geo.lat + "&longitude=" + geo.lon
+      + "&current=temperature_2m,weather_code,wind_speed_10m,is_day&timezone=auto";
     const wRes = await fetch(wUrl, { headers: { "User-Agent": "PCL-Homepage" } });
     if (!wRes.ok) return buildWeatherUnavailable();
     const w = await wRes.json();
-    const cw = (w && w.current_weather) || {};
-    const temp = Math.round(cw.temperature);
-    const wind = Math.round(cw.windspeed);
-    const desc = WCODE[cw.weathercode] || "未知";
+    const cw = (w && w.current) || {};
+    const temp = Math.round(cw.temperature_2m);
+    const wind = Math.round(cw.wind_speed_10m);
+    const desc = WCODE[cw.weather_code] || "未知";
     const isDay = cw.is_day;
-    return buildWeatherXaml(city, temp, desc, wind, isDay);
+    return buildWeatherXaml(geo.city, temp, desc, wind, isDay);
   } catch (e) {
     console.error("[Weather] 获取天气失败：", e);
     return buildWeatherUnavailable();
