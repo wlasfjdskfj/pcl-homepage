@@ -1,30 +1,35 @@
 <StackPanel>
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
+            <Border CornerRadius="12" Height="300" Margin="0,0,0,16" ClipToBounds="True" BorderBrush="#33FFFFFF" BorderThickness="1">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.Santenay_ZH-CN5676942384_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#33000000" Offset="0" />
-                                <GradientStop Color="#88000000" Offset="0.55" />
-                                <GradientStop Color="#CC000000" Offset="1" />
+                                <GradientStop Color="#4D000000" Offset="0" />
+                                <GradientStop Color="#66000000" Offset="0.45" />
+                                <GradientStop Color="#B3000000" Offset="0.75" />
+                                <GradientStop Color="#E6000000" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                     </Border>
-                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#59000000" CornerRadius="14" Padding="12,10,16,10">
+                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66000000" CornerRadius="16" BorderBrush="#40FFFFFF" BorderThickness="1" Padding="14,11,18,11">
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
-                                <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource ColorBrush1}" Margin="0,0,9,0" VerticalAlignment="Center">
-                                    <local:MyImage Width="17" Height="17" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                                <Border Width="30" Height="30" CornerRadius="15" Background="{DynamicResource ColorBrush1}" BorderBrush="#55FFFFFF" BorderThickness="1" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <local:MyImage Width="19" Height="19" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                                 </Border>
-                                <TextBlock Text="__GREETING__，{user}！" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="__GREETING__，{user}！" FontSize="15" FontWeight="Bold" Foreground="White" />
+                                    <TextBlock Text="欢迎回来，今天也一起去冒险吧。" FontSize="11.5" Foreground="#E0FFFFFF" Margin="0,3,0,0" />
+                                </StackPanel>
                             </StackPanel>
-                            <TextBlock Text="欢迎回来，今天也一起去冒险吧。" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />
                         </StackPanel>
                     </Border>
-                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="__DATE_YEAR__ · __DATE_MONTH__ / __DATE_DAY__" />
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,18,16" Background="#33000000" CornerRadius="9" Padding="10,5,10,5">
+                        <TextBlock FontSize="11" FontWeight="Bold" Foreground="#D9FFFFFF" Text="__DATE_YEAR__ · __DATE_MONTH__ / __DATE_DAY__" />
+                    </Border>
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                             <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
@@ -32,13 +37,48 @@
                             <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <Grid>
+                                <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="#66000000" Margin="0,4,0,0" />
+                                <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            </Grid>
                             <TextBlock Text=" 月 " FontSize="14" VerticalAlignment="Bottom" Margin="0,0,6,18" Foreground="#CCFFFFFF" />
-                            <TextBlock Text="__DATE_DAY__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <Grid>
+                                <TextBlock Text="__DATE_DAY__" FontSize="60" FontWeight="Bold" Foreground="#66000000" Margin="0,4,0,0" />
+                                <TextBlock Text="__DATE_DAY__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            </Grid>
                             <TextBlock Text=" 日" FontSize="14" VerticalAlignment="Bottom" Margin="0,0,6,18" Foreground="#CCFFFFFF" />
                         </StackPanel>
-                        <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />
+                        <Grid>
+                            <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#66000000" Margin="0,2,0,0" />
+                            <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" />
+                        </Grid>
+                        <Border Width="26" Height="2" CornerRadius="1" Background="{DynamicResource ColorBrush1}" HorizontalAlignment="Center" Margin="0,9,0,0" Opacity="0.9" />
                     </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,10" Opacity="0.6">
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Grass.png">
+                            <local:MyImage.RenderTransform>
+                                <TranslateTransform Y="-4" />
+                            </local:MyImage.RenderTransform>
+                        </local:MyImage>
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Dirt.png" Margin="1,0,0,0" />
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Stone.png">
+                            <local:MyImage.RenderTransform>
+                                <TranslateTransform Y="-3" />
+                            </local:MyImage.RenderTransform>
+                        </local:MyImage>
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Grass.png">
+                            <local:MyImage.RenderTransform>
+                                <TranslateTransform Y="-1" />
+                            </local:MyImage.RenderTransform>
+                        </local:MyImage>
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Dirt.png" Margin="1,0,0,0" />
+                        <local:MyImage Width="17" Height="17" Source="pack://application:,,,/images/Blocks/Stone.png">
+                            <local:MyImage.RenderTransform>
+                                <TranslateTransform Y="-5" />
+                            </local:MyImage.RenderTransform>
+                        </local:MyImage>
+                    </StackPanel>
+                    <Border Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="{DynamicResource ColorBrush1}" Opacity="0.35" />
                 </Grid>
             </Border>
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
@@ -61,31 +101,39 @@
                 </Grid.ColumnDefinitions>
                 <Border Grid.Column="0" CornerRadius="10" Padding="16,14" Margin="0,0,6,0" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                     <Grid>
-                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="80" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,-12,0" Opacity="0.06" />
+                        <TextBlock Text="__LUCKY_NUMBER__" FontSize="100" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-10,8" Opacity="0.05" />
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
                                 <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
                                 <TextBlock Text="幸运数字" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                             </StackPanel>
-                            <TextBlock Text="__LUCKY_NUMBER__" FontSize="34" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                            <TextBlock Text="__LUCKY_NUMBER__" FontSize="38" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                            <Border Width="22" Height="2" CornerRadius="1" Background="{DynamicResource ColorBrush1}" HorizontalAlignment="Center" Margin="0,6,0,0" Opacity="0.5" />
                         </StackPanel>
                     </Grid>
                 </Border>
-                <Border Grid.Column="1" CornerRadius="10" Padding="16,14" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                            <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneLampOn.png" />
-                            <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                <Border Grid.Column="1" CornerRadius="10" Padding="16,14" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                    <Grid>
+                        <Border CornerRadius="10" Background="__LUCKY_COLOR_HEX__" Opacity="0.08" />
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
+                                <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneLampOn.png" />
+                                <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Grid Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center">
+                                    <Border CornerRadius="18" Background="__LUCKY_COLOR_HEX__" Margin="2" />
+                                    <Border CornerRadius="18" BorderBrush="__LUCKY_COLOR_HEX__" BorderThickness="3" Opacity="0.45" />
+                                    <Border CornerRadius="18" BorderBrush="#44FFFFFF" BorderThickness="1" Margin="2" />
+                                    <Ellipse Width="9" Height="9" Fill="#55FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="7,7,0,0" />
+                                </Grid>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                                    <TextBlock Text="今日吉色" FontSize="10.5" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
+                                </StackPanel>
+                            </StackPanel>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Grid Width="28" Height="28" Margin="0,0,10,0" VerticalAlignment="Center">
-                                <Border CornerRadius="14" Background="__LUCKY_COLOR_HEX__" />
-                                <Border CornerRadius="14" BorderBrush="#44FFFFFF" BorderThickness="1" />
-                                <Ellipse Width="8" Height="8" Fill="#55FFFFFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5,5,0,0" />
-                            </Grid>
-                            <TextBlock Text="__LUCKY_COLOR_NAME__" FontSize="15" FontWeight="Bold" VerticalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
-                        </StackPanel>
-                    </StackPanel>
+                    </Grid>
                 </Border>
             </Grid>
         </StackPanel>
@@ -93,15 +141,21 @@
     <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
-            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                <Grid>
+                    <local:MyImage Width="88" Height="88" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-12,-8" Opacity="0.07" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <Border Width="18" Height="18" CornerRadius="4" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center">
+                                <local:MyImage Width="12" Height="12" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                            </Border>
+                            <TextBlock Text="主推服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="mc.hypixel.net" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />
+                        <Border Width="40" Height="2" CornerRadius="1" Background="{DynamicResource ColorBrush1}" HorizontalAlignment="Center" Margin="0,0,0,14" Opacity="0.4" />
+                        <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
                     </StackPanel>
-                    <TextBlock Text="mc.hypixel.net" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />
-                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="mc.hypixel.net" />
-                </StackPanel>
+                </Grid>
             </Border>
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
@@ -158,33 +212,30 @@
     </local:MyCard>
     <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                            <TextBlock Text="{user}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
-                            <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
+            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                <Grid>
+                    <local:MyImage Width="96" Height="96" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-14,-10,0" Opacity="0.06" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Border Width="34" Height="34" CornerRadius="17" Background="{DynamicResource ColorBrush1}" BorderBrush="#33FFFFFF" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
+                                <local:MyImage Width="20" Height="20" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                                <TextBlock Text="{user}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                                <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
+                            </StackPanel>
                         </StackPanel>
-                    </Grid>
-                    <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                            <TextBlock Text="__USER_IP__" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                        <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />
+                        <StackPanel Orientation="Horizontal">
+                            <local:MyImage Width="22" Height="22" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                                <TextBlock Text="__USER_IP__" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                            </StackPanel>
                         </StackPanel>
-                    </Grid>
-                </StackPanel>
+                    </StackPanel>
+                </Grid>
             </Border>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -209,6 +260,7 @@
                             </LinearGradientBrush>
                         </Border.Background>
                     </Border>
+                    <local:MyImage Width="132" Height="132" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-20,-18" Opacity="0.12" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                     <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66FFFFFF" CornerRadius="10" Padding="10,4,10,4">
                         <StackPanel Orientation="Horizontal">
                             <local:MyImage Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
@@ -219,6 +271,7 @@
                         <TextBlock Text="__CHALLENGE_DIFF__" FontSize="10" FontWeight="Bold" Foreground="White" />
                     </Border>
                     <TextBlock Text="__CHALLENGE__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />
+                    <Border Height="3" VerticalAlignment="Bottom" Background="{DynamicResource ColorBrush1}" Opacity="0.35" />
                 </Grid>
             </Border>
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
@@ -242,6 +295,7 @@
             <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />
             <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <local:MyImage Width="15" Height="15" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Stone.png" />
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="最近正式版" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
@@ -253,6 +307,7 @@
             <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />
             <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <local:MyImage Width="15" Height="15" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="更新内容" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
             </StackPanel>
@@ -552,14 +607,17 @@
     </local:MyCard>
     <local:MyCard Title="今日种子推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
+                <Grid>
+                    <local:MyImage Width="72" Height="72" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-10,-8" Opacity="0.07" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                    <StackPanel Orientation="Horizontal">
+                        <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                            <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
             <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
             <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="__SEED__" />
