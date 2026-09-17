@@ -1145,9 +1145,14 @@ export async function onRequest(context) {
         <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="hidden" name="action" value="maint">
           <input type="hidden" name="on" value="1">
-          <input name="eta" type="time" value="${escapeHtml(maintEta)}" placeholder="预计完成时间" style="flex:1;min-width:120px;">
+          <input name="eta" type="time" value="${escapeHtml(maintEta)}" placeholder="预计完成时间" style="flex:1;min-width:110px;">
           <button type="submit" class="btn btn-warn">开启</button>
         </form>
+        <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <button type="button" class="btn btn-ghost eta-quick-btn" data-min="30" style="font-size:12px;padding:6px 10px;">+30分钟</button>
+          <button type="button" class="btn btn-ghost eta-quick-btn" data-min="60" style="font-size:12px;padding:6px 10px;">+1小时</button>
+          <button type="button" class="btn btn-ghost eta-quick-btn" data-min="120" style="font-size:12px;padding:6px 10px;">+2小时</button>
+        </div>
         <form method="post" style="margin-top:8px;">
           <input type="hidden" name="action" value="maint">
           <input type="hidden" name="on" value="0">
@@ -1190,6 +1195,19 @@ export async function onRequest(context) {
       });
     });
   })();
+
+  // 服务器更新：快捷预计完成时间（按北京时间+增量自动填入）
+  document.querySelectorAll('.eta-quick-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mins = Number(btn.dataset.min) || 0;
+      const now = new Date(Date.now() + 8 * 3600 * 1000);
+      const t = new Date(now.getTime() + mins * 60000);
+      const hh = String(t.getUTCHours()).padStart(2, '0');
+      const mm = String(t.getUTCMinutes()).padStart(2, '0');
+      const input = btn.closest('.manage-card').querySelector('input[name=eta]');
+      if (input) input.value = hh + ':' + mm;
+    });
+  });
 
   // 数字滚动
   document.querySelectorAll('[data-count]').forEach((el) => {
