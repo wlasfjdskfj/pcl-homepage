@@ -570,7 +570,7 @@ export async function onRequest(context) {
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body {
-    margin:0; padding:28px 20px 60px;
+    margin:0; padding:0;
     background: var(--bg); color: var(--text);
     font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;
     min-height:100vh; position:relative; overflow-x:hidden;
@@ -924,6 +924,67 @@ export async function onRequest(context) {
   .manage-desc { font-size:12.5px; color:var(--text-dim); margin:0 0 14px; }
   .empty-block { text-align:center; color:var(--text-dim); padding:16px; font-size:13px; }
 
+  /* ===== 侧边导航控制台布局 ===== */
+  .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+  .sidebar {
+    width:214px; flex-shrink:0; position:sticky; top:0; height:100vh;
+    background: var(--card);
+    border-right:1px solid var(--card-border);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    display:flex; flex-direction:column;
+    padding:20px 14px;
+    z-index:20;
+  }
+  .brand { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; color:var(--text-strong); padding:4px 8px 20px; }
+  .brand-icon {
+    width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#fff; font-size:16px;
+    box-shadow: 0 6px 16px rgba(255,68,68,.35);
+  }
+  .nav { display:flex; flex-direction:column; gap:4px; margin-top:6px; flex:1; }
+  .nav-item {
+    display:flex; align-items:center; gap:11px;
+    padding:11px 13px; border-radius:10px;
+    color: var(--text-dim); text-decoration:none; font-size:13.5px; font-weight:500;
+    transition: background .2s, color .2s, transform .15s;
+    cursor:pointer; border:1px solid transparent; user-select:none;
+  }
+  .nav-item .nav-ico { font-size:15px; opacity:.9; }
+  .nav-item:hover { background: var(--btn-ghost-bg); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(255,68,68,.12), rgba(255,68,68,.06));
+    color: var(--accent); border-color: rgba(255,68,68,.22);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .sidebar-foot { display:flex; gap:6px; padding-top:12px; border-top:1px solid var(--card-border); }
+  .sidebar-foot .btn { flex:1; justify-content:center; }
+
+  .main { flex:1; min-width:0; display:flex; flex-direction:column; }
+  .topbar {
+    position:sticky; top:0; z-index:15;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    padding:16px 26px;
+    background: var(--bg);
+    border-bottom:1px solid var(--card-border);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  }
+  .topbar-title { font-size:17px; font-weight:700; color:var(--text-strong); }
+  .topbar-right { display:flex; align-items:center; gap:10px; font-size:12.5px; color:var(--text-dim); flex-wrap:wrap; }
+  .content { flex:1; padding:24px 26px 40px; }
+  .section { animation: fadeUp .4s ease both; }
+
+  @media (max-width: 860px) {
+    .layout { flex-direction:column; }
+    .sidebar { width:100%; height:auto; position:static; flex-direction:row; align-items:center; padding:12px 16px; border-right:none; border-bottom:1px solid var(--card-border); }
+    .brand { padding:0 12px 0 0; }
+    .brand-text { display:none; }
+    .nav { flex-direction:row; margin:0; overflow-x:auto; }
+    .nav-item { white-space:nowrap; }
+    .sidebar-foot { border-top:none; padding-top:0; margin-left:auto; }
+    .content { padding:20px 16px 36px; }
+    .topbar { padding:14px 16px; }
+  }
+
   @media (max-width: 640px) {
     .manage-grid { grid-template-columns:1fr; }
     .split-card { grid-template-columns:1fr; }
@@ -937,33 +998,31 @@ export async function onRequest(context) {
   <div class="top-band" aria-hidden="true"></div>
   <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
-  <div class="container">
-    <div class="hero">
-      <div class="hero-left">
-        <div class="hero-title">
-          <span class="hero-icon">📊</span>
-          <span>访问统计</span>
-        </div>
-        <div class="hero-sub">
-          <span class="hero-date">
-            <span class="hero-date-icon">📅</span>
-            <span id="bjDate">--</span>
-          </span>
-          <span class="hero-divider"></span>
-          <span class="hero-time">
-            <span class="hero-time-icon">🕒</span>
-            更新于 <b id="bjTime">${initialTime}</b>
-            <span class="hero-tz">UTC+8</span>
-          </span>
-        </div>
-      </div>
-      <div class="actions">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-icon">📊</span><span class="brand-text">PCL 后台</span></div>
+      <nav class="nav">
+        <a class="nav-item active" data-tab="overview"><span class="nav-ico">📈</span>概览</a>
+        <a class="nav-item" data-tab="visitors"><span class="nav-ico">🌍</span>访问排行</a>
+        <a class="nav-item" data-tab="manage"><span class="nav-ico">🛠</span>封禁管理</a>
+      </nav>
+      <div class="sidebar-foot">
         <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
-        <a href="/admin" class="btn btn-primary">↻ 刷新</a>
+        <a href="/admin" class="btn btn-ghost" title="刷新">↻</a>
         <a href="/admin?action=logout" class="btn btn-ghost">退出</a>
       </div>
-    </div>
-
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title" id="tabTitle">概览</div>
+        <div class="topbar-right">
+          <span class="hero-date"><span class="hero-date-icon">📅</span><span id="bjDate">--</span></span>
+          <span class="hero-divider"></span>
+          <span class="hero-time"><span class="hero-time-icon">🕒</span>更新于 <b id="bjTime">${initialTime}</b><span class="hero-tz">UTC+8</span></span>
+        </div>
+      </header>
+      <div class="content">
+        <section id="tab-overview" class="section">
     ${warnHtml}
 
     <div class="cards">
@@ -1037,15 +1096,18 @@ export async function onRequest(context) {
       </table>
     </div>
 
-    <h2>IP 访问排行（前 100）</h2>
-    <div class="table-wrap" style="animation-delay:.44s;">
-      <table>
-        <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th></tr></thead>
-        <tbody>${ipRows || '<tr><td colspan="4" class="empty">暂无记录</td></tr>'}</tbody>
-      </table>
-    </div>
-
-    <h2>管理</h2>
+        </section>
+        <section id="tab-visitors" class="section" hidden>
+          <h2>IP 访问排行（前 100）</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th></tr></thead>
+              <tbody>${ipRows || '<tr><td colspan="4" class="empty">暂无记录</td></tr>'}</tbody>
+            </table>
+          </div>
+        </section>
+        <section id="tab-manage" class="section" hidden>
+          <h2>管理</h2>
     <div class="manage-grid">
       <div class="manage-card">
         <div class="manage-title">🚫 IP 封禁</div>
@@ -1064,22 +1126,43 @@ export async function onRequest(context) {
           <button type="submit" class="btn btn-warn">重置天气缓存</button>
         </form>
       </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="footer">
+        <div class="footer-left">
+          <span>访问统计后台</span>
+          <span class="footer-dot">·</span>
+          <span>数据源：KV + request.cf</span>
+        </div>
+        <div class="footer-right">
+          <a href="/admin">刷新</a>
+          <a href="/admin?action=logout">退出</a>
+        </div>
+      </footer>
     </div>
   </div>
 
-  <footer class="footer">
-    <div class="footer-left">
-      <span>访问统计后台</span>
-      <span class="footer-dot">·</span>
-      <span>数据源：KV + request.cf</span>
-    </div>
-    <div class="footer-right">
-      <a href="/admin">刷新</a>
-      <a href="/admin?action=logout">退出</a>
-    </div>
-  </footer>
-
 <script>
+  // 侧边导航切换
+  (function(){
+    const navs = document.querySelectorAll('.nav-item');
+    const title = document.getElementById('tabTitle');
+    const tabs = { overview:'概览', visitors:'访问排行', manage:'封禁管理' };
+    navs.forEach(a => {
+      a.addEventListener('click', () => {
+        navs.forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+        const t = a.dataset.tab;
+        document.querySelectorAll('.section').forEach(s => { s.hidden = true; });
+        const sec = document.getElementById('tab-' + t);
+        if (sec) sec.hidden = false;
+        if (title && tabs[t]) title.textContent = tabs[t];
+      });
+    });
+  })();
+
   // 数字滚动
   document.querySelectorAll('[data-count]').forEach((el) => {
     const target = Number(el.dataset.count) || 0;
