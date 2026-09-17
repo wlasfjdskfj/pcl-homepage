@@ -933,7 +933,8 @@ export async function onRequest(context) {
       .replace(/__SCORE__/g, String(score))
       .replace(/__COMMENT__/g, info.comment)
       .replace(/__GRADE__/g, info.grade)
-      .replace(/__SCORE_BAR__/g, scoreBar)
+      // 兼容注释包裹形式（<!-- __SCORE_BAR__ -->）与历史裸占位符
+      .replace(/<!--\s*__SCORE_BAR__\s*-->|__SCORE_BAR__/g, scoreBar)
       .replace(/__FORTUNE_GOOD__/g, fortuneGood)
       .replace(/__FORTUNE_BAD__/g, fortuneBad)
       .replace(/__FORTUNE_TIP__/g, fortuneTip)
