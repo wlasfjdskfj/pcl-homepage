@@ -884,22 +884,12 @@ function buildCountdownXaml(date) {
     const diff = Math.round((Date.UTC(y, e.month - 1, e.day) - today) / 86400000);
     if (!best || diff < best.diff) best = { name: e.name, diff, month: e.month, day: e.day };
   }
-  if (!best) return '<local:MyHint Theme="Blue" Text="近期没有节日，享受平常的日子吧。" />';
-  const soon = best.diff <= 3;
-  const line1 = best.diff === 0
+  if (!best) return "";
+  const line = best.diff === 0
     ? "今天就是 " + escapeXaml(best.name) + "！"
-    : "距离 " + escapeXaml(best.name) + " 还有 " + best.diff + " 天";
-  const icon = soon
-    ? "pack://application:,,,/images/Blocks/GoldBlock.png"
-    : "pack://application:,,,/images/Blocks/Anvil.png";
-  return '<Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">'
-    + '<StackPanel>'
-    + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">'
-    + '<local:MyImage Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
-    + '<TextBlock Text="' + escapeXaml(best.name) + '" FontSize="12" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
-    + '</StackPanel>'
-    + '<TextBlock Text="' + line1 + '" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />'
-    + '</StackPanel>'
+    : escapeXaml(best.name) + " · 还有 " + best.diff + " 天";
+  return '<Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#59000000" CornerRadius="12" Padding="12,8,12,8">'
+    + '<TextBlock Text="' + line + '" FontSize="12" FontWeight="Bold" Foreground="White" />'
     + '</Border>';
 }
 

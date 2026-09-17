@@ -652,7 +652,6 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
     lines.append('            <!-- __FESTIVAL_BANNER__ -->')
-    lines.append('            <!-- __COUNTDOWN_BODY__ -->')
 
     lines.append('            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
@@ -680,6 +679,7 @@ def build_xaml():
     lines.append('                    </Border>')
 
     lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="' + year + ' · ' + month + ' / ' + day + '" />')
+    lines.append('                    <!-- __COUNTDOWN_BODY__ -->')
 
     lines.append('                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">')
     lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')

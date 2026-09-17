@@ -2,7 +2,6 @@
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <!-- __FESTIVAL_BANNER__ -->
-            <!-- __COUNTDOWN_BODY__ -->
             <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.Santenay_ZH-CN5676942384_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
@@ -27,6 +26,7 @@
                         </StackPanel>
                     </Border>
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="__DATE_YEAR__ · __DATE_MONTH__ / __DATE_DAY__" />
+                    <!-- __COUNTDOWN_BODY__ -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                             <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
