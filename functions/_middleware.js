@@ -663,44 +663,10 @@ function buildFallbackXaml(title, message, eta) {
   }
 
   // ===== 服务器正在更新：精致加载页 =====
-  // 敲稿动画（PCL Storyboard）：逐字敲出 + 弹性缩放弹入 + 尾部闪烁光标，不加百分比
-  const loadingText = '正在加载中';
-  const cycle = 3.5;  // 循环周期（秒）
-  const step = 0.22;  // 每字间隔（秒）
-  let anim = '';
-  let chars = '';
-  for (let i = 0; i < loadingText.length; i++) {
-    const b = (i * step).toFixed(2);
-    const b2 = (i * step + 0.2).toFixed(2);
-    anim +=
-      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.12" BeginTime="0:0:' + b + '"/>' +
-      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="0.4" To="1.15" Duration="0:0:0.2" BeginTime="0:0:' + b + '"/>' +
-      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.4" To="1.15" Duration="0:0:0.2" BeginTime="0:0:' + b + '"/>' +
-      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>' +
-      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>';
-    chars +=
-      '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="17" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,1,0" Opacity="0" RenderTransformOrigin="0.5,0.5">' +
-      '<TextBlock.RenderTransform><ScaleTransform ScaleX="0.4" ScaleY="0.4"/></TextBlock.RenderTransform>' +
-      '</TextBlock>';
-  }
-  // 尾部闪烁光标
-  const curBegin = (loadingText.length * step).toFixed(2);
-  anim += '<DoubleAnimation Storyboard.TargetName="CUR" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:' + curBegin + '"/>';
-  chars += '<TextBlock x:Name="CUR" Text="|" FontSize="17" FontWeight="Bold" Foreground="{DynamicResource ColorBrush2}" Margin="1,0,0,0" Opacity="0" />';
-
-  const typeLine =
-    '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,14,0,0">' +
-    '<StackPanel.Triggers>' +
-    '<EventTrigger RoutedEvent="StackPanel.Loaded">' +
-    '<BeginStoryboard>' +
-    '<Storyboard RepeatBehavior="Forever" FillBehavior="Stop" Duration="0:0:' + cycle + '">' +
-    anim +
-    '</Storyboard>' +
-    '</BeginStoryboard>' +
-    '</EventTrigger>' +
-    '</StackPanel.Triggers>' +
-    chars +
-    '</StackPanel>';
+  // 状态提示文案（居中、可换行）
+  const statusText = '短暂的等待，是为了之后更长久的顺畅，感谢您的耐心。';
+  const statusLine =
+    '<TextBlock Text="' + statusText + '" FontSize="15" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="440" HorizontalAlignment="Center" LineHeight="26" Margin="0,18,0,0"/>';
 
   // 旋转加载圈（参考 PCL 动画语法）
   const spinner =
@@ -724,7 +690,7 @@ function buildFallbackXaml(title, message, eta) {
     '        <StackPanel Margin="30,42,30,34">' +
     spinner +
     '            <TextBlock Text="服务器正在更新" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,20,0,0"/>' +
-    typeLine +
+    statusLine +
     etaLine +
     '            <local:MyIconTextButton Margin="0,24,0,0" Height="40" HorizontalAlignment="Center" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
     '            <local:MyHint Theme="Yellow" Margin="0,18,0,0" Text="' + message + '" />' +
