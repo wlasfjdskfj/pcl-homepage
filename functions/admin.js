@@ -523,6 +523,7 @@ export async function onRequest(context) {
     const providedPwd = String(form.get("pwd") || "");
     if (safeEqual(providedPwd, adminPwd)) {
       try {
+        await ensureD1Table(env);
         const token = randomToken();
         await env.STATS_DB.prepare(
           "INSERT INTO admin_sessions (token, expires) VALUES (?, ?)"
