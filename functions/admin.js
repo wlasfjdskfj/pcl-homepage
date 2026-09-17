@@ -107,6 +107,17 @@ function ccToName(cc) {
   return COUNTRY_NAMES[key] || key;
 }
 
+// 时间戳格式化为北京时间 MM-DD HH:MM
+function fmtTime(ms) {
+  if (!ms) return "—";
+  const d = new Date(Number(ms) + 8 * 3600 * 1000);
+  const M = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const D = String(d.getUTCDate()).padStart(2, "0");
+  const h = String(d.getUTCHours()).padStart(2, "0");
+  const m = String(d.getUTCMinutes()).padStart(2, "0");
+  return M + "-" + D + " " + h + ":" + m;
+}
+
 /* ---------------- 主题脚本 ---------------- */
 
 const THEME_SCRIPT = `
@@ -516,11 +527,12 @@ export async function onRequest(context) {
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
     // 统一解析 IP 记录，兼容多种存储结构
+    const sortMode = url.searchParams.get("sort") === "time" ? "time" : "count";
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
         // 旧格式：直接是数字
         if (typeof val === "number") {
-          return [ip, { c: val, cc: "XX" }];
+          return [ip, { c: val, cc: "XX", t: 0 }];
         }
 
         // 对象格式：兼容 c / count / visits，国家兼容 cc / country / cf.country
@@ -531,13 +543,18 @@ export async function onRequest(context) {
           val.cf?.country ||
           val.cf?.countryCode ||
           "XX";
+        const t = Number(val.t ?? val.lastTime ?? 0) || 0;
 
-        return [ip, { c, cc: String(cc).toUpperCase() }];
+        return [ip, { c, cc: String(cc).toUpperCase(), t }];
       })
       .filter(([, v]) => Number.isFinite(v.c) && v.c > 0)
-      .sort((a, b) => b[1].c - a[1].c);
+      .sort((a, b) =>
+        sortMode === "time"
+          ? (b[1].t || 0) - (a[1].t || 0)
+          : b[1].c - a[1].c
+      );
 
-    // IP 表格增加“国家/地区”列
+    // IP 表格：增加"国家/地区"列 和 "最近访问"列
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);
       const country = ccToName(v.cc);
@@ -546,6 +563,7 @@ export async function onRequest(context) {
         <td><span class="ip-flag">${flag}</span><span class="ip-text">${escapeHtml(ipAddr)}</span></td>
         <td>${escapeHtml(country)}</td>
         <td>${escapeHtml(v.c)}</td>
+        <td>${v.t ? fmtTime(v.t) : "—"}</td>
       </tr>`;
     }).join("");
 
@@ -1112,10 +1130,15 @@ export async function onRequest(context) {
         </section>
         <section id="tab-visitors" class="section" hidden>
           <h2>IP 访问排行（前 100）</h2>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
+            <span style="font-size:13px;color:var(--text-dim);">排序：</span>
+            <a class="btn ${sortMode === 'count' ? 'btn-primary' : 'btn-ghost'}" href="/admin?sort=count" style="font-size:12.5px;padding:6px 12px;">按次数</a>
+            <a class="btn ${sortMode === 'time' ? 'btn-primary' : 'btn-ghost'}" href="/admin?sort=time" style="font-size:12.5px;padding:6px 12px;">按最近访问</a>
+          </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th></tr></thead>
-              <tbody>${ipRows || '<tr><td colspan="4" class="empty">暂无记录</td></tr>'}</tbody>
+              <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th><th>最近访问</th></tr></thead>
+              <tbody>${ipRows || '<tr><td colspan="5" class="empty">暂无记录</td></tr>'}</tbody>
             </table>
           </div>
         </section>

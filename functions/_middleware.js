@@ -1224,10 +1224,11 @@ export async function onRequest(context) {
         ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
         : null;
 
-      // 写入新格式 { c, cc }
+      // 写入新格式 { c, cc, t }（t 为最后访问时间戳）
       ipMap[ip] = {
         c: oldCount + 1,
         cc: oldCc || country,
+        t: Date.now(),
       };
 
       // 排序要按 c 排，不能再按数字排
