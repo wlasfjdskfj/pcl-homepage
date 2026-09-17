@@ -415,15 +415,22 @@ export async function onRequest(context) {
     }
     const providedPwd = String(form.get("pwd") || "");
     if (adminPwd && safeEqual(providedPwd, adminPwd)) {
-      const token = randomToken();
-      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
-      return new Response(null, {
-        status: 302,
-        headers: securityHeaders({
-          "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
-          Location: "/admin",
-        }),
-      });
+      try {
+        const token = randomToken();
+        await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
+        return new Response(null, {
+          status: 302,
+          headers: securityHeaders({
+            "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
+            Location: "/admin",
+          }),
+        });
+      } catch (e) {
+        return new Response("login error: " + (e && e.message ? e.message : String(e)), {
+          status: 500,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
     }
 
     // 已登录管理员的管理动作
