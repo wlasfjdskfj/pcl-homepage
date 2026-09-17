@@ -648,13 +648,45 @@ const SCORE_COMMENTS = {
 
 // ============ 兜底页面 ============
 
-function buildFallbackXaml(title, message) {
+function buildFallbackXaml(title, message, eta) {
+  // 打字机敲字动画（PCL Storyboard 语法）：文字逐字敲出循环，不加百分比
+  const loadingText = '正在获取更新内容';
+  const cycle = 3;   // 动画循环周期（秒）
+  const step = 0.2;  // 每字间隔（秒）
+  let anim = '';
+  let chars = '';
+  for (let i = 0; i < loadingText.length; i++) {
+    const begin = (i * step).toFixed(1);
+    anim += '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.001" BeginTime="0:0:' + begin + '"/>';
+    chars += '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="16" Foreground="#FF8A8A8A" Margin="0,0,1,0" Opacity="0" />';
+  }
+  const typeLine =
+    '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,22,0,0">' +
+    '<StackPanel.Triggers>' +
+    '<EventTrigger RoutedEvent="StackPanel.Loaded">' +
+    '<BeginStoryboard>' +
+    '<Storyboard RepeatBehavior="Forever" FillBehavior="Stop" Duration="0:0:' + cycle + '">' +
+    anim +
+    '</Storyboard>' +
+    '</BeginStoryboard>' +
+    '</EventTrigger>' +
+    '</StackPanel.Triggers>' +
+    chars +
+    '</StackPanel>';
+
+  let etaLine = '';
+  if (eta && eta !== '0') {
+    etaLine = '<local:MyHint Theme="Blue" Margin="0,16,0,0" Text="预计 ' + eta + ' 更新完成。" />';
+  }
+
   return '<StackPanel>' +
     '    <local:MyCard Title="' + title + '" Margin="0,0,0,15">' +
     '        <StackPanel Margin="25,40,23,20">' +
-    '            <local:MyHint Theme="Yellow" Text="' + message + '" />' +
-    '            <local:MyIconTextButton Margin="0,16,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
-    '            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="如果一直看到这个页面，请去 GitHub 提 Issue。" />' +
+    typeLine +
+    etaLine +
+    '            <local:MyIconTextButton Margin="0,22,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
+    '            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="' + message + '" />' +
+    '            <local:MyHint Theme="Blue" Margin="0,10,0,0" Text="如果一直看到这个页面，请去 GitHub 提 Issue。" />' +
     '        </StackPanel>' +
     '    </local:MyCard>' +
     '</StackPanel>';
@@ -1067,7 +1099,8 @@ export async function onRequest(context) {
     try {
       const maint = await env.HOMEPAGE_KV.get('maint_mode');
       if (maint && maint !== '0') {
-        return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
+        const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
+        return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。', maintEta), {
           headers: {
             'Content-Type': 'application/xml; charset=utf-8',
             'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',

@@ -428,8 +428,14 @@ export async function onRequest(context) {
           await env.HOMEPAGE_KV.put('weather_version', String(ver));
         } else if (action === "maint") {
           const on = form.get("on") === "1";
-          if (on) await env.HOMEPAGE_KV.put('maint_mode', String(Date.now()));
-          else await env.HOMEPAGE_KV.put('maint_mode', '0');
+          const eta = (form.get("eta") || "").trim();
+          if (on) {
+            await env.HOMEPAGE_KV.put('maint_mode', String(Date.now()));
+            if (eta) await env.HOMEPAGE_KV.put('maint_eta', eta);
+            else await env.HOMEPAGE_KV.delete('maint_eta');
+          } else {
+            await env.HOMEPAGE_KV.put('maint_mode', '0');
+          }
         }
       } catch (e) { /* 忽略管理动作错误 */ }
       return new Response(null, {
@@ -506,6 +512,7 @@ export async function onRequest(context) {
     const weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0";
     const maintMode = (await env.HOMEPAGE_KV.get('maint_mode')) || '0';
     const maintOn = !!(maintMode && maintMode !== '0');
+    const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
     // 统一解析 IP 记录，兼容多种存储结构
@@ -1134,10 +1141,11 @@ export async function onRequest(context) {
       </div>
       <div class="manage-card">
         <div class="manage-title">🛠 服务器更新模拟</div>
-        <p class="manage-desc">开启后，主页对所有访问者显示"服务器正在更新"兜底页（用于测试故障效果）。当前：<b style="color:${maintOn ? '#FF4444' : '#17DD62'}">${maintOn ? '已开启' : '已关闭'}</b>。</p>
-        <form method="post" style="display:flex;gap:8px;">
+        <p class="manage-desc">开启后主页显示"服务器正在更新"兜底页（带敲字动画 + 预计完成时间）。当前：<b style="color:${maintOn ? '#FF4444' : '#17DD62'}">${maintOn ? '已开启' : '已关闭'}</b></p>
+        <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="hidden" name="action" value="maint">
           <input type="hidden" name="on" value="1">
+          <input name="eta" type="time" value="${escapeHtml(maintEta)}" placeholder="预计完成时间" style="flex:1;min-width:120px;">
           <button type="submit" class="btn btn-warn">开启</button>
         </form>
         <form method="post" style="margin-top:8px;">
