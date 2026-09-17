@@ -206,7 +206,8 @@ def check_middleware_placeholders():
 
     missing = []
     for ph in PLACEHOLDERS:
-        pattern = r"replace\s*\(\s*/" + re.escape(ph) + r"/g"
+        # 允许替换正则里带有额外修饰（如 <!-- __SCORE_BAR__ --> 的注释包裹）
+        pattern = r"replace\s*\(\s*/[^/]*?" + re.escape(ph) + r"/g"
         if not re.search(pattern, content):
             missing.append(ph)
 
