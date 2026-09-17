@@ -1145,7 +1145,7 @@ export async function onRequest(context) {
         <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="hidden" name="action" value="maint">
           <input type="hidden" name="on" value="1">
-          <input name="eta" type="time" value="${escapeHtml(maintEta)}" placeholder="预计完成时间" style="flex:1;min-width:110px;">
+          <input name="eta" type="text" value="${escapeHtml(maintEta)}" placeholder="直接输入时间，如 19:00" style="flex:1;min-width:130px;">
           <button type="submit" class="btn btn-warn">开启</button>
         </form>
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
