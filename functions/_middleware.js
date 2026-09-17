@@ -790,6 +790,116 @@ function buildFestivalBanner(festival) {
   return '<local:MyHint Theme="Red" Margin="0,0,0,14" Text="' + text + '" />';
 }
 
+// ============ 实时天气（IP 定位 + 天气） ============
+const WCODE = {
+  0: "晴", 1: "基本晴朗", 2: "少云", 3: "多云", 45: "雾", 48: "雾凇",
+  51: "毛毛雨", 53: "毛毛雨", 55: "毛毛雨", 61: "小雨", 63: "中雨", 65: "大雨",
+  71: "小雪", 73: "中雪", 75: "大雪", 80: "阵雨", 81: "强阵雨", 82: "暴雨",
+  95: "雷雨", 96: "雷雨伴冰雹", 99: "雷暴冰雹",
+};
+function buildWeatherUnavailable() {
+  return '<local:MyHint Theme="Yellow" Margin="0,0,0,0" Text="天气获取失败，请稍后刷新重试。" />';
+}
+function buildWeatherXaml(city, temp, desc, wind, isDay) {
+  const icon = isDay
+    ? "pack://application:,,,/images/Blocks/Grass.png"
+    : "pack://application:,,,/images/Blocks/RedstoneBlock.png";
+  const tip = temp >= 30 ? "注意防暑" : temp <= 0 ? "注意保暖" : (wind >= 40 ? "风有点大" : "适合出门挖矿");
+  return '<Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">'
+    + '<StackPanel>'
+    + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">'
+    + '<local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
+    + '<TextBlock Text="' + escapeXaml(city) + ' 当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
+    + '</StackPanel>'
+    + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
+    + '<TextBlock Text="' + temp + '°" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
+    + '<TextBlock Text="' + escapeXaml(desc) + '" FontSize="16" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,8" />'
+    + '</StackPanel>'
+    + '<TextBlock Text="风力 ' + wind + ' km/h · ' + escapeXaml(tip) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />'
+    + '</StackPanel>'
+    + '</Border>'
+    + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="数据按公网 IP 自动定位，来自 Open-Meteo。" />';
+}
+async function fetchWeather(env, ip) {
+  try {
+    const geoUrl = "https://ip-api.com/json/" + encodeURIComponent(ip) + "?lang=zh-CN";
+    const geoRes = await fetch(geoUrl, { headers: { "User-Agent": "PCL-Homepage" } });
+    if (!geoRes.ok) return buildWeatherUnavailable();
+    const geo = await geoRes.json();
+    if (!geo || geo.status !== "success") return buildWeatherUnavailable();
+    const city = geo.city || geo.regionName || "未知地区";
+    const lat = geo.lat, lon = geo.lon;
+    const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
+      + "&current_weather=true&timezone=auto";
+    const wRes = await fetch(wUrl, { headers: { "User-Agent": "PCL-Homepage" } });
+    if (!wRes.ok) return buildWeatherUnavailable();
+    const w = await wRes.json();
+    const cw = (w && w.current_weather) || {};
+    const temp = Math.round(cw.temperature);
+    const wind = Math.round(cw.windspeed);
+    const desc = WCODE[cw.weathercode] || "未知";
+    const isDay = cw.is_day;
+    return buildWeatherXaml(city, temp, desc, wind, isDay);
+  } catch (e) {
+    console.error("[Weather] 获取天气失败：", e);
+    return buildWeatherUnavailable();
+  }
+}
+
+// ============ 节日/纪念日倒计时 ============
+// 春节（农历正月初一）公历日期表（2024-2036），超出年份不参与倒计时
+const LUNAR_NEW_YEAR = {
+  2024: [2, 10], 2025: [1, 29], 2026: [2, 17], 2027: [2, 6], 2028: [1, 26],
+  2029: [2, 13], 2030: [2, 3], 2031: [1, 23], 2032: [2, 11], 2033: [1, 31],
+  2034: [2, 19], 2035: [2, 8], 2036: [1, 28],
+};
+function buildCountdownXaml(date) {
+  const today = Date.UTC(date.year, date.month - 1, date.day);
+  const events = FESTIVALS.map((f) => ({ name: f.name, month: f.month, day: f.day }));
+  const ny = LUNAR_NEW_YEAR[date.year];
+  const ny2 = LUNAR_NEW_YEAR[date.year + 1];
+  if (ny) events.push({ name: "春节", month: ny[0], day: ny[1] });
+  if (ny2) events.push({ name: "春节", month: ny2[0], day: ny2[1] });
+  let best = null;
+  for (const e of events) {
+    let y = date.year;
+    if (Date.UTC(y, e.month - 1, e.day) < today) y += 1;
+    const diff = Math.round((Date.UTC(y, e.month - 1, e.day) - today) / 86400000);
+    if (!best || diff < best.diff) best = { name: e.name, diff, month: e.month, day: e.day };
+  }
+  if (!best) return '<local:MyHint Theme="Blue" Text="近期没有节日，享受平常的日子吧。" />';
+  const soon = best.diff <= 3;
+  const line1 = best.diff === 0
+    ? "今天就是 " + escapeXaml(best.name) + "！"
+    : "距离 " + escapeXaml(best.name) + " 还有 " + best.diff + " 天";
+  const icon = soon
+    ? "pack://application:,,,/images/Blocks/GoldBlock.png"
+    : "pack://application:,,,/images/Blocks/Anvil.png";
+  return '<Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">'
+    + '<StackPanel>'
+    + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">'
+    + '<local:MyImage Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
+    + '<TextBlock Text="' + escapeXaml(best.name) + '" FontSize="12" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
+    + '</StackPanel>'
+    + '<TextBlock Text="' + line1 + '" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />'
+    + '</StackPanel>'
+    + '</Border>';
+}
+
+// ============ 随机挑战渐变背景（按难度配色） ============
+function buildChallengeBg(diff) {
+  const d = diff || "";
+  let c;
+  if (/困难|地狱/.test(d)) c = ["#B71C1C", "#F57C00"];
+  else if (/专家/.test(d)) c = ["#5E35B1", "#D81B60"];
+  else if (/简单/.test(d)) c = ["#1B6B3A", "#66BB6A"];
+  else c = ["#1565C0", "#42A5F5"];
+  return '<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">'
+    + '<GradientStop Color="' + c[0] + '" Offset="0" />'
+    + '<GradientStop Color="' + c[1] + '" Offset="1" />'
+    + '</LinearGradientBrush>';
+}
+
 // ============ 中间件 ============
 
 export async function onRequest(context) {
@@ -953,6 +1063,9 @@ export async function onRequest(context) {
     // ========== 节日与纪念日 ==========
     const festival = getFestival(date);
     const festivalBanner = buildFestivalBanner(festival);
+    const countdownBody = buildCountdownXaml(date);
+    const challengeBg = buildChallengeBg(challenge.diff);
+    const weatherBody = await fetchWeather(env, ip);
 
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
@@ -980,7 +1093,10 @@ export async function onRequest(context) {
       .replace(/__SEED_DESC__/g, seed.desc)
       .replace(/__QUIZ_Q__/g, quiz.q)
       .replace(/__QUIZ_A__/g, quiz.a)
-      .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner);
+      .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
+      .replace(/<!--\s*__WEATHER_BODY__\s*-->|__WEATHER_BODY__/g, weatherBody)
+      .replace(/<!--\s*__COUNTDOWN_BODY__\s*-->|__COUNTDOWN_BODY__/g, countdownBody)
+      .replace(/<!--\s*__CHALLENGE_BG__\s*-->|__CHALLENGE_BG__/g, challengeBg);
 
     return new Response(xaml, {
       headers: {

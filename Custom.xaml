@@ -91,6 +91,16 @@
             </Grid>
         </StackPanel>
     </local:MyCard>
+    <local:MyCard Title="实时天气" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <!-- __WEATHER_BODY__ -->
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="节日倒计时" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,20">
+            <!-- __COUNTDOWN_BODY__ -->
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
@@ -204,10 +214,7 @@
                 <Grid>
                     <Border>
                         <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                                <GradientStop Color="#4A1A2E" Offset="0" />
-                                <GradientStop Color="#2D1B4E" Offset="1" />
-                            </LinearGradientBrush>
+                            <!-- __CHALLENGE_BG__ -->
                         </Border.Background>
                     </Border>
                     <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18,16,0,0" Background="#66FFFFFF" CornerRadius="10" Padding="10,4,10,4">
