@@ -1202,63 +1202,59 @@ export async function onRequest(context) {
     const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
 
-    // ========== 访问统计：写入 KV，不生成 XAML ==========
-    try {
-      // 总计
-      const totalKey = "visit:total";
-      let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
-      total += 1;
-      await env.HOMEPAGE_KV.put(totalKey, String(total));
-
-      // 每 IP 次数 + 国家码
-      const ipMapKey = "visit:ipmap";
-      let ipMap = {};
+    // ========== 访问统计：异步写入 KV（waitUntil），不阻塞主页返回 ==========
+    context.waitUntil((async () => {
       try {
-        ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
-      } catch { ipMap = {}; }
+        // 总计
+        const totalKey = "visit:total";
+        let total = parseInt(await env.HOMEPAGE_KV.get(totalKey) || "0", 10);
+        total += 1;
+        await env.HOMEPAGE_KV.put(totalKey, String(total));
 
-      // 取国家码（Cloudflare 代理下才有值，本地 dev 为 XX）
-      const country = (request.cf && request.cf.country) || "XX";
+        // 每 IP 次数 + 国家码 + 最后访问时间
+        const ipMapKey = "visit:ipmap";
+        let ipMap = {};
+        try {
+          ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
+        } catch { ipMap = {}; }
 
-      // 兼容旧格式：数字 或 对象
-      const oldVal = ipMap[ip];
-      const oldCount = typeof oldVal === "number"
-        ? oldVal
-        : Number(oldVal && (oldVal.c ?? oldVal.count)) || 0;
-      const oldCc = (typeof oldVal === "object" && oldVal)
-        ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
-        : null;
+        const country = (request.cf && request.cf.country) || "XX";
+        const oldVal = ipMap[ip];
+        const oldCount = typeof oldVal === "number"
+          ? oldVal
+          : Number(oldVal && (oldVal.c ?? oldVal.count)) || 0;
+        const oldCc = (typeof oldVal === "object" && oldVal)
+          ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
+          : null;
+        ipMap[ip] = {
+          c: oldCount + 1,
+          cc: oldCc || country,
+          t: Date.now(),
+        };
 
-      // 写入新格式 { c, cc, t }（t 为最后访问时间戳）
-      ipMap[ip] = {
-        c: oldCount + 1,
-        cc: oldCc || country,
-        t: Date.now(),
-      };
+        const entries = Object.entries(ipMap).sort((a, b) => {
+          const ac = typeof a[1] === "number" ? a[1] : Number(a[1].c) || 0;
+          const bc = typeof b[1] === "number" ? b[1] : Number(b[1].c) || 0;
+          return bc - ac;
+        });
+        if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
+        await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
 
-      // 排序要按 c 排，不能再按数字排
-      const entries = Object.entries(ipMap).sort((a, b) => {
-        const ac = typeof a[1] === "number" ? a[1] : Number(a[1].c) || 0;
-        const bc = typeof b[1] === "number" ? b[1] : Number(b[1].c) || 0;
-        return bc - ac;
-      });
-      if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
-      await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
-
-      // 今日（去重）
-      const todayKey = "visit:today:" + today;
-      let todaySet = [];
-      try {
-        todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
-      } catch { todaySet = []; }
-      if (!todaySet.includes(ip)) {
-        todaySet.push(ip);
-        if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
-        await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 2592000 });
+        // 今日（去重）
+        const todayKey = "visit:today:" + today;
+        let todaySet = [];
+        try {
+          todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
+        } catch { todaySet = []; }
+        if (!todaySet.includes(ip)) {
+          todaySet.push(ip);
+          if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
+          await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 2592000 });
+        }
+      } catch (e) {
+        console.error("[Visit] 统计失败：", e);
       }
-    } catch (e) {
-      console.error("[Visit] 统计失败：", e);
-    }
+    })());
 
     // ========== 节日与纪念日 ==========
     const festival = getFestival(date);
