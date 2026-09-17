@@ -869,14 +869,37 @@ export async function onRequest(context) {
       total += 1;
       await env.HOMEPAGE_KV.put(totalKey, String(total));
 
-      // 每 IP 次数
+      // 每 IP 次数 + 国家码
       const ipMapKey = "visit:ipmap";
       let ipMap = {};
       try {
         ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
       } catch { ipMap = {}; }
-      ipMap[ip] = (ipMap[ip] || 0) + 1;
-      const entries = Object.entries(ipMap).sort((a, b) => b[1] - a[1]);
+
+      // 取国家码（Cloudflare 代理下才有值，本地 dev 为 XX）
+      const country = (request.cf && request.cf.country) || "XX";
+
+      // 兼容旧格式：数字 或 对象
+      const oldVal = ipMap[ip];
+      const oldCount = typeof oldVal === "number"
+        ? oldVal
+        : Number(oldVal && (oldVal.c ?? oldVal.count)) || 0;
+      const oldCc = (typeof oldVal === "object" && oldVal)
+        ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
+        : null;
+
+      // 写入新格式 { c, cc }
+      ipMap[ip] = {
+        c: oldCount + 1,
+        cc: oldCc || country,
+      };
+
+      // 排序要按 c 排，不能再按数字排
+      const entries = Object.entries(ipMap).sort((a, b) => {
+        const ac = typeof a[1] === "number" ? a[1] : Number(a[1].c) || 0;
+        const bc = typeof b[1] === "number" ? b[1] : Number(b[1].c) || 0;
+        return bc - ac;
+      });
       if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
       await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
 
