@@ -803,7 +803,7 @@ const WCODE = {
 function buildWeatherUnavailable() {
   return '<local:MyHint Theme="Yellow" Margin="0,0,0,0" Text="天气获取失败，请稍后刷新重试。" />';
 }
-function buildWeatherXaml(city, temp, desc, wind, isDay) {
+function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
   const icon = isDay
     ? "pack://application:,,,/images/Blocks/Grass.png"
     : "pack://application:,,,/images/Blocks/RedstoneBlock.png";
@@ -821,7 +821,30 @@ function buildWeatherXaml(city, temp, desc, wind, isDay) {
     + '<TextBlock Text="风力 ' + wind + ' km/h · ' + escapeXaml(tip) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />'
     + '</StackPanel>'
     + '</Border>'
-    + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="天气数据来自 Open-Meteo。" />';
+    + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="' + (source || "天气数据来自中国气象局") + '" />';
+}
+// 接口盒子 IP 天气 API：按访问者 IP 一步完成定位+天气（数据源中国气象局），免费无日调用上限
+const APIHZ_ID = "10021131";
+const APIHZ_KEY = "4952e475c4fb75ae3ee2f925a22db6ba";
+async function fetchApihzWeather(ip) {
+  try {
+    const clean = String(ip || "").replace(/:\d+$/, "");
+    if (!clean || clean === "unknown") return null;
+    const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(APIHZ_ID)
+      + "&key=" + encodeURIComponent(APIHZ_KEY) + "&ip=" + encodeURIComponent(clean);
+    const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || j.code !== 200 || !j.nowinfo) return null;
+    const temp = Math.round(j.nowinfo.temperature);
+    const wind = Math.round(j.nowinfo.windSpeed);
+    const desc = (j.weather1 && j.weather2 && j.weather1 !== j.weather2)
+      ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
+    return buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
+  } catch (e) {
+    console.error("[Weather] 接口盒子失败：", e);
+    return null;
+  }
 }
 // 定位：优先 ipwho.is（对国内 IP 更细、返回威海等城市，https 免费），失败重试后降级 ip-api.com
 async function fetchGeo(ip) {
@@ -850,6 +873,10 @@ async function fetchGeo(ip) {
   return null;
 }
 async function fetchWeather(env, ip) {
+  // 优先：接口盒子 IP 天气（按访问者 IP 通用定位，数据源中国气象局）
+  const apihz = await fetchApihzWeather(ip);
+  if (apihz) return apihz;
+  // 降级：Open-Meteo（按 IP 定位经纬度取天气）
   try {
     const geo = await fetchGeo(ip);
     if (!geo) return buildWeatherUnavailable();
@@ -863,7 +890,7 @@ async function fetchWeather(env, ip) {
     const wind = Math.round(cw.wind_speed_10m);
     const desc = WCODE[cw.weather_code] || "未知";
     const isDay = cw.is_day;
-    return buildWeatherXaml(geo.city, temp, desc, wind, isDay);
+    return buildWeatherXaml(geo.city, temp, desc, wind, isDay, "天气数据来自 Open-Meteo。");
   } catch (e) {
     console.error("[Weather] 获取天气失败：", e);
     return buildWeatherUnavailable();
