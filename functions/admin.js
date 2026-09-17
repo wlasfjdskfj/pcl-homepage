@@ -452,9 +452,10 @@ let d1TableReady = false;
 async function ensureD1Table(env) {
   if (d1TableReady || !env.STATS_DB) return;
   try {
-    await env.STATS_DB.prepare(
-      "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"
-    ).run();
+    await env.STATS_DB.batch([
+      env.STATS_DB.prepare("CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"),
+      env.STATS_DB.prepare("CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, expires INTEGER NOT NULL)"),
+    ]);
     d1TableReady = true;
   } catch (e) { /* 建表失败忽略，下次重试 */ }
 }
@@ -482,12 +483,23 @@ export async function onRequest(context) {
 
   let isAdmin = false;
   if (cookieToken) {
-    const session = await env.HOMEPAGE_KV.get(`admin:session:${cookieToken}`);
-    if (session === "1") isAdmin = true;
+    try {
+      if (env.STATS_DB) {
+        await ensureD1Table(env);
+        const sess = await env.STATS_DB.prepare(
+          "SELECT token FROM admin_sessions WHERE token = ? AND expires > ?"
+        ).bind(cookieToken, Date.now()).first();
+        if (sess) isAdmin = true;
+      }
+    } catch (e) { isAdmin = false; }
   }
 
   if (url.searchParams.get("action") === "logout") {
-    if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
+    if (cookieToken) {
+      try {
+        if (env.STATS_DB) await env.STATS_DB.prepare("DELETE FROM admin_sessions WHERE token = ?").bind(cookieToken).run();
+      } catch (e) {}
+    }
     return new Response(null, {
       status: 302,
       headers: securityHeaders({
@@ -512,8 +524,11 @@ export async function onRequest(context) {
     if (safeEqual(providedPwd, adminPwd)) {
       try {
         const token = randomToken();
-      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
-      return new Response(null, {
+        await env.STATS_DB.prepare(
+          "INSERT INTO admin_sessions (token, expires) VALUES (?, ?)"
+        ).bind(token, Date.now() + SESSION_TTL * 1000).run();
+        try { await env.STATS_DB.prepare("DELETE FROM admin_sessions WHERE expires < ?").bind(Date.now()).run(); } catch (e) {}
+        return new Response(null, {
         status: 302,
         headers: securityHeaders({
           "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
