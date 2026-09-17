@@ -1140,7 +1140,7 @@ export async function onRequest(context) {
         </form>
       </div>
       <div class="manage-card">
-        <div class="manage-title">🛠 服务器更新模拟</div>
+        <div class="manage-title">🛠 服务器更新</div>
         <p class="manage-desc">开启后主页显示"服务器正在更新"兜底页（带敲字动画 + 预计完成时间）。当前：<b style="color:${maintOn ? '#FF4444' : '#17DD62'}">${maintOn ? '已开启' : '已关闭'}</b></p>
         <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="hidden" name="action" value="maint">

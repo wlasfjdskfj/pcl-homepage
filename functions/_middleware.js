@@ -650,7 +650,7 @@ const SCORE_COMMENTS = {
 
 function buildFallbackXaml(title, message, eta) {
   // 敲稿动画（PCL Storyboard）：逐字敲出 + 弹性缩放弹入 + 尾部闪烁光标，不加百分比
-  const loadingText = '正在获取更新内容';
+  const loadingText = '正在加载中';
   const cycle = 3.5;  // 循环周期（秒）
   const step = 0.22;  // 每字间隔（秒）
   let anim = '';
