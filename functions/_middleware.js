@@ -648,7 +648,7 @@ const SCORE_COMMENTS = {
 
 // ============ 兜底页面 ============
 
-function buildFallbackXaml(title, message, eta) {
+function buildFallbackXaml(title, message, eta, reason) {
   const showLoading = title === '服务器正在更新';
   // 简单场景（如访问被拒绝）：精致版 - 红圈禁止图标 + 居中标题 + 说明 + 刷新按钮
   if (!showLoading) {
@@ -689,6 +689,10 @@ function buildFallbackXaml(title, message, eta) {
   if (eta && eta !== '0') {
     etaLine = '<TextBlock Text="预计 ' + eta + ' 更新完成" FontSize="14" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,16,0,0"/>';
   }
+  let reasonLine = '';
+  if (reason && reason.trim()) {
+    reasonLine = '<TextBlock Text="原因：' + reason + '" FontSize="13" Foreground="{DynamicResource ColorBrush2}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="440" HorizontalAlignment="Center" LineHeight="22" Margin="0,8,0,0"/>';
+  }
 
   return '<StackPanel>' +
     '    <local:MyCard Title="" Margin="0,0,0,15">' +
@@ -696,6 +700,7 @@ function buildFallbackXaml(title, message, eta) {
     spinner +
     '            <TextBlock Text="服务器正在更新" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,20,0,0"/>' +
     statusLine +
+    reasonLine +
     etaLine +
     '            <local:MyIconTextButton Margin="0,24,0,0" Height="40" HorizontalAlignment="Center" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
     '            <local:MyHint Theme="Yellow" Margin="0,18,0,0" Text="' + message + '" />' +
@@ -1103,12 +1108,13 @@ export async function onRequest(context) {
   // 2. 主页文件
   if (url.pathname === '/Custom.xaml' || url.pathname === '/') {
     // 并行读取封禁列表 + 维护模式（减少串行 KV 延迟）
-    let blockRaw = '{}', maintRaw = '', maintEta = '';
+    let blockRaw = '{}', maintRaw = '', maintEta = '', maintReason = '';
     try {
-      [blockRaw, maintRaw, maintEta] = await Promise.all([
+      [blockRaw, maintRaw, maintEta, maintReason] = await Promise.all([
         env.HOMEPAGE_KV.get('block:list'),
         env.HOMEPAGE_KV.get('maint_mode'),
         env.HOMEPAGE_KV.get('maint_eta'),
+        env.HOMEPAGE_KV.get('maint_reason'),
       ]);
     } catch (e) { /* KV 读取失败则放行 */ }
 
@@ -1129,7 +1135,7 @@ export async function onRequest(context) {
     }
     // 服务器更新/维护模式模拟：后台开启后主页返回"服务器正在更新"兜底页（用于测试故障效果）
     if (maintRaw && maintRaw !== '0') {
-      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。', maintEta || ''), {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。', maintEta || '', maintReason || ''), {
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',

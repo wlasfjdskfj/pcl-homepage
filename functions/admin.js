@@ -440,10 +440,13 @@ export async function onRequest(context) {
         } else if (action === "maint") {
           const on = form.get("on") === "1";
           const eta = (form.get("eta") || "").trim();
+          const reason = (form.get("reason") || "").trim();
           if (on) {
             await env.HOMEPAGE_KV.put('maint_mode', String(Date.now()));
             if (eta) await env.HOMEPAGE_KV.put('maint_eta', eta);
             else await env.HOMEPAGE_KV.delete('maint_eta');
+            if (reason) await env.HOMEPAGE_KV.put('maint_reason', reason);
+            else await env.HOMEPAGE_KV.delete('maint_reason');
           } else {
             await env.HOMEPAGE_KV.put('maint_mode', '0');
           }
@@ -524,6 +527,7 @@ export async function onRequest(context) {
     const maintMode = (await env.HOMEPAGE_KV.get('maint_mode')) || '0';
     const maintOn = !!(maintMode && maintMode !== '0');
     const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
+    const maintReason = (await env.HOMEPAGE_KV.get('maint_reason')) || '';
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
     // 统一解析 IP 记录，兼容多种存储结构，按最近访问时间排序
@@ -1158,7 +1162,8 @@ export async function onRequest(context) {
         <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <input type="hidden" name="action" value="maint">
           <input type="hidden" name="on" value="1">
-          <input name="eta" type="text" value="${escapeHtml(maintEta)}" placeholder="直接输入时间，如 19:00" style="flex:1;min-width:130px;">
+          <input name="eta" type="text" value="${escapeHtml(maintEta)}" placeholder="预计完成时间，如 19:00" style="flex:1;min-width:120px;">
+          <input name="reason" type="text" value="${escapeHtml(maintReason)}" placeholder="更新原因（可选），如：修复天气接口" style="flex:2;min-width:200px;">
           <button type="submit" class="btn btn-warn">开启</button>
         </form>
         <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
