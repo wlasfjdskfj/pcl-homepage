@@ -41,6 +41,7 @@
                         </StackPanel>
                         <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />
                     </StackPanel>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,40" FontSize="10" FontWeight="Bold" Foreground="#99FFFFFF" Text="主页版本 __HOMEPAGE_VER__" />
                 </Grid>
             </Border>
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">
@@ -242,7 +243,6 @@
             </Border>
             <TextBlock Text="最新快照：26.3" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />
             <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />
-            <TextBlock Text="主页版本 __HOMEPAGE_VER__" FontSize="11" Foreground="#88AAFF" HorizontalAlignment="Left" Margin="0,0,0,14" />
             <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                 <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />

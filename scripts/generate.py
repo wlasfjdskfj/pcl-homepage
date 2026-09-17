@@ -695,6 +695,7 @@ def build_xaml():
     lines.append('                        </StackPanel>')
     lines.append('                        <TextBlock Text="星期' + weekday + '" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />')
     lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,40" FontSize="10" FontWeight="Bold" Foreground="#99FFFFFF" Text="主页版本 __HOMEPAGE_VER__" />')
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
@@ -906,8 +907,6 @@ def build_xaml():
     lines.append('            <TextBlock Text="' + version_info + '" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />')
 
     lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
-
-    lines.append('            <TextBlock Text="主页版本 __HOMEPAGE_VER__" FontSize="11" Foreground="#88AAFF" HorizontalAlignment="Left" Margin="0,0,0,14" />')
 
     lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
 
