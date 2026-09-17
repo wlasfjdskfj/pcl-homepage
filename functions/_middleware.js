@@ -812,7 +812,7 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
     + '<StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">'
     + '<local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
-    + '<TextBlock Text="当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
+    + '<TextBlock Text="' + escapeXaml(city) + ' · 当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
     + '</StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
     + '<TextBlock Text="' + temp + '°" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'

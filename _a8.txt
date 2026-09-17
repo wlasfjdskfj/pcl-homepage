@@ -1,0 +1,8 @@
+﻿git.exe : warning: in the working copy of 'scripts/generate.py', LF will be replaced by CRLF the next time Git touches 
+it
+所在位置 行:1 字符: 277
++ ... ml" -Force; & $g -C $tmp add scripts/generate.py Custom.xaml *> "$tmp ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (warning: in the... Git touches it:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
