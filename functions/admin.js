@@ -446,6 +446,19 @@ function getResetCountdown() {
   return { resetAt: target, diffMs: target - now };
 }
 
+/* ---------------- D1 初始化 ---------------- */
+
+let d1TableReady = false;
+async function ensureD1Table(env) {
+  if (d1TableReady || !env.STATS_DB) return;
+  try {
+    await env.STATS_DB.prepare(
+      "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"
+    ).run();
+    d1TableReady = true;
+  } catch (e) { /* 建表失败忽略，下次重试 */ }
+}
+
 /* ---------------- 主入口 ---------------- */
 
 export async function onRequest(context) {
@@ -574,19 +587,14 @@ export async function onRequest(context) {
 
   try {
     // 并发读取全部 KV
+    // 并发读取 KV（统计已迁 D1，KV 只保留封禁/维护/天气版本）
     const [
-      totalRaw,
-      ipmapRaw,
-      days7Raw,
       blockRaw,
       weatherVerRaw,
       maintModeRaw,
       maintEtaRaw,
       maintReasonRaw,
     ] = await Promise.all([
-      env.HOMEPAGE_KV.get("visit:total"),
-      env.HOMEPAGE_KV.get("visit:ipmap"),
-      env.HOMEPAGE_KV.get("visit:days:7"),
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
       env.HOMEPAGE_KV.get("maint_mode_live"),
@@ -594,14 +602,28 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("maint_reason"),
     ]);
 
-    let ipMap = {};
-    try { ipMap = JSON.parse(ipmapRaw || "{}"); } catch { ipMap = {}; }
+    // 从 D1 读取访问统计
+    let total = 0;
+    let entries = [];
+    let daysMap = {};
+    if (env.STATS_DB) {
+      await ensureD1Table(env);
+      try {
+        const totalRes = await env.STATS_DB.prepare("SELECT COUNT(*) AS c FROM visits").first();
+        total = totalRes ? Number(totalRes.c) || 0 : 0;
 
-    // 总访问数：优先取历史 total，否则从 IP 表求和（total 已不再写入 KV，省写入配额）
-    const total = totalRaw || String(Object.values(ipMap).reduce((s, v) => s + (typeof v === "number" ? v : Number(v && v.c) || 0), 0));
+        const ipRes = await env.STATS_DB.prepare(
+          "SELECT ip, country, COUNT(*) AS c, MAX(ts) AS t FROM visits GROUP BY ip ORDER BY t DESC LIMIT 100"
+        ).all();
+        entries = (ipRes.results || []).map((r) => [r.ip, { c: Number(r.c) || 0, cc: String(r.country || "XX").toUpperCase(), t: Number(r.t) || 0 }]);
 
-    let days7Map = null;
-    try { if (days7Raw) days7Map = JSON.parse(days7Raw); } catch { days7Map = null; }
+        const weekAgo = Date.now() - 6 * 86400000;
+        const dayRes = await env.STATS_DB.prepare(
+          "SELECT substr(datetime(ts/1000,'unixepoch','+8 hours'),1,10) AS d, COUNT(DISTINCT ip) AS c FROM visits WHERE ts >= ? GROUP BY d ORDER BY d"
+        ).bind(weekAgo).all();
+        (dayRes.results || []).forEach((r) => { daysMap[r.d] = Number(r.c) || 0; });
+      } catch (e) { console.error("[admin] D1 统计查询失败", e); }
+    }
 
     let blockList = {};
     try { blockList = JSON.parse(blockRaw || "{}"); } catch { blockList = {}; }
@@ -620,20 +642,7 @@ export async function onRequest(context) {
       dates.push(d.toISOString().slice(0, 10));
     }
 
-    let days;
-    if (days7Map && typeof days7Map === "object" && !Array.isArray(days7Map)) {
-      days = dates.map((date) => ({ date, count: Number(days7Map[date]) || 0 }));
-    } else {
-      days = await Promise.all(
-        dates.map(async (date) => {
-          let set = [];
-          try {
-            set = JSON.parse((await env.HOMEPAGE_KV.get(`visit:today:${date}`)) || "[]");
-          } catch { set = []; }
-          return { date, count: Array.isArray(set) ? set.length : 0 };
-        })
-      );
-    }
+    let days = dates.map((date) => ({ date, count: Number(daysMap[date]) || 0 }));
 
     const utcToday = new Date().toISOString().slice(0, 10);
     const { workers, pages, error: apiError } = await fetchUsageSplit(env, utcToday);
@@ -646,23 +655,7 @@ export async function onRequest(context) {
     const resetInfo = getResetCountdown();
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
-    const entries = Object.entries(ipMap)
-      .map(([ip, val]) => {
-        if (typeof val === "number") {
-          return [ip, { c: val, cc: "XX", t: 0 }];
-        }
-        const c = Number(val.c ?? val.count ?? val.visits ?? 0) || 0;
-        const cc =
-          val.cc ||
-          val.country ||
-          val.cf?.country ||
-          val.cf?.countryCode ||
-          "XX";
-        const t = Number(val.t ?? val.lastTime ?? 0) || 0;
-        return [ip, { c, cc: String(cc).toUpperCase(), t }];
-      })
-      .filter(([, v]) => Number.isFinite(v.c) && v.c > 0)
-      .sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
+    // entries 已在上方 D1 查询中生成
 
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);

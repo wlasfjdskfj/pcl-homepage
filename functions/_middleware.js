@@ -1085,6 +1085,18 @@ function buildChallengeBg(diff) {
     + '</LinearGradientBrush>';
 }
 
+// D1 统计表初始化（同一 Worker 实例只建一次）
+let d1TableReady = false;
+async function ensureD1Table(env) {
+  if (d1TableReady || !env.STATS_DB) return;
+  try {
+    await env.STATS_DB.prepare(
+      "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"
+    ).run();
+    d1TableReady = true;
+  } catch (e) { /* 建表失败忽略，下次重试 */ }
+}
+
 // ============ 中间件 ============
 
 export async function onRequest(context) {
@@ -1223,54 +1235,18 @@ export async function onRequest(context) {
     const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
 
-    // ========== 访问统计：异步写入 KV（waitUntil），不阻塞主页返回 ==========
+    // ========== 访问统计：异步写入 D1（每次访问插一行，D1 写入配额 10 万/天） ==========
     context.waitUntil((async () => {
       try {
-        // 每 IP 次数 + 国家码 + 最后访问时间（60 秒限流，防止耗尽 KV 每日写入配额）
-        const ipMapKey = "visit:ipmap";
-        let ipMap = {};
-        try {
-          ipMap = JSON.parse(await env.HOMEPAGE_KV.get(ipMapKey) || "{}");
-        } catch { ipMap = {}; }
-
-        const country = (request.cf && request.cf.country) || "XX";
-        const oldVal = ipMap[ip];
-        const oldCount = typeof oldVal === "number"
-          ? oldVal
-          : Number(oldVal && (oldVal.c ?? oldVal.count)) || 0;
-        const oldCc = (typeof oldVal === "object" && oldVal)
-          ? (oldVal.cc || oldVal.country || (oldVal.cf && oldVal.cf.country))
-          : null;
-        const oldT = (typeof oldVal === "object" && oldVal) ? Number(oldVal.t) || 0 : 0;
-        if (Date.now() - oldT < 60000) return; // 同 IP 60 秒内已记录过，跳过写入省配额
-
-        ipMap[ip] = {
-          c: oldCount + 1,
-          cc: oldCc || country,
-          t: Date.now(),
-        };
-
-        const entries = Object.entries(ipMap).sort((a, b) => {
-          const ac = typeof a[1] === "number" ? a[1] : Number(a[1].c) || 0;
-          const bc = typeof b[1] === "number" ? b[1] : Number(b[1].c) || 0;
-          return bc - ac;
-        });
-        if (entries.length > 500) ipMap = Object.fromEntries(entries.slice(0, 500));
-        await env.HOMEPAGE_KV.put(ipMapKey, JSON.stringify(ipMap));
-
-        // 今日（去重）
-        const todayKey = "visit:today:" + today;
-        let todaySet = [];
-        try {
-          todaySet = JSON.parse(await env.HOMEPAGE_KV.get(todayKey) || "[]");
-        } catch { todaySet = []; }
-        if (!todaySet.includes(ip)) {
-          todaySet.push(ip);
-          if (todaySet.length > 2000) todaySet = todaySet.slice(-2000);
-          await env.HOMEPAGE_KV.put(todayKey, JSON.stringify(todaySet), { expirationTtl: 2592000 });
+        if (env.STATS_DB) {
+          await ensureD1Table(env);
+          const country = (request.cf && request.cf.country) || "XX";
+          await env.STATS_DB.prepare(
+            "INSERT INTO visits (ip, country, ts) VALUES (?, ?, ?)"
+          ).bind(ip, country, Date.now()).run();
         }
       } catch (e) {
-        console.error("[Visit] 统计失败：", e);
+        console.error("[Visit] D1 统计失败：", e);
       }
     })());
 
