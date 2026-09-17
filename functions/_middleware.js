@@ -872,7 +872,7 @@ async function fetchApihzWeather(env, ip) {
     const id = (env && env.APIHZ_ID) || "";
     const key = (env && env.APIHZ_KEY) || "";
     if (!id || !key) return null; // 未配置环境变量 → 走 Open-Meteo 兜底
-    // 按 IP + 天气版本号缓存 10 分钟（版本号用于在线"重置天气缓存"）
+    // 按 IP + 天气版本号缓存 1 小时（KV 到点自动过期清除，防止占用；版本号用于在线"重置天气缓存"）
     let weatherVer = "0";
     try { weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0"; } catch (e) {}
     const cacheKey = "weather:" + weatherVer + ":" + clean;
@@ -892,7 +892,7 @@ async function fetchApihzWeather(env, ip) {
       ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
     const xaml = buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
     if (env && env.HOMEPAGE_KV) {
-      try { await env.HOMEPAGE_KV.put(cacheKey, xaml, { expirationTtl: 600 }); } catch (e) { /* 缓存失败忽略 */ }
+      try { await env.HOMEPAGE_KV.put(cacheKey, xaml, { expirationTtl: 3600 }); } catch (e) { /* 缓存失败忽略 */ }
     }
     return xaml;
   } catch (e) {
