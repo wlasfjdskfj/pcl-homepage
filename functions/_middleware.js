@@ -649,17 +649,31 @@ const SCORE_COMMENTS = {
 // ============ 兜底页面 ============
 
 function buildFallbackXaml(title, message, eta) {
-  // 打字机敲字动画（PCL Storyboard 语法）：文字逐字敲出循环，不加百分比
+  // 敲稿动画（PCL Storyboard）：逐字敲出 + 弹性缩放弹入 + 尾部闪烁光标，不加百分比
   const loadingText = '正在获取更新内容';
-  const cycle = 3;   // 动画循环周期（秒）
-  const step = 0.2;  // 每字间隔（秒）
+  const cycle = 3.5;  // 循环周期（秒）
+  const step = 0.22;  // 每字间隔（秒）
   let anim = '';
   let chars = '';
   for (let i = 0; i < loadingText.length; i++) {
-    const begin = (i * step).toFixed(1);
-    anim += '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.001" BeginTime="0:0:' + begin + '"/>';
-    chars += '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="16" Foreground="#FF8A8A8A" Margin="0,0,1,0" Opacity="0" />';
+    const b = (i * step).toFixed(2);
+    const b2 = (i * step + 0.2).toFixed(2);
+    anim +=
+      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.12" BeginTime="0:0:' + b + '"/>' +
+      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="0.4" To="1.15" Duration="0:0:0.2" BeginTime="0:0:' + b + '"/>' +
+      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="0.4" To="1.15" Duration="0:0:0.2" BeginTime="0:0:' + b + '"/>' +
+      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>' +
+      '<DoubleAnimation Storyboard.TargetName="T' + i + '" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" From="1.15" To="1" Duration="0:0:0.16" BeginTime="0:0:' + b2 + '"/>';
+    chars +=
+      '<TextBlock x:Name="T' + i + '" Text="' + loadingText[i] + '" FontSize="16" Foreground="#FF8A8A8A" Margin="0,0,1,0" Opacity="0" RenderTransformOrigin="0.5,0.5">' +
+      '<TextBlock.RenderTransform><ScaleTransform ScaleX="0.4" ScaleY="0.4"/></TextBlock.RenderTransform>' +
+      '</TextBlock>';
   }
+  // 尾部闪烁光标
+  const curBegin = (loadingText.length * step).toFixed(2);
+  anim += '<DoubleAnimation Storyboard.TargetName="CUR" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5" AutoReverse="True" RepeatBehavior="Forever" BeginTime="0:0:' + curBegin + '"/>';
+  chars += '<TextBlock x:Name="CUR" Text="|" FontSize="16" FontWeight="Bold" Foreground="#FF5B9CFF" Margin="1,0,0,0" Opacity="0" />';
+
   const typeLine =
     '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,22,0,0">' +
     '<StackPanel.Triggers>' +
