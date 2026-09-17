@@ -823,24 +823,28 @@ function buildWeatherXaml(city, temp, desc, wind, isDay) {
     + '</Border>'
     + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="数据按公网 IP 自动定位，来自 Open-Meteo。" />';
 }
-// 定位：优先 ipwho.is（https 免费），降级 ip-api.com（http 免费）
+// 定位：优先 ipwho.is（对国内 IP 更细、返回威海等城市，https 免费），失败重试后降级 ip-api.com
 async function fetchGeo(ip) {
   const clean = String(ip || "").replace(/:\d+$/, "");
-  const tryOne = async (url) => {
-    const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
-    if (!r.ok) return null;
-    return await r.json();
-  };
+  const q = (clean && clean !== "unknown") ? "/" + encodeURIComponent(clean) : "";
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const r = await fetch("https://ipwho.is/" + q);
+      if (r.ok) {
+        const j = await r.json();
+        if (j && j.success !== false && j.latitude != null) {
+          return { city: j.city || j.region || "未知地区", lat: j.latitude, lon: j.longitude };
+        }
+      }
+    } catch (e) { /* 重试 */ }
+  }
   try {
-    const j = await tryOne("https://ipwho.is/" + (clean && clean !== "unknown" ? encodeURIComponent(clean) : ""));
-    if (j && j.success !== false && j.latitude != null) {
-      return { city: j.city || j.region || "未知地区", lat: j.latitude, lon: j.longitude };
-    }
-  } catch (e) { /* 忽略，尝试下一个 */ }
-  try {
-    const j = await tryOne("http://ip-api.com/json/" + encodeURIComponent(clean) + "?lang=zh-CN");
-    if (j && j.status === "success") {
-      return { city: j.city || j.regionName || "未知地区", lat: j.lat, lon: j.lon };
+    const r = await fetch("http://ip-api.com/json/" + encodeURIComponent(clean) + "?lang=zh-CN");
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.status === "success") {
+        return { city: j.city || j.regionName || "未知地区", lat: j.lat, lon: j.lon };
+      }
     }
   } catch (e) { /* 忽略 */ }
   return null;
