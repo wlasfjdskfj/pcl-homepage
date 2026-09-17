@@ -922,7 +922,7 @@ export async function onRequest(context) {
       response = await env.ASSETS.fetch(assetUrl);
     } catch (e) {
       console.error('[Middleware] 获取静态资源失败：', e);
-      return new Response(buildFallbackXaml('服务器连接失败', '无法读取主页文件，请稍后重试。'), {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -932,7 +932,7 @@ export async function onRequest(context) {
 
     if (!response.ok) {
       console.error('[Middleware] 静态资源返回错误：', response.status);
-      return new Response(buildFallbackXaml('主页暂时不可用', '服务器返回了 ' + response.status + '，请稍后重试。'), {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -945,7 +945,7 @@ export async function onRequest(context) {
       xaml = await response.text();
     } catch (e) {
       console.error('[Middleware] 读取响应文本失败：', e);
-      return new Response(buildFallbackXaml('读取失败', '无法解析主页内容，请稍后重试。'), {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -955,7 +955,7 @@ export async function onRequest(context) {
 
     if (!xaml || xaml.trim().length < 50) {
       console.error('[Middleware] 主页内容为空或过短');
-      return new Response(buildFallbackXaml('主页内容异常', '主页文件为空或损坏，请稍后重试。'), {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
@@ -963,6 +963,8 @@ export async function onRequest(context) {
       });
     }
 
+    // ===== 以下整段组装与替换：任何未预期异常都兜底为"服务器正在更新"，避免 PCL 白屏 =====
+    try {
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
     const quote = pickRandom(QUOTES);
@@ -1126,6 +1128,15 @@ export async function onRequest(context) {
         'Vary': 'CF-Connecting-IP',
       },
     });
+    } catch (e) {
+      console.error('[Middleware] 主页组装失败，已返回"服务器正在更新"占位：', e);
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
+    }
   }
 
   return context.next();
