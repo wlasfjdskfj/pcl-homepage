@@ -650,13 +650,18 @@ const SCORE_COMMENTS = {
 
 function buildFallbackXaml(title, message, eta) {
   const showLoading = title === '服务器正在更新';
-  // 简单场景（如访问被拒绝）：仅提示 + 刷新按钮
+  // 简单场景（如访问被拒绝）：精致版 - 红圈禁止图标 + 居中标题 + 说明 + 刷新按钮
   if (!showLoading) {
     return '<StackPanel>' +
-      '<local:MyCard Title="' + title + '" Margin="0,0,0,15">' +
-      '<StackPanel Margin="25,40,23,20">' +
-      '<local:MyHint Theme="Yellow" Text="' + message + '" />' +
-      '<local:MyIconTextButton Margin="0,16,0,0" Height="40" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
+      '<local:MyCard Title="" Margin="0,0,0,15">' +
+      '<StackPanel Margin="30,40,30,32">' +
+      '<Grid Width="64" Height="64" HorizontalAlignment="Center">' +
+      '<Ellipse Width="64" Height="64" Fill="#FFE5484D"/>' +
+      '<Path Data="M20,20 L44,44" Stroke="#FFFFFFFF" StrokeThickness="8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>' +
+      '</Grid>' +
+      '<TextBlock Text="' + title + '" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,18,0,0"/>' +
+      '<TextBlock Text="' + message + '" FontSize="14" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420" HorizontalAlignment="Center" LineHeight="24" Margin="0,10,0,0"/>' +
+      '<local:MyIconTextButton Margin="0,22,0,0" Height="40" HorizontalAlignment="Center" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />' +
       '</StackPanel>' +
       '</local:MyCard>' +
       '</StackPanel>';
