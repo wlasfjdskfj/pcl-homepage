@@ -647,65 +647,25 @@ def build_xaml():
     lines = []
     lines.append('<StackPanel>')
 
-    # ========== 卡片 1：服务器推荐 ==========
-    lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
-
-    # 主推服务器大卡
-    lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
-    lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />')
-    lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + server_address + '" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-
-    # 其他服务器列表
-    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
-    lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
-    lines.append('                <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('            </StackPanel>')
-
-    for srv in server_list:
-        srv_name = srv["name"]
-        srv_addr = srv["address"]
-
-        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
-        lines.append('                <Grid>')
-        lines.append('                    <Grid.ColumnDefinitions>')
-        lines.append('                        <ColumnDefinition Width="*" />')
-        lines.append('                        <ColumnDefinition Width="Auto" />')
-        lines.append('                    </Grid.ColumnDefinitions>')
-        lines.append('                    <StackPanel Grid.Column="0" VerticalAlignment="Center">')
-        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-        lines.append('                        <TextBlock Text="' + srv_addr + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />')
-        lines.append('                    </StackPanel>')
-        lines.append('                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + srv_addr + '" />')
-        lines.append('                </Grid>')
-        lines.append('            </Border>')
-
-    # 推荐按钮
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
-    lines.append('                <local:CustomEventService.Events>')
-    lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
-    lines.append('                    </local:CustomEventCollection>')
-    lines.append('                </local:CustomEventService.Events>')
-    lines.append('            </local:MyIconTextButton>')
-
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-
-    # ========== 卡片 2：今日概览 ==========
+    # ========== 卡片 1：今日概览 ==========
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
+    lines.append('            <Border CornerRadius="12" Padding="20,16" Margin="0,0,0,16" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <Grid>')
+    lines.append('                    <Grid.ColumnDefinitions>')
+    lines.append('                        <ColumnDefinition Width="Auto" />')
+    lines.append('                        <ColumnDefinition Width="*" />')
+    lines.append('                    </Grid.ColumnDefinitions>')
+    lines.append('                    <Border Grid.Column="0" Width="48" Height="48" CornerRadius="24" Background="{DynamicResource ColorBrush1}" Margin="0,0,16,0" VerticalAlignment="Center">')
+    lines.append('                        <local:MyImage Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+    lines.append('                    </Border>')
+    lines.append('                    <StackPanel Grid.Column="1" VerticalAlignment="Center">')
+    lines.append('                        <TextBlock Text="' + greeting + '，{user}！" FontSize="19" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                        <TextBlock Text="欢迎回来，今天也一起去冒险吧。" FontSize="12" Foreground="{DynamicResource ColorBrush4}" Margin="0,4,0,0" TextWrapping="Wrap" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                </Grid>')
+    lines.append('            </Border>')
     lines.append('            <Border CornerRadius="12" Height="260" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
     lines.append('                    <local:MyImage Source="' + wallpaper_url + '" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
@@ -717,13 +677,6 @@ def build_xaml():
     lines.append('                                <GradientStop Color="#CC000000" Offset="1" />')
     lines.append('                            </LinearGradientBrush>')
     lines.append('                        </Border.Background>')
-    lines.append('                    </Border>')
-
-    lines.append('                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,18,0,0" Background="#66000000" CornerRadius="12" Padding="12,5,12,5">')
-    lines.append('                        <StackPanel Orientation="Horizontal">')
-    lines.append('                            <Border Width="6" Height="6" CornerRadius="3" Background="#FFD166" VerticalAlignment="Center" Margin="0,0,7,0" />')
-    lines.append('                            <TextBlock Text="' + greeting + '" FontSize="11" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
-    lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
 
     lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" FontSize="11" FontWeight="Bold" Foreground="#66FFFFFF" Text="' + year + ' · ' + month + ' / ' + day + '" />')
@@ -798,7 +751,60 @@ def build_xaml():
 
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
+    # ========== 卡片 2：服务器推荐 ==========
+    lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
 
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器：Hypixel。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
+
+    # 主推服务器大卡
+    lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
+    lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+    lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock Text="' + server_address + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />')
+    lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="' + server_address + '" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+
+    # 其他服务器列表
+    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
+    lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+    lines.append('                <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('            </StackPanel>')
+
+    for srv in server_list:
+        srv_name = srv["name"]
+        srv_addr = srv["address"]
+
+        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
+        lines.append('                <Grid>')
+        lines.append('                    <Grid.ColumnDefinitions>')
+        lines.append('                        <ColumnDefinition Width="*" />')
+        lines.append('                        <ColumnDefinition Width="Auto" />')
+        lines.append('                    </Grid.ColumnDefinitions>')
+        lines.append('                    <StackPanel Grid.Column="0" VerticalAlignment="Center">')
+        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+        lines.append('                        <TextBlock Text="' + srv_addr + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />')
+        lines.append('                    </StackPanel>')
+        lines.append('                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + srv_addr + '" />')
+        lines.append('                </Grid>')
+        lines.append('            </Border>')
+
+    # 推荐按钮
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
+    lines.append('                <local:CustomEventService.Events>')
+    lines.append('                    <local:CustomEventCollection>')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;jklahhranget@163.com&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
+    lines.append('                    </local:CustomEventCollection>')
+    lines.append('                </local:CustomEventService.Events>')
+    lines.append('            </local:MyIconTextButton>')
+
+    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
     # ========== 卡片 3：你的信息 ==========
     lines.append('    <local:MyCard Title="你的信息" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
