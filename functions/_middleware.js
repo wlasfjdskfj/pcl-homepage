@@ -1266,8 +1266,12 @@ export async function onRequest(context) {
     const challengeBg = buildChallengeBg(challenge.diff);
     const weatherBody = await fetchWeather(env, ip);
 
+    const _vnow = new Date(Date.now() + 8 * 3600 * 1000);
+    const homePageVer = _vnow.getUTCFullYear() + '-' + String(_vnow.getUTCMonth()+1).padStart(2,'0') + '-' + String(_vnow.getUTCDate()).padStart(2,'0') + ' ' + String(_vnow.getUTCHours()).padStart(2,'0') + ':' + String(_vnow.getUTCMinutes()).padStart(2,'0');
+
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
+      .replace(/__HOMEPAGE_VER__/g, homePageVer)
       .replace(/__DATE_MONTH__/g, date.month)
       .replace(/__DATE_DAY__/g, date.day)
       .replace(/__DATE_WEEKDAY__/g, date.weekday)

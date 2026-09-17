@@ -907,6 +907,8 @@ def build_xaml():
 
     lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
 
+    lines.append('            <TextBlock Text="主页版本 __HOMEPAGE_VER__" FontSize="11" Foreground="#88AAFF" HorizontalAlignment="Left" Margin="0,0,0,14" />')
+
     lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
 
     lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
