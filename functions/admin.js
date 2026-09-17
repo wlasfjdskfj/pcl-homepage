@@ -60,7 +60,8 @@ function securityHeaders(extra = {}) {
 }
 
 function ccToFlag(cc) {
-  if (!cc || cc.length !== 2) return "🌐";
+  // ★ 正则校验，避免 "12" 这类非国家码产生乱码
+  if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return "🌐";
   const OFFSET = 127397;
   try {
     return String.fromCodePoint(
@@ -109,8 +110,10 @@ function ccToName(cc) {
 
 // 时间戳格式化为北京时间 MM-DD HH:MM
 function fmtTime(ms) {
-  if (!ms) return "—";
-  const d = new Date(Number(ms) + 8 * 3600 * 1000);
+  // ★ 数值判断：0 / 负数 / NaN 都返回 —
+  const n = Number(ms);
+  if (!Number.isFinite(n) || n <= 0) return "—";
+  const d = new Date(n + 8 * 3600 * 1000);
   const M = String(d.getUTCMonth() + 1).padStart(2, "0");
   const D = String(d.getUTCDate()).padStart(2, "0");
   const h = String(d.getUTCHours()).padStart(2, "0");
@@ -321,6 +324,16 @@ async function fetchUsageSplit(env, dateStr) {
     return { workers: 0, pages: 0, error: "missing_config" };
   }
 
+  // ★ 日期格式校验，防止 GraphQL 注入
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dateStr))) {
+    return { workers: 0, pages: 0, error: "bad_date" };
+  }
+
+  // ★ Account ID 格式校验（32 位 hex）
+  if (!/^[a-f0-9]{32}$/i.test(String(env.CF_ACCOUNT_ID))) {
+    return { workers: 0, pages: 0, error: "bad_account" };
+  }
+
   const query = `
     query {
       viewer {
@@ -339,6 +352,10 @@ async function fetchUsageSplit(env, dateStr) {
   `;
 
   try {
+    // ★ 5 秒超时
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+
     const res = await fetch("https://api.cloudflare.com/client/v4/graphql", {
       method: "POST",
       headers: {
@@ -346,7 +363,9 @@ async function fetchUsageSplit(env, dateStr) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query }),
-    });
+      signal: ctrl.signal,
+    }).finally(() => clearTimeout(timer));
+
     if (!res.ok) return { workers: 0, pages: 0, error: "api_" + res.status };
     const json = await res.json();
     if (json.errors) return { workers: 0, pages: 0, error: "api_error" };
@@ -356,8 +375,14 @@ async function fetchUsageSplit(env, dateStr) {
       pages: acc.pages?.[0]?.sum?.requests || 0,
       error: null,
     };
-  } catch {
-    return { workers: 0, pages: 0, error: "network" };
+  } catch (e) {
+    // ★ 不再静默
+    console.error("[fetchUsageSplit]", e && e.message);
+    return {
+      workers: 0,
+      pages: 0,
+      error: e && e.name === "AbortError" ? "timeout" : "network",
+    };
   }
 }
 
@@ -380,15 +405,25 @@ export async function onRequest(context) {
   const adminPwd = env.ADMIN_PASSWORD || "";
   const cookieToken = getCookie(request, COOKIE_NAME);
 
+  // ★ 密码未配置时直接报错，避免后台静默锁死
+  if (!adminPwd) {
+    return new Response(
+      `<h1 style="font-family:sans-serif">后台未配置</h1>
+       <p style="font-family:sans-serif;color:#888">请在环境变量中设置 <code>ADMIN_PASSWORD</code> 后重试。</p>`,
+      {
+        status: 500,
+        headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
+      }
+    );
+  }
+
   let isAdmin = false;
-  if (adminPwd && cookieToken) {
+  if (cookieToken) {
     const session = await env.HOMEPAGE_KV.get(`admin:session:${cookieToken}`);
     if (session === "1") isAdmin = true;
   }
 
-  if (url.pathname === "/admin/logout") {
-    return Response.redirect(new URL("/admin?action=logout", url).toString(), 302);
-  }
+  // ★ 已删除 /admin/logout 死代码，统一走 ?action=logout
 
   if (url.searchParams.get("action") === "logout") {
     if (cookieToken) await env.HOMEPAGE_KV.delete(`admin:session:${cookieToken}`);
@@ -414,23 +449,16 @@ export async function onRequest(context) {
       form = new URLSearchParams();
     }
     const providedPwd = String(form.get("pwd") || "");
-    if (adminPwd && safeEqual(providedPwd, adminPwd)) {
-      try {
-        const token = randomToken();
-        await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
-        return new Response(null, {
-          status: 302,
-          headers: securityHeaders({
-            "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
-            Location: "/admin",
-          }),
-        });
-      } catch (e) {
-        return new Response("login error: " + (e && e.message ? e.message : String(e)), {
-          status: 500,
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
-        });
-      }
+    if (safeEqual(providedPwd, adminPwd)) {
+      const token = randomToken();
+      await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
+      return new Response(null, {
+        status: 302,
+        headers: securityHeaders({
+          "Set-Cookie": `${COOKIE_NAME}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_TTL}`,
+          Location: "/admin",
+        }),
+      });
     }
 
     // 已登录管理员的管理动作
@@ -468,7 +496,10 @@ export async function onRequest(context) {
             await env.HOMEPAGE_KV.put('maint_mode', '0');
           }
         }
-      } catch (e) { /* 忽略管理动作错误 */ }
+      } catch (e) {
+        // ★ 不再完全静默
+        console.error("[admin action]", action, e && e.message);
+      }
       return new Response(null, {
         status: 302,
         headers: securityHeaders({ Location: "/admin" }),
@@ -490,12 +521,44 @@ export async function onRequest(context) {
   }
 
   try {
-    const total = (await env.HOMEPAGE_KV.get("visit:total")) || "0";
+    // ★ 并发读取全部 KV，8 次 RTT → 1 次
+    const [
+      totalRaw,
+      ipmapRaw,
+      days7Raw,
+      blockRaw,
+      weatherVerRaw,
+      maintModeRaw,
+      maintEtaRaw,
+      maintReasonRaw,
+    ] = await Promise.all([
+      env.HOMEPAGE_KV.get("visit:total"),
+      env.HOMEPAGE_KV.get("visit:ipmap"),
+      env.HOMEPAGE_KV.get("visit:days:7"),
+      env.HOMEPAGE_KV.get("block:list"),
+      env.HOMEPAGE_KV.get("weather_version"),
+      env.HOMEPAGE_KV.get("maint_mode"),
+      env.HOMEPAGE_KV.get("maint_eta"),
+      env.HOMEPAGE_KV.get("maint_reason"),
+    ]);
+
+    const total = totalRaw || "0";
 
     let ipMap = {};
-    try {
-      ipMap = JSON.parse((await env.HOMEPAGE_KV.get("visit:ipmap")) || "{}");
-    } catch { ipMap = {}; }
+    try { ipMap = JSON.parse(ipmapRaw || "{}"); } catch { ipMap = {}; }
+
+    let days7Map = null;
+    try { if (days7Raw) days7Map = JSON.parse(days7Raw); } catch { days7Map = null; }
+
+    let blockList = {};
+    try { blockList = JSON.parse(blockRaw || "{}"); } catch { blockList = {}; }
+    const blockCount = Object.keys(blockList).length;
+
+    const weatherVer = weatherVerRaw || "0";
+    const maintMode = maintModeRaw || "0";
+    const maintOn = !!(maintMode && maintMode !== "0");
+    const maintEta = maintEtaRaw || "";
+    const maintReason = maintReasonRaw || "";
 
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
@@ -503,12 +566,6 @@ export async function onRequest(context) {
       const d = new Date(now.getTime() - i * 86400000);
       dates.push(d.toISOString().slice(0, 10));
     }
-
-    let days7Map = null;
-    try {
-      const raw = await env.HOMEPAGE_KV.get("visit:days:7");
-      if (raw) days7Map = JSON.parse(raw);
-    } catch { days7Map = null; }
 
     let days;
     if (days7Map && typeof days7Map === "object" && !Array.isArray(days7Map)) {
@@ -525,7 +582,7 @@ export async function onRequest(context) {
       );
     }
 
-    // 关键修复：GraphQL 按 UTC 日期统计，用 UTC 当天
+    // GraphQL 按 UTC 日期统计，用 UTC 当天
     const utcToday = new Date().toISOString().slice(0, 10);
     const { workers, pages, error: apiError } = await fetchUsageSplit(env, utcToday);
 
@@ -536,15 +593,6 @@ export async function onRequest(context) {
 
     const resetInfo = getResetCountdown();
 
-    // 封禁列表 + 天气缓存版本
-    let blockList = {};
-    try { blockList = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}'); } catch { blockList = {}; }
-    const blockCount = Object.keys(blockList).length;
-    const weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0";
-    const maintMode = (await env.HOMEPAGE_KV.get('maint_mode')) || '0';
-    const maintOn = !!(maintMode && maintMode !== '0');
-    const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
-    const maintReason = (await env.HOMEPAGE_KV.get('maint_reason')) || '';
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
     // 统一解析 IP 记录，兼容多种存储结构，按最近访问时间排序
@@ -600,7 +648,7 @@ export async function onRequest(context) {
     }).join("");
 
     const warnHtml = apiError
-      ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用，配额显示为 0</div>`
+      ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用（${escapeHtml(apiError)}），配额显示为 0</div>`
       : "";
 
     const initialTime = new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(11, 19);
@@ -1050,7 +1098,7 @@ export async function onRequest(context) {
       <div class="brand"><span class="brand-icon">📊</span><span class="brand-text">PCL 后台</span></div>
       <nav class="nav">
         <a class="nav-item active" data-tab="overview"><span class="nav-ico">📈</span>概览</a>
-        <a class="nav-item" data-tab="visitors"><span class="nav-ico">🌍</span>访问排行</a>
+        <a class="nav-item" data-tab="visitors"><span class="nav-ico">🌍</span>访问记录</a>
         <a class="nav-item" data-tab="manage"><span class="nav-ico">🛠</span>封禁管理</a>
       </nav>
       <div class="sidebar-foot">
@@ -1145,7 +1193,7 @@ export async function onRequest(context) {
 
         </section>
         <section id="tab-visitors" class="section" hidden>
-          <h2>IP 访问排行（前 100）· 按最近访问排序</h2>
+          <h2>IP 访问记录（最近 100 条）· 按最近访问排序</h2>
           <div class="table-wrap">
             <table>
               <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th><th>最近访问</th></tr></thead>
@@ -1218,7 +1266,7 @@ export async function onRequest(context) {
   (function(){
     const navs = document.querySelectorAll('.nav-item');
     const title = document.getElementById('tabTitle');
-    const tabs = { overview:'概览', visitors:'访问排行', manage:'封禁管理' };
+    const tabs = { overview:'概览', visitors:'访问记录', manage:'封禁管理' };
     navs.forEach(a => {
       a.addEventListener('click', () => {
         navs.forEach(x => x.classList.remove('active'));
@@ -1340,7 +1388,8 @@ export async function onRequest(context) {
     return new Response(html, {
       headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
     });
-  } catch {
+  } catch (e) {
+    console.error("[admin render]", e && e.message);
     return new Response("<h1>读取失败</h1><p>请稍后重试</p>", {
       status: 500,
       headers: securityHeaders({ "Content-Type": "text/html; charset=utf-8" }),
