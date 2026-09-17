@@ -402,7 +402,17 @@ export async function onRequest(context) {
   }
 
   if (request.method === "POST") {
-    const form = await request.formData();
+    // 用 text + URLSearchParams 手动解析，规避 Workers 环境下 formData() 可能抛异常
+    let rawBody = "";
+    try {
+      rawBody = await request.text();
+    } catch (e) { rawBody = ""; }
+    let form;
+    try {
+      form = new URLSearchParams(rawBody);
+    } catch (e) {
+      form = new URLSearchParams();
+    }
     const providedPwd = String(form.get("pwd") || "");
     if (adminPwd && safeEqual(providedPwd, adminPwd)) {
       const token = randomToken();
