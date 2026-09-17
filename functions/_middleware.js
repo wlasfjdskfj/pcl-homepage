@@ -845,7 +845,7 @@ async function fetchApihzWeather(env, ip) {
     const j = await r.json();
     if (!j || j.code !== 200 || !j.nowinfo) return null;
     const temp = Math.round(j.nowinfo.temperature);
-    const wind = Math.round(j.nowinfo.windSpeed);
+    const wind = Math.round((j.nowinfo.windSpeed || 0) * 3.6); // 接口盒子风速为 m/s，转 km/h 与卡片文案一致
     const desc = (j.weather1 && j.weather2 && j.weather1 !== j.weather2)
       ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
     const xaml = buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
