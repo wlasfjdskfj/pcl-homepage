@@ -812,7 +812,7 @@ function buildWeatherXaml(city, temp, desc, wind, isDay) {
     + '<StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">'
     + '<local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
-    + '<TextBlock Text="' + escapeXaml(city) + ' 当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
+    + '<TextBlock Text="当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
     + '</StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
     + '<TextBlock Text="' + temp + '°" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
@@ -821,7 +821,7 @@ function buildWeatherXaml(city, temp, desc, wind, isDay) {
     + '<TextBlock Text="风力 ' + wind + ' km/h · ' + escapeXaml(tip) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />'
     + '</StackPanel>'
     + '</Border>'
-    + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="数据按公网 IP 自动定位，来自 Open-Meteo。" />';
+    + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="天气数据来自 Open-Meteo。" />';
 }
 // 定位：优先 ipwho.is（对国内 IP 更细、返回威海等城市，https 免费），失败重试后降级 ip-api.com
 async function fetchGeo(ip) {
