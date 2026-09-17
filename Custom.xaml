@@ -2,6 +2,7 @@
     <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,20">
             <!-- __FESTIVAL_BANNER__ -->
+            <!-- __COUNTDOWN_BODY__ -->
             <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.Santenay_ZH-CN5676942384_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
@@ -89,16 +90,6 @@
                     </StackPanel>
                 </Border>
             </Grid>
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="实时天气" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <!-- __WEATHER_BODY__ -->
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="节日倒计时" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,20">
-            <!-- __COUNTDOWN_BODY__ -->
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
@@ -197,6 +188,7 @@
                     </Grid>
                 </StackPanel>
             </Border>
+            <!-- __WEATHER_BODY__ -->
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />

@@ -652,6 +652,7 @@ def build_xaml():
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
     lines.append('            <!-- __FESTIVAL_BANNER__ -->')
+    lines.append('            <!-- __COUNTDOWN_BODY__ -->')
 
     lines.append('            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">')
     lines.append('                <Grid>')
@@ -750,19 +751,7 @@ def build_xaml():
 
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
-    # ========== 卡片 2：实时天气 ==========
-    lines.append('    <local:MyCard Title="实时天气" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <!-- __WEATHER_BODY__ -->')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-    # ========== 卡片 3：节日倒计时 ==========
-    lines.append('    <local:MyCard Title="节日倒计时" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <!-- __COUNTDOWN_BODY__ -->')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-    # ========== 卡片 4：服务器推荐 ==========
+    # ========== 卡片 2：服务器推荐 ==========
     lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
@@ -848,6 +837,7 @@ def build_xaml():
     lines.append('                    </Grid>')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
+    lines.append('            <!-- __WEATHER_BODY__ -->')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
