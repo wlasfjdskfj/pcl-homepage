@@ -72,6 +72,41 @@ function ccToFlag(cc) {
   }
 }
 
+/* ---------------- 国家/地区中文映射 ---------------- */
+
+const COUNTRY_NAMES = {
+  CN: "中国", HK: "中国香港", MO: "中国澳门", TW: "中国台湾",
+  US: "美国", JP: "日本", KR: "韩国", KP: "朝鲜", MN: "蒙古",
+  SG: "新加坡", MY: "马来西亚", TH: "泰国", VN: "越南",
+  PH: "菲律宾", ID: "印度尼西亚", IN: "印度", PK: "巴基斯坦",
+  BD: "孟加拉国", LK: "斯里兰卡", NP: "尼泊尔", KH: "柬埔寨",
+  LA: "老挝", MM: "缅甸", BN: "文莱", KZ: "哈萨克斯坦",
+  GB: "英国", IE: "爱尔兰", DE: "德国", FR: "法国",
+  NL: "荷兰", BE: "比利时", LU: "卢森堡", CH: "瑞士",
+  AT: "奥地利", IT: "意大利", ES: "西班牙", PT: "葡萄牙",
+  GR: "希腊", SE: "瑞典", NO: "挪威", DK: "丹麦",
+  FI: "芬兰", IS: "冰岛", PL: "波兰", CZ: "捷克",
+  SK: "斯洛伐克", HU: "匈牙利", RO: "罗马尼亚", BG: "保加利亚",
+  HR: "克罗地亚", SI: "斯洛文尼亚", RS: "塞尔维亚", UA: "乌克兰",
+  BY: "白俄罗斯", RU: "俄罗斯", LT: "立陶宛", LV: "拉脱维亚",
+  EE: "爱沙尼亚", TR: "土耳其", IL: "以色列", SA: "沙特阿拉伯",
+  AE: "阿联酋", QA: "卡塔尔", KW: "科威特", BH: "巴林",
+  OM: "阿曼", JO: "约旦", LB: "黎巴嫩", IR: "伊朗",
+  IQ: "伊拉克", EG: "埃及", ZA: "南非", NG: "尼日利亚",
+  KE: "肯尼亚", ET: "埃塞俄比亚", GH: "加纳", TZ: "坦桑尼亚",
+  MA: "摩洛哥", DZ: "阿尔及利亚", TN: "突尼斯", LY: "利比亚",
+  CA: "加拿大", MX: "墨西哥", BR: "巴西", AR: "阿根廷",
+  CL: "智利", CO: "哥伦比亚", PE: "秘鲁", VE: "委内瑞拉",
+  EC: "厄瓜多尔", UY: "乌拉圭", PY: "巴拉圭", BO: "玻利维亚",
+  AU: "澳大利亚", NZ: "新西兰", FJ: "斐济", PG: "巴布亚新几内亚",
+};
+
+function ccToName(cc) {
+  if (!cc || cc === "XX") return "未知";
+  const key = String(cc).toUpperCase();
+  return COUNTRY_NAMES[key] || key;
+}
+
 /* ---------------- 主题脚本 ---------------- */
 
 const THEME_SCRIPT = `
@@ -430,20 +465,36 @@ export async function onRequest(context) {
 
     const resetInfo = getResetCountdown();
 
+    // 统一解析 IP 记录，兼容多种存储结构
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
-        if (typeof val === "number") return [ip, { c: val, cc: "XX" }];
-        const cc = val.cc || val.cf?.country || "XX";
-        return [ip, { c: Number(val.c) || 0, cc }];
+        // 旧格式：直接是数字
+        if (typeof val === "number") {
+          return [ip, { c: val, cc: "XX" }];
+        }
+
+        // 对象格式：兼容 c / count / visits，国家兼容 cc / country / cf.country
+        const c = Number(val.c ?? val.count ?? val.visits ?? 0) || 0;
+        const cc =
+          val.cc ||
+          val.country ||
+          val.cf?.country ||
+          val.cf?.countryCode ||
+          "XX";
+
+        return [ip, { c, cc: String(cc).toUpperCase() }];
       })
-      .filter(([, v]) => Number.isFinite(v.c))
+      .filter(([, v]) => Number.isFinite(v.c) && v.c > 0)
       .sort((a, b) => b[1].c - a[1].c);
 
+    // IP 表格增加“国家/地区”列
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
       const flag = ccToFlag(v.cc);
+      const country = ccToName(v.cc);
       return `<tr>
         <td>${i + 1}</td>
         <td><span class="ip-flag">${flag}</span><span class="ip-text">${escapeHtml(ipAddr)}</span></td>
+        <td>${escapeHtml(country)}</td>
         <td>${escapeHtml(v.c)}</td>
       </tr>`;
     }).join("");
@@ -747,7 +798,9 @@ export async function onRequest(context) {
   }
   tbody tr:last-child { border-bottom:none; }
   tbody tr:hover { background: rgba(255,68,68,.06); }
-  td:nth-child(3) { color:#17DD62; font-weight:600; font-variant-numeric: tabular-nums; }
+  /* 第 3 列为国家/地区（弱化），第 4 列为次数（绿色强调） */
+  td:nth-child(3) { color: var(--text-dim); }
+  td:nth-child(4) { color:#17DD62; font-weight:600; font-variant-numeric: tabular-nums; }
   .empty { text-align:center; color: var(--text-dim); padding:28px; font-size:13px; }
 
   .ip-flag { display:inline-block; margin-right:8px; font-size:15px; vertical-align:-1px; }
@@ -882,8 +935,8 @@ export async function onRequest(context) {
     <h2>IP 访问排行（前 100）</h2>
     <div class="table-wrap" style="animation-delay:.44s;">
       <table>
-        <thead><tr><th>#</th><th>IP</th><th>次数</th></tr></thead>
-        <tbody>${ipRows || '<tr><td colspan="3" class="empty">暂无记录</td></tr>'}</tbody>
+        <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th></tr></thead>
+        <tbody>${ipRows || '<tr><td colspan="4" class="empty">暂无记录</td></tr>'}</tbody>
       </table>
     </div>
   </div>
