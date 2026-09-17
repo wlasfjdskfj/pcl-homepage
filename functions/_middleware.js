@@ -887,7 +887,16 @@ async function fetchApihzWeather(env, ip) {
     }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
       + "&key=" + encodeURIComponent(key) + "&ip=" + encodeURIComponent(clean);
-    const r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" } });
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    let r;
+    try {
+      r = await fetch(url, { headers: { "User-Agent": "PCL-Homepage" }, signal: controller.signal });
+    } catch (e) {
+      clearTimeout(timer);
+      return null;
+    }
+    clearTimeout(timer);
     if (!r.ok) return null;
     const j = await r.json();
     if (!j || j.code !== 200 || !j.nowinfo) return null;
@@ -1093,11 +1102,21 @@ export async function onRequest(context) {
 
   // 2. 主页文件
   if (url.pathname === '/Custom.xaml' || url.pathname === '/') {
+    // 并行读取封禁列表 + 维护模式（减少串行 KV 延迟）
+    let blockRaw = '{}', maintRaw = '', maintEta = '';
+    try {
+      [blockRaw, maintRaw, maintEta] = await Promise.all([
+        env.HOMEPAGE_KV.get('block:list'),
+        env.HOMEPAGE_KV.get('maint_mode'),
+        env.HOMEPAGE_KV.get('maint_eta'),
+      ]);
+    } catch (e) { /* KV 读取失败则放行 */ }
+
     // 封禁 IP 检查：命中管理员封禁列表则拒绝访问
     const reqIp = request.headers.get('CF-Connecting-IP') || 'unknown';
     if (reqIp && reqIp !== 'unknown') {
       try {
-        const blockList = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}');
+        const blockList = JSON.parse(blockRaw || '{}');
         if (blockList[reqIp]) {
           return new Response(buildFallbackXaml('访问被拒绝', '你的 IP 已被管理员禁止访问本主页。'), {
             headers: {
@@ -1109,18 +1128,14 @@ export async function onRequest(context) {
       } catch (e) { /* 封禁列表读取失败则放行 */ }
     }
     // 服务器更新/维护模式模拟：后台开启后主页返回"服务器正在更新"兜底页（用于测试故障效果）
-    try {
-      const maint = await env.HOMEPAGE_KV.get('maint_mode');
-      if (maint && maint !== '0') {
-        const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
-        return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。', maintEta), {
-          headers: {
-            'Content-Type': 'application/xml; charset=utf-8',
-            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-          },
-        });
-      }
-    } catch (e) { /* 维护模式读取失败则忽略 */ }
+    if (maintRaw && maintRaw !== '0') {
+      return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。', maintEta || ''), {
+        headers: {
+          'Content-Type': 'application/xml; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        },
+      });
+    }
     const assetUrl = new URL('/Custom.xaml', url.origin);
 
     let response;
