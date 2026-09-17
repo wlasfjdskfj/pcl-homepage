@@ -526,8 +526,7 @@ export async function onRequest(context) {
     const maintEta = (await env.HOMEPAGE_KV.get('maint_eta')) || '';
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
-    // 统一解析 IP 记录，兼容多种存储结构
-    const sortMode = url.searchParams.get("sort") === "time" ? "time" : "count";
+    // 统一解析 IP 记录，兼容多种存储结构，按最近访问时间排序
     const entries = Object.entries(ipMap)
       .map(([ip, val]) => {
         // 旧格式：直接是数字
@@ -548,11 +547,7 @@ export async function onRequest(context) {
         return [ip, { c, cc: String(cc).toUpperCase(), t }];
       })
       .filter(([, v]) => Number.isFinite(v.c) && v.c > 0)
-      .sort((a, b) =>
-        sortMode === "time"
-          ? (b[1].t || 0) - (a[1].t || 0)
-          : b[1].c - a[1].c
-      );
+      .sort((a, b) => (b[1].t || 0) - (a[1].t || 0));
 
     // IP 表格：增加"国家/地区"列 和 "最近访问"列
     const ipRows = entries.slice(0, 100).map(([ipAddr, v], i) => {
@@ -1129,12 +1124,7 @@ export async function onRequest(context) {
 
         </section>
         <section id="tab-visitors" class="section" hidden>
-          <h2>IP 访问排行（前 100）</h2>
-          <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;">
-            <span style="font-size:13px;color:var(--text-dim);">排序：</span>
-            <a class="btn ${sortMode === 'count' ? 'btn-primary' : 'btn-ghost'}" href="/admin?sort=count" style="font-size:12.5px;padding:6px 12px;">按次数</a>
-            <a class="btn ${sortMode === 'time' ? 'btn-primary' : 'btn-ghost'}" href="/admin?sort=time" style="font-size:12.5px;padding:6px 12px;">按最近访问</a>
-          </div>
+          <h2>IP 访问排行（前 100）· 按最近访问排序</h2>
           <div class="table-wrap">
             <table>
               <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th><th>最近访问</th></tr></thead>
@@ -1175,6 +1165,7 @@ export async function onRequest(context) {
           <button type="button" class="btn btn-ghost eta-quick-btn" data-min="30" style="font-size:12px;padding:6px 10px;">+30分钟</button>
           <button type="button" class="btn btn-ghost eta-quick-btn" data-min="60" style="font-size:12px;padding:6px 10px;">+1小时</button>
           <button type="button" class="btn btn-ghost eta-quick-btn" data-min="120" style="font-size:12px;padding:6px 10px;">+2小时</button>
+          <button type="button" class="btn btn-ghost eta-quick-btn" data-time="明天" style="font-size:12px;padding:6px 10px;">切到明天</button>
         </div>
         <form method="post" style="margin-top:8px;">
           <input type="hidden" name="action" value="maint">
@@ -1219,16 +1210,20 @@ export async function onRequest(context) {
     });
   })();
 
-  // 服务器更新：快捷预计完成时间（按北京时间+增量自动填入）
+  // 服务器更新：快捷预计完成时间
   document.querySelectorAll('.eta-quick-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      const input = btn.closest('.manage-card').querySelector('input[name=eta]');
+      if (!input) return;
+      // 固定时间文本（如"明天 08:00"）直接填入
+      if (btn.dataset.time) { input.value = btn.dataset.time; return; }
+      // 相对增量：按北京时间+分钟自动计算
       const mins = Number(btn.dataset.min) || 0;
       const now = new Date(Date.now() + 8 * 3600 * 1000);
       const t = new Date(now.getTime() + mins * 60000);
       const hh = String(t.getUTCHours()).padStart(2, '0');
       const mm = String(t.getUTCMinutes()).padStart(2, '0');
-      const input = btn.closest('.manage-card').querySelector('input[name=eta]');
-      if (input) input.value = hh + ':' + mm;
+      input.value = hh + ':' + mm;
     });
   });
 
