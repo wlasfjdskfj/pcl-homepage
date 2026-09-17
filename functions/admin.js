@@ -497,7 +497,8 @@ export async function onRequest(context) {
     }
     const providedPwd = String(form.get("pwd") || "");
     if (safeEqual(providedPwd, adminPwd)) {
-      const token = randomToken();
+      try {
+        const token = randomToken();
       await env.HOMEPAGE_KV.put(`admin:session:${token}`, "1", { expirationTtl: SESSION_TTL });
       return new Response(null, {
         status: 302,
@@ -506,6 +507,12 @@ export async function onRequest(context) {
           Location: "/admin",
         }),
       });
+      } catch (e) {
+        return new Response("login error: " + (e && e.message ? e.message : String(e)), {
+          status: 500,
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
     }
 
     if (isAdmin) {
