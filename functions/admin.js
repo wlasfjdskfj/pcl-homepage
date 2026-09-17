@@ -426,6 +426,10 @@ export async function onRequest(context) {
         } else if (action === "resetweather") {
           const ver = parseInt((await env.HOMEPAGE_KV.get('weather_version')) || "0", 10) + 1;
           await env.HOMEPAGE_KV.put('weather_version', String(ver));
+        } else if (action === "maint") {
+          const on = form.get("on") === "1";
+          if (on) await env.HOMEPAGE_KV.put('maint_mode', String(Date.now()));
+          else await env.HOMEPAGE_KV.put('maint_mode', '0');
         }
       } catch (e) { /* 忽略管理动作错误 */ }
       return new Response(null, {
@@ -500,6 +504,8 @@ export async function onRequest(context) {
     try { blockList = JSON.parse((await env.HOMEPAGE_KV.get('block:list')) || '{}'); } catch { blockList = {}; }
     const blockCount = Object.keys(blockList).length;
     const weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0";
+    const maintMode = (await env.HOMEPAGE_KV.get('maint_mode')) || '0';
+    const maintOn = !!(maintMode && maintMode !== '0');
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
     // 统一解析 IP 记录，兼容多种存储结构
@@ -1124,6 +1130,20 @@ export async function onRequest(context) {
         <form method="post">
           <input type="hidden" name="action" value="resetweather">
           <button type="submit" class="btn btn-warn">重置天气缓存</button>
+        </form>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">🛠 服务器更新模拟</div>
+        <p class="manage-desc">开启后，主页对所有访问者显示"服务器正在更新"兜底页（用于测试故障效果）。当前：<b style="color:${maintOn ? '#FF4444' : '#17DD62'}">${maintOn ? '已开启' : '已关闭'}</b>。</p>
+        <form method="post" style="display:flex;gap:8px;">
+          <input type="hidden" name="action" value="maint">
+          <input type="hidden" name="on" value="1">
+          <button type="submit" class="btn btn-warn">开启</button>
+        </form>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="action" value="maint">
+          <input type="hidden" name="on" value="0">
+          <button type="submit" class="btn btn-ghost">关闭</button>
         </form>
       </div>
           </div>

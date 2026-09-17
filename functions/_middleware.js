@@ -1063,6 +1063,18 @@ export async function onRequest(context) {
         }
       } catch (e) { /* 封禁列表读取失败则放行 */ }
     }
+    // 服务器更新/维护模式模拟：后台开启后主页返回"服务器正在更新"兜底页（用于测试故障效果）
+    try {
+      const maint = await env.HOMEPAGE_KV.get('maint_mode');
+      if (maint && maint !== '0') {
+        return new Response(buildFallbackXaml('服务器正在更新', '服务器正在更新中，请稍后刷新重试。'), {
+          headers: {
+            'Content-Type': 'application/xml; charset=utf-8',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+          },
+        });
+      }
+    } catch (e) { /* 维护模式读取失败则忽略 */ }
     const assetUrl = new URL('/Custom.xaml', url.origin);
 
     let response;
