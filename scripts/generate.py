@@ -698,6 +698,7 @@ def build_xaml():
     lines.append('                        <TextBlock Text="星期' + weekday + '" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />')
     lines.append('                    </StackPanel>')
     lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,40" FontSize="10" FontWeight="Bold" Foreground="#99FFFFFF" Text="主题版本更新时间 __HOMEPAGE_VER__" />')
+    lines.append('                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,24" FontSize="10" FontWeight="Bold" Foreground="#99FFFFFF" Text="PCL版本 {pcl_version}" />')
     lines.append('                </Grid>')
     lines.append('            </Border>')
 
