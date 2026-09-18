@@ -1681,15 +1681,28 @@ export async function onRequest(context) {
     const navs = document.querySelectorAll('.nav-item');
     const title = document.getElementById('tabTitle');
     const tabs = { overview:'概览', visitors:'访问记录', content:'内容管理', settings:'系统设置' };
+    function switchTab(t){
+      navs.forEach(x => x.classList.toggle('active', x.dataset.tab === t));
+      document.querySelectorAll('.section').forEach(s => { s.hidden = true; });
+      const sec = document.getElementById('tab-' + t);
+      if (sec) sec.hidden = false;
+      if (title && tabs[t]) title.textContent = tabs[t];
+    }
     navs.forEach(a => {
-      a.addEventListener('click', () => {
-        navs.forEach(x => x.classList.remove('active'));
-        a.classList.add('active');
-        const t = a.dataset.tab;
-        document.querySelectorAll('.section').forEach(s => { s.hidden = true; });
-        const sec = document.getElementById('tab-' + t);
-        if (sec) sec.hidden = false;
-        if (title && tabs[t]) title.textContent = tabs[t];
+      a.addEventListener('click', () => switchTab(a.dataset.tab));
+    });
+    // 页面加载时恢复之前所在的标签页（表单提交后 URL 带 ?tab=xxx）
+    const urlTab = new URLSearchParams(location.search).get('tab');
+    if (urlTab && tabs[urlTab]) switchTab(urlTab);
+    // 表单提交时把当前标签页附加到 action，避免提交后跳回概览
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', () => {
+        const active = document.querySelector('.nav-item.active');
+        const t = active ? active.dataset.tab : '';
+        if (t && t !== 'overview') {
+          const sep = form.action.indexOf('?') >= 0 ? '&' : '?';
+          form.action = form.action + sep + 'tab=' + t;
+        }
       });
     });
   })();
