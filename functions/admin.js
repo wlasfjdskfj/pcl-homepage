@@ -589,6 +589,11 @@ export async function onRequest(context) {
           const text = String(form.get("text") || "").trim();
           if (text) await env.HOMEPAGE_KV.put('quote_custom', text);
           else await env.HOMEPAGE_KV.delete('quote_custom');
+        } else if (action === "countdown") {
+          const name = String(form.get("name") || "").trim();
+          const date = String(form.get("date") || "").trim();
+          if (name && /^\d{4}-\d{2}-\d{2}$/.test(date)) await env.HOMEPAGE_KV.put('custom_countdown', JSON.stringify({ name, date }));
+          else await env.HOMEPAGE_KV.delete('custom_countdown');
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -625,6 +630,7 @@ export async function onRequest(context) {
       bannerRaw,
       serverCfgRaw,
       quoteCfgRaw,
+      countdownRaw,
     ] = await Promise.all([
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
@@ -634,6 +640,7 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("homepage_banner"),
       env.HOMEPAGE_KV.get("server_cfg"),
       env.HOMEPAGE_KV.get("quote_custom"),
+      env.HOMEPAGE_KV.get("custom_countdown"),
     ]);
 
     // 从 D1 读取访问统计
@@ -689,7 +696,12 @@ export async function onRequest(context) {
       if (sc.email) serverEmail = String(sc.email);
     } catch { /* 默认值 */ }
     const quoteCustom = quoteCfgRaw || "";
-
+    let countdownName = "", countdownDate = "";
+    try {
+      const cc = JSON.parse(countdownRaw || "{}");
+      if (cc.name) countdownName = String(cc.name);
+      if (cc.date) countdownDate = String(cc.date);
+    } catch { /* 默认 */ }
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -711,6 +723,23 @@ export async function onRequest(context) {
     const kvPct = (kvUsed / 1000) * 100;
     const kvColor = kvPct >= 80 ? "#FF4444" : kvPct >= 50 ? "#FFB020" : "#17DD62";
     const kvWarn = kvPct >= 80 ? '<span style="color:#FF4444;font-weight:600;">⚠ 接近上限，注意排查</span>' : '';
+    // 近7天访问趋势图（SVG）
+    const tMax = Math.max(...days.map((d) => d.count), 1);
+    const tw = 560, th = 168, padL = 34, padB = 22, padT = 14;
+    const tpts = days.map((d, i) => {
+      const x = padL + (i * (tw - padL - 8)) / 6;
+      const y = padT + (1 - (d.count / tMax)) * (th - padT - padB);
+      return { x: x.toFixed(1), y: y.toFixed(1), count: d.count, date: d.date.slice(5) };
+    });
+    const tline = tpts.map((p) => p.x + ',' + p.y).join(' ');
+    const tarea = padL + ',' + (th - padB) + ' ' + tline + ' ' + (tw - 8) + ',' + (th - padB);
+    let trendSvg = '<svg viewBox="0 0 ' + tw + ' ' + th + '" style="width:100%;display:block;margin-top:10px;">';
+    tpts.forEach((p) => { trendSvg += '<text x="' + p.x + '" y="' + (th - 8) + '" font-size="9" fill="#8a8a9a" text-anchor="middle">' + p.date + '</text>'; });
+    tpts.forEach((p) => { trendSvg += '<text x="' + p.x + '" y="' + (parseFloat(p.y) - 6) + '" font-size="9" fill="#17DD62" text-anchor="middle">' + p.count + '</text>'; });
+    trendSvg += '<polygon points="' + tarea + '" fill="rgba(23,221,98,0.12)"/>';
+    trendSvg += '<polyline points="' + tline + '" fill="none" stroke="#17DD62" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    tpts.forEach((p) => { trendSvg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="#17DD62"/>'; });
+    trendSvg += '</svg>';
 
     const resetInfo = getResetCountdown();
     const maxDay = Math.max(1, ...days.map((d) => d.count));
@@ -1262,6 +1291,14 @@ export async function onRequest(context) {
       </div>
     </div>
 
+    <div class="quota" style="margin-top:14px;">
+      <div class="quota-head">
+        <span class="quota-title">近 7 天访问趋势</span>
+        <span class="quota-sub">独立 IP 数 / 天</span>
+      </div>
+      ${trendSvg}
+    </div>
+
     <div class="split-card">
       <div class="split-item">
         <div class="split-label">Workers 请求</div>
@@ -1343,6 +1380,22 @@ export async function onRequest(context) {
           <input type="hidden" name="action" value="quotecfg">
           <input type="hidden" name="text" value="">
           <button type="submit" class="btn btn-ghost">恢复默认一言</button>
+        </form>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">⏳ 自定义倒计时目标</div>
+        <p class="manage-desc">主页顶部显示"距目标还有 X 天"。留空保存即恢复节日倒计时。</p>
+        <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="hidden" name="action" value="countdown">
+          <input name="name" type="text" value="${escapeHtml(countdownName)}" placeholder="目标名称，如：国庆节" style="flex:1;min-width:140px;">
+          <input name="date" type="date" value="${escapeHtml(countdownDate)}" style="flex:1;min-width:150px;">
+          <button type="submit" class="btn btn-warn">保存</button>
+        </form>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="action" value="countdown">
+          <input type="hidden" name="name" value="">
+          <input type="hidden" name="date" value="">
+          <button type="submit" class="btn btn-ghost">恢复节日倒计时</button>
         </form>
       </div>
           </div>

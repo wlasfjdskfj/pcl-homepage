@@ -1116,6 +1116,21 @@ def build_xaml():
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
 
+    # ========== 卡片：每日冷知识 ==========
+    lines.append('    <local:MyCard Title="每日冷知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
+    lines.append('        <StackPanel Margin="25,40,23,20">')
+    lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('                <StackPanel>')
+    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
+    lines.append('                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+    lines.append('                        <TextBlock Text="你知道 MC 里……" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    lines.append('                    </StackPanel>')
+    lines.append('                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22" Foreground="{DynamicResource ColorBrush1}" Text="__COLD_TIP__" />')
+    lines.append('                </StackPanel>')
+    lines.append('            </Border>')
+    lines.append('        </StackPanel>')
+    lines.append('    </local:MyCard>')
+
     # ========== 卡片 11：MC 知识小测（默认折叠） ==========
     lines.append('    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')

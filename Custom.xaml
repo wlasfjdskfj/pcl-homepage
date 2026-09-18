@@ -570,6 +570,19 @@
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="创建新世界时，在「种子」栏粘贴即可。" />
         </StackPanel>
     </local:MyCard>
+    <local:MyCard Title="每日冷知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <TextBlock Text="你知道 MC 里……" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22" Foreground="{DynamicResource ColorBrush1}" Text="__COLD_TIP__" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
