@@ -769,24 +769,6 @@ export async function onRequest(context) {
     const kvPct = (kvUsed / 1000) * 100;
     const kvColor = kvPct >= 80 ? "#FF4444" : kvPct >= 50 ? "#FFB020" : "#17DD62";
     const kvWarn = kvPct >= 80 ? '<span style="color:#FF4444;font-weight:600;">⚠ 接近上限，注意排查</span>' : '';
-    // 近7天访问趋势图（SVG）
-    const tMax = Math.max(...days.map((d) => d.count), 1);
-    const tw = 560, th = 168, padL = 34, padB = 22, padT = 14;
-    const tpts = days.map((d, i) => {
-      const x = padL + (i * (tw - padL - 8)) / 6;
-      const y = padT + (1 - (d.count / tMax)) * (th - padT - padB);
-      return { x: x.toFixed(1), y: y.toFixed(1), count: d.count, date: d.date.slice(5) };
-    });
-    const tline = tpts.map((p) => p.x + ',' + p.y).join(' ');
-    const tarea = padL + ',' + (th - padB) + ' ' + tline + ' ' + (tw - 8) + ',' + (th - padB);
-    let trendSvg = '<svg viewBox="0 0 ' + tw + ' ' + th + '" style="width:100%;display:block;margin-top:10px;">';
-    tpts.forEach((p) => { trendSvg += '<text x="' + p.x + '" y="' + (th - 8) + '" font-size="9" fill="#8a8a9a" text-anchor="middle">' + p.date + '</text>'; });
-    tpts.forEach((p) => { trendSvg += '<text x="' + p.x + '" y="' + (parseFloat(p.y) - 6) + '" font-size="9" fill="#17DD62" text-anchor="middle">' + p.count + '</text>'; });
-    trendSvg += '<polygon points="' + tarea + '" fill="rgba(23,221,98,0.12)"/>';
-    trendSvg += '<polyline points="' + tline + '" fill="none" stroke="#17DD62" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
-    tpts.forEach((p) => { trendSvg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="3" fill="#17DD62"/>'; });
-    trendSvg += '</svg>';
-
     const resetInfo = getResetCountdown();
     const maxDay = Math.max(1, ...days.map((d) => d.count));
 
@@ -824,11 +806,6 @@ export async function onRequest(context) {
           + '</td></tr>'
         ).join("")
       : '<tr><td colspan="2" class="empty">无 KV 键</td></tr>';
-
-    const chartHtml = days.map((d) => {
-      const h = Math.max(3, Math.round((d.count / maxDay) * 100));
-      return `<div class="chart-col"><div class="chart-bar" style="height:${h}%"></div><div class="chart-val">${d.count}</div><div class="chart-date">${escapeHtml(d.date.slice(5))}</div></div>`;
-    }).join("");
 
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用（${escapeHtml(apiError)}），配额显示为 0</div>`
@@ -1349,14 +1326,6 @@ export async function onRequest(context) {
       </div>
     </div>
 
-    <div class="quota" style="margin-top:14px;">
-      <div class="quota-head">
-        <span class="quota-title">近 7 天访问趋势</span>
-        <span class="quota-sub">独立 IP 数 / 天</span>
-      </div>
-      ${trendSvg}
-    </div>
-
     <div class="split-card">
       <div class="split-item">
         <div class="split-label">Workers 请求</div>
@@ -1377,11 +1346,6 @@ export async function onRequest(context) {
       每日请求数重置清零：距离重置还有 <b id="countdown">--</b>，
       北京时间（UTC+8）<b>8:00</b> 重置，
       今日使用情况总计：<b>${quotaUsed.toLocaleString()}</b>。
-    </div>
-
-    <h2>近 7 天趋势</h2>
-    <div class="chart">
-      ${chartHtml}
     </div>
 
     <h2>最近 7 天</h2>
