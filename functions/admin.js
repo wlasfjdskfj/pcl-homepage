@@ -581,6 +581,14 @@ export async function onRequest(context) {
           const text = String(form.get("text") || "").trim();
           const on = form.get("on") === "0" ? false : true;
           await env.HOMEPAGE_KV.put('homepage_banner', JSON.stringify({ text, enabled: on && text ? true : false }));
+        } else if (action === "servercfg") {
+          const addr = String(form.get("addr") || "").trim();
+          const email = String(form.get("email") || "").trim();
+          await env.HOMEPAGE_KV.put('server_cfg', JSON.stringify({ addr, email }));
+        } else if (action === "quotecfg") {
+          const text = String(form.get("text") || "").trim();
+          if (text) await env.HOMEPAGE_KV.put('quote_custom', text);
+          else await env.HOMEPAGE_KV.delete('quote_custom');
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -615,6 +623,8 @@ export async function onRequest(context) {
       maintEtaRaw,
       maintReasonRaw,
       bannerRaw,
+      serverCfgRaw,
+      quoteCfgRaw,
     ] = await Promise.all([
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
@@ -622,6 +632,8 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("maint_eta"),
       env.HOMEPAGE_KV.get("maint_reason"),
       env.HOMEPAGE_KV.get("homepage_banner"),
+      env.HOMEPAGE_KV.get("server_cfg"),
+      env.HOMEPAGE_KV.get("quote_custom"),
     ]);
 
     // 从 D1 读取访问统计
@@ -670,6 +682,13 @@ export async function onRequest(context) {
       bannerText = b.text || "";
       bannerOn = !!(b.enabled && b.text);
     } catch { bannerText = ""; bannerOn = false; }
+    let serverAddr = "mc.hypixel.net", serverEmail = "jklahhranget@163.com";
+    try {
+      const sc = JSON.parse(serverCfgRaw || "{}");
+      if (sc.addr) serverAddr = String(sc.addr);
+      if (sc.email) serverEmail = String(sc.email);
+    } catch { /* 默认值 */ }
+    const quoteCustom = quoteCfgRaw || "";
 
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
@@ -1298,6 +1317,32 @@ export async function onRequest(context) {
           <input type="hidden" name="action" value="banner">
           <input type="hidden" name="on" value="0">
           <button type="submit" class="btn btn-ghost">关闭公告</button>
+        </form>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">🖥 服务器推荐</div>
+        <p class="manage-desc">主推地址与投稿邮箱，主页"服务器推荐"卡片实时生效。</p>
+        <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="hidden" name="action" value="servercfg">
+          <input name="addr" type="text" value="${escapeHtml(serverAddr)}" placeholder="主推地址，如 mc.hypixel.net" style="flex:1;min-width:200px;">
+          <input name="email" type="text" value="${escapeHtml(serverEmail)}" placeholder="投稿邮箱" style="flex:1;min-width:160px;">
+          <button type="submit" class="btn btn-warn">保存</button>
+        </form>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">💬 每日一言</div>
+        <p class="manage-desc">每行一条，主页优先从这些里随机。留空保存即恢复默认一言。</p>
+        <form method="post">
+          <input type="hidden" name="action" value="quotecfg">
+          <textarea name="text" rows="6" placeholder="每行一条一言，如：今天也要好好挖矿。" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;padding:8px;">${escapeHtml(quoteCustom)}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button type="submit" class="btn btn-warn">保存一言</button>
+          </div>
+        </form>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="action" value="quotecfg">
+          <input type="hidden" name="text" value="">
+          <button type="submit" class="btn btn-ghost">恢复默认一言</button>
         </form>
       </div>
           </div>

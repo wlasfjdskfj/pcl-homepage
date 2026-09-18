@@ -1228,7 +1228,24 @@ export async function onRequest(context) {
     try {
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
-    const quote = pickRandom(QUOTES);
+    let quote = pickRandom(QUOTES);
+    try {
+      const qRaw = await env.HOMEPAGE_KV.get("quote_custom");
+      if (qRaw) {
+        const qList = qRaw.split(/\r?\n/).map((x) => x.trim()).filter((x) => x);
+        if (qList.length) quote = pickRandom(qList);
+      }
+    } catch (e) { /* 自定义一言读取失败忽略 */ }
+    let serverAddr = "mc.hypixel.net";
+    let serverEmail = "jklahhranget@163.com";
+    try {
+      const scRaw = await env.HOMEPAGE_KV.get("server_cfg");
+      if (scRaw) {
+        const sc = JSON.parse(scRaw);
+        if (sc.addr) serverAddr = String(sc.addr);
+        if (sc.email) serverEmail = String(sc.email);
+      }
+    } catch (e) { /* 服务器配置读取失败忽略 */ }
     const eggData = egg.title + "|" + egg.content;
 
     const date = getBeijingDate();
@@ -1314,6 +1331,8 @@ export async function onRequest(context) {
       .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
       .replace(/__EGG_DATA__/g, eggData)
       .replace(/__QUOTE__/g, quote)
+      .replace(/__SERVER_ADDR__/g, serverAddr)
+      .replace(/__SERVER_EMAIL__/g, serverEmail)
       .replace(/__SCORE__/g, String(score))
       .replace(/__COMMENT__/g, info.comment)
       .replace(/__GRADE__/g, info.grade)
