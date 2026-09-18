@@ -1310,9 +1310,16 @@ export async function onRequest(context) {
       if (bannerRaw) {
         const bn = JSON.parse(bannerRaw);
         if (bn && bn.enabled && bn.text && String(bn.text).trim()) {
+          const bText = String(bn.text).trim();
+          const bDur = Math.max(10, Math.min(30, Math.round(bText.length * 0.45)));
           bannerBody = '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
-            + '<StackPanel>'
-            + '<TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Text="' + escapeXaml(bn.text) + '" />'
+            + '<StackPanel ClipToBounds="True" Height="26">'
+            + '<TextBlock Text="' + escapeXaml(bText) + '" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center">'
+            + '<TextBlock.RenderTransform><TranslateTransform x:Name="bqMarquee" X="0"/></TextBlock.RenderTransform>'
+            + '<TextBlock.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever">'
+            + '<DoubleAnimation Storyboard.TargetName="bqMarquee" Storyboard.TargetProperty="X" From="360" To="-360" Duration="0:0:' + bDur + '"/>'
+            + '</Storyboard></BeginStoryboard></EventTrigger></TextBlock.Triggers>'
+            + '</TextBlock>'
             + '</StackPanel>'
             + '</local:MyCard>';
         }
