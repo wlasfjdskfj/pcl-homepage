@@ -594,6 +594,26 @@ export async function onRequest(context) {
           const date = String(form.get("date") || "").trim();
           if (name && /^\d{4}-\d{2}-\d{2}$/.test(date)) await env.HOMEPAGE_KV.put('custom_countdown', JSON.stringify({ name, date }));
           else await env.HOMEPAGE_KV.delete('custom_countdown');
+        } else if (action === "festadd") {
+          const fm = parseInt(form.get("month") || "0", 10);
+          const fd = parseInt(form.get("day") || "0", 10);
+          const fname = String(form.get("name") || "").trim();
+          const fmsg = String(form.get("msg") || "").trim();
+          let flist = [];
+          try { const fr = await env.HOMEPAGE_KV.get("custom_festivals"); if (fr) flist = JSON.parse(fr) || []; } catch (e) { flist = []; }
+          if (fm >= 1 && fm <= 12 && fd >= 1 && fd <= 31 && fname) {
+            flist.push({ month: fm, day: fd, name: fname, msg: fmsg });
+            await env.HOMEPAGE_KV.put('custom_festivals', JSON.stringify(flist));
+          }
+        } else if (action === "festdel") {
+          const idx = parseInt(form.get("i") || "-1", 10);
+          let flist = [];
+          try { const fr = await env.HOMEPAGE_KV.get("custom_festivals"); if (fr) flist = JSON.parse(fr) || []; } catch (e) { flist = []; }
+          if (idx >= 0 && idx < flist.length) { flist.splice(idx, 1); await env.HOMEPAGE_KV.put('custom_festivals', JSON.stringify(flist)); }
+        } else if (action === "banners") {
+          const text = String(form.get("text") || "").trim();
+          if (text) await env.HOMEPAGE_KV.put('banners', text);
+          else await env.HOMEPAGE_KV.delete('banners');
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -631,6 +651,8 @@ export async function onRequest(context) {
       serverCfgRaw,
       quoteCfgRaw,
       countdownRaw,
+      festivalsRaw,
+      bannersRaw,
     ] = await Promise.all([
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
@@ -641,6 +663,8 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("server_cfg"),
       env.HOMEPAGE_KV.get("quote_custom"),
       env.HOMEPAGE_KV.get("custom_countdown"),
+      env.HOMEPAGE_KV.get("custom_festivals"),
+      env.HOMEPAGE_KV.get("banners"),
     ]);
 
     // 从 D1 读取访问统计
@@ -702,6 +726,18 @@ export async function onRequest(context) {
       if (cc.name) countdownName = String(cc.name);
       if (cc.date) countdownDate = String(cc.date);
     } catch { /* 默认 */ }
+    let festivals = [];
+    try { const fa = JSON.parse(festivalsRaw || "[]"); if (Array.isArray(fa)) festivals = fa; } catch { festivals = []; }
+    const festRows = festivals.length
+      ? festivals.map((f, i) =>
+          '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+          + '<span style="flex:0 0 64px;color:#888;font-size:12px;">' + (Number(f.month) || 0) + '/' + (Number(f.day) || 0) + '</span>'
+          + '<span style="flex:1;font-size:12px;">' + escapeHtml(String(f.name || "")) + (f.msg ? ' <span style="color:#888;font-size:11px;">' + escapeHtml(String(f.msg)) + '</span>' : '') + '</span>'
+          + '<form method="post" style="margin:0;"><input type="hidden" name="action" value="festdel"><input type="hidden" name="i" value="' + i + '"><button type="submit" class="btn btn-ghost">删</button></form>'
+          + '</div>'
+        ).join('')
+      : '<div style="color:#888;font-size:12px;margin-top:6px;">还没有自定义纪念日。</div>';
+    const multiBanners = bannersRaw || "";
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
     for (let i = 0; i < 7; i++) {
@@ -1396,6 +1432,35 @@ export async function onRequest(context) {
           <input type="hidden" name="name" value="">
           <input type="hidden" name="date" value="">
           <button type="submit" class="btn btn-ghost">恢复节日倒计时</button>
+        </form>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">🎊 节日 / 纪念日</div>
+        <p class="manage-desc">添加你自己的纪念日（生日等），会显示在主页节日横幅和倒计时中。</p>
+        <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="hidden" name="action" value="festadd">
+          <input name="month" type="number" min="1" max="12" placeholder="月" style="width:60px;">
+          <input name="day" type="number" min="1" max="31" placeholder="日" style="width:60px;">
+          <input name="name" type="text" placeholder="名称，如：我的生日" style="flex:1;min-width:110px;">
+          <input name="msg" type="text" placeholder="祝福语（可选）" style="flex:1;min-width:130px;">
+          <button type="submit" class="btn btn-warn">添加</button>
+        </form>
+        <div style="margin-top:10px;">${festRows}</div>
+      </div>
+      <div class="manage-card">
+        <div class="manage-title">📢 多公告轮播</div>
+        <p class="manage-desc">每行一条，≥2 条时主页公告自动轮播切换。留空保存即清除（回退到上方单条公告）。</p>
+        <form method="post">
+          <input type="hidden" name="action" value="banners">
+          <textarea name="text" rows="5" placeholder="每行一条公告，如：&#10;服务器近期维护中&#10;记得领取每日福利" style="width:100%;box-sizing:border-box;resize:vertical;font-size:12px;padding:8px;">${escapeHtml(multiBanners)}</textarea>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button type="submit" class="btn btn-warn">保存轮播</button>
+          </div>
+        </form>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="action" value="banners">
+          <input type="hidden" name="text" value="">
+          <button type="submit" class="btn btn-ghost">清除多公告</button>
         </form>
       </div>
           </div>

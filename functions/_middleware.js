@@ -831,8 +831,9 @@ const FESTIVALS = [
   { month: 12, day: 25, name: "圣诞节",                  msg: "圣诞快乐！别忘了给村民准备礼物~" },
   { month: 12, day: 31, name: "跨年夜",                  msg: "今年最后一晚，明年继续挖矿！" },
 ];
-function getFestival(date) {
-  const solar = FESTIVALS.find((f) => f.month === date.month && f.day === date.day);
+function getFestival(date, extra) {
+  const all = (extra && extra.length) ? FESTIVALS.concat(extra) : FESTIVALS;
+  const solar = all.find((f) => f.month === date.month && f.day === date.day);
   if (solar) return solar;
   const lun = solar2lunar(date.year, date.month, date.day);
   return LUNAR_FESTIVALS.find((f) => f.lm === lun.m && f.ld === lun.d) || null;
@@ -1068,7 +1069,7 @@ const LUNAR_FESTIVALS = [
   { lm: 9,  ld: 9,  name: "重阳节", msg: "重阳安康，登高望远！" },
   { lm: 12, ld: 8,  name: "腊八节", msg: "腊八节快乐，喝碗热粥吧！" },
 ];
-function buildCountdownXaml(date, custom) {
+function buildCountdownXaml(date, custom, extra) {
   const today = Date.UTC(date.year, date.month - 1, date.day);
   if (custom && custom.name && custom.date) {
     const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(custom.date);
@@ -1085,7 +1086,8 @@ function buildCountdownXaml(date, custom) {
         + '</Border>';
     }
   }
-  const events = FESTIVALS.map((f) => ({ name: f.name, month: f.month, day: f.day }));
+  const allF = (extra && extra.length) ? FESTIVALS.concat(extra) : FESTIVALS;
+  const events = allF.map((f) => ({ name: f.name, month: f.month, day: f.day }));
   for (const y of [date.year, date.year + 1]) {
     for (const f of LUNAR_FESTIVALS) {
       const s = lunarToSolar(y, f.lm, f.ld);
@@ -1272,6 +1274,9 @@ export async function onRequest(context) {
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
     let quote = pickRandom(QUOTES);
+    quote = quote.replace(/\{date\}/g, date.month + "月" + date.day + "日")
+                 .replace(/\{weekday\}/g, date.weekday)
+                 .replace(/\{year\}/g, String(date.year));
     const coldTip = pickRandom(COLD_TIPS);
     try {
       const qRaw = await env.HOMEPAGE_KV.get("quote_custom");
@@ -1343,19 +1348,52 @@ export async function onRequest(context) {
     })());
 
     // ========== 节日与纪念日 ==========
-    const festival = getFestival(date);
+    let extraFestivals = [];
+    try {
+      const efRaw = await env.HOMEPAGE_KV.get("custom_festivals");
+      if (efRaw) { const arr = JSON.parse(efRaw); if (Array.isArray(arr)) extraFestivals = arr.filter((f) => f && f.month && f.day && f.name); }
+    } catch (e) { /* 自定义节日读取失败忽略 */ }
+    const festival = getFestival(date, extraFestivals);
     const festivalBanner = buildFestivalBanner(festival);
     let customCountdown = null;
     try {
       const ccRaw = await env.HOMEPAGE_KV.get("custom_countdown");
       if (ccRaw) { const cc = JSON.parse(ccRaw); if (cc.name && cc.date) customCountdown = cc; }
     } catch (e) { /* 自定义倒计时读取失败忽略 */ }
-    const countdownBody = buildCountdownXaml(date, customCountdown);
+    const countdownBody = buildCountdownXaml(date, customCountdown, extraFestivals);
     const challengeBg = buildChallengeBg(challenge.diff);
     const weatherBody = await fetchWeather(env, ip);
     let bannerBody = "";
+    let bannerSet = false;
     try {
-      const bannerRaw = await env.HOMEPAGE_KV.get("homepage_banner");
+      const mbRaw = await env.HOMEPAGE_KV.get("banners");
+      if (mbRaw) {
+        const mbs = mbRaw.split(/\r?\n/).map((x) => x.trim()).filter((x) => x);
+        if (mbs.length >= 2) {
+          const bn2 = Math.min(mbs.length, 4);
+          const per = 8;
+          let anims = "", texts = "";
+          for (let i = 0; i < bn2; i++) {
+            const on0 = i * per, off0 = (i + 1) * per - 1;
+            texts += '<TextBlock x:Name="mb' + i + '" Text="' + escapeXaml(mbs[i]) + '" FontSize="15" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" Opacity="0"/>';
+            anims += '<DoubleAnimation Storyboard.TargetName="mb' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:' + on0 + '"/>'
+              + '<DoubleAnimation Storyboard.TargetName="mb' + i + '" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:1" BeginTime="0:0:' + off0 + '"/>';
+          }
+          bannerBody = '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
+            + '<StackPanel Margin="25,36,23,16" ClipToBounds="True" Height="28">'
+            + '<Grid>'
+            + '<Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever">' + anims + '</Storyboard></BeginStoryboard></EventTrigger></Grid.Triggers>'
+            + texts
+            + '</Grid>'
+            + '</StackPanel>'
+            + '</local:MyCard>';
+          bannerSet = true;
+        }
+      }
+    } catch (e) { /* 多公告读取失败忽略 */ }
+    if (!bannerSet) {
+      try {
+        const bannerRaw = await env.HOMEPAGE_KV.get("homepage_banner");
       if (bannerRaw) {
         const bn = JSON.parse(bannerRaw);
         if (bn && bn.enabled && bn.text && String(bn.text).trim()) {
@@ -1386,7 +1424,8 @@ export async function onRequest(context) {
           }
         }
       }
-    } catch (e) { /* 公告读取失败忽略 */ }
+      } catch (e) { /* 公告读取失败忽略 */ }
+    }
 
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
