@@ -901,7 +901,12 @@ async function fetchApihzWeather(env, ip) {
     const cacheKey = "weather:" + weatherVer + ":" + clean;
     if (env && env.HOMEPAGE_KV) {
       const cached = await env.HOMEPAGE_KV.get(cacheKey);
-      if (cached) return cached;
+      if (cached) {
+        try {
+          const d = JSON.parse(cached);
+          return buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。");
+        } catch (e) { /* 缓存解析失败 → 走 API */ }
+      }
     }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
       + "&key=" + encodeURIComponent(key) + "&ip=" + encodeURIComponent(clean);
@@ -922,11 +927,15 @@ async function fetchApihzWeather(env, ip) {
     const wind = Math.round((j.nowinfo.windSpeed || 0) * 3.6); // 接口盒子风速为 m/s，转 km/h 与卡片文案一致
     const desc = (j.weather1 && j.weather2 && j.weather1 !== j.weather2)
       ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
-    const xaml = buildWeatherXaml(j.name || j.shi || "未知地区", temp, desc, wind, true, "天气数据来自中国气象局。");
+    const city = j.name || j.shi || "未知地区";
+    const source = "天气数据来自中国气象局。";
     if (env && env.HOMEPAGE_KV) {
-      try { await env.HOMEPAGE_KV.put(cacheKey, xaml, { expirationTtl: 3600 }); } catch (e) { /* 缓存失败忽略 */ }
+      try {
+        const data = { city, temp, desc, wind, source };
+        await env.HOMEPAGE_KV.put(cacheKey, JSON.stringify(data), { expirationTtl: 3600 });
+      } catch (e) { /* 缓存失败忽略 */ }
     }
-    return xaml;
+    return buildWeatherXaml(city, temp, desc, wind, true, source);
   } catch (e) {
     console.error("[Weather] 接口盒子失败：", e);
     return null;
