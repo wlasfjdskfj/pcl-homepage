@@ -656,6 +656,7 @@ export async function onRequest(context) {
               const dd = await rr.json();
               if (dd && dd.code === 0 && dd.data && dd.data.music) {
                 finalUrl = String(dd.data.music);
+                if (finalUrl.indexOf("http://") === 0) finalUrl = "https://" + finalUrl.slice(7);
                 if (!finalName) finalName = String(dd.data.song || song);
               }
             } catch (e) { /* ignore */ }
@@ -1727,7 +1728,7 @@ export async function onRequest(context) {
       if (i < 0) i = list.length - 1;
       if (i >= list.length) i = 0;
       idx = i;
-      audio.src = list[i];
+      audio.src = list[i].indexOf("http://") === 0 ? ("https://" + list[i].slice(7)) : list[i];
       audio.play().catch(function(){});
     }
     box.addEventListener('click', function(e){
