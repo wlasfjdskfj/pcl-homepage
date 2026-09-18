@@ -649,14 +649,16 @@ export async function onRequest(context) {
           const pmusic = pmap[pf] || "wy.music";
           let finalUrl = url;
           let finalName = name;
+          let finalLyric = "";
           if (!finalUrl && song) {
             try {
               const query = (singer && singer !== "未知") ? (song + " " + singer) : song;
-              const rr = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(query) + "&n=1", { headers: { "User-Agent": "Mozilla/5.0" } });
+              const rr = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(query) + "&n=1&gc=1", { headers: { "User-Agent": "Mozilla/5.0" } });
               const dd = await rr.json();
               if (dd && dd.code === 0 && dd.data && dd.data.music) {
                 finalUrl = String(dd.data.music);
                 if (finalUrl.indexOf("http://") === 0) finalUrl = "https://" + finalUrl.slice(7);
+                finalLyric = dd.data.lyric ? String(dd.data.lyric) : "";
                 if (!finalName) finalName = String(dd.data.song || song);
               }
             } catch (e) { /* ignore */ }
@@ -670,7 +672,7 @@ export async function onRequest(context) {
                 if (mr && mr.value) ml = JSON.parse(mr.value) || [];
               } catch (e) { ml = []; }
             }
-            ml.push({ name: (finalName || "音乐 " + (ml.length + 1)), url: finalUrl });
+            ml.push({ name: (finalName || "音乐 " + (ml.length + 1)), url: finalUrl, lyric: finalLyric });
             if (env.STATS_DB) await env.STATS_DB.prepare("INSERT INTO admin_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind("admin_music", JSON.stringify(ml)).run();
           } else if (song) {
             actionOk = false;
@@ -897,7 +899,7 @@ export async function onRequest(context) {
           + '</div>'
         ).join('')
       : '<div style="color:#888;font-size:12px;margin-top:6px;">还没有音乐，添加音频直链（mp3 等）即可播放。</div>';
-    const musicJson = JSON.stringify(musicList.map((m) => String(m.url || "")));
+    const musicJson = JSON.stringify(musicList.map((m) => ({ name: String(m.name || ""), url: String(m.url || ""), lyric: String(m.lyric || "") })));
 
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用（${escapeHtml(apiError)}），配额显示为 0</div>`
@@ -1611,6 +1613,7 @@ export async function onRequest(context) {
           <button type="button" class="btn" id="musicAddBtn">添加</button>
           <button type="button" class="btn btn-ghost" id="musicPrevBtn">⏮ 上一首</button>
           <button type="button" class="btn btn-ghost" id="musicNextBtn">下一首 ⏭</button>
+          <button type="button" class="btn btn-ghost" id="musicFloatBtn">↗ 歌词</button>
         </div>
         <audio id="adminAudio" controls style="width:100%;margin-top:10px;height:36px;"></audio>
         <div id="musicListBox" style="margin-top:8px;">${musicRows}</div>
@@ -1643,6 +1646,19 @@ export async function onRequest(context) {
           <a href="/admin?action=logout">退出</a>
         </div>
       </footer>
+      <div id="lyricFloat" style="position:fixed;right:16px;bottom:16px;width:340px;max-width:92vw;z-index:9999;background:var(--card);border:1px solid var(--card-border);border-radius:12px;box-shadow:var(--shadow-card);overflow:hidden;font-family:inherit;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--card-border);">
+          <span id="lyricTitle" style="font-size:12px;color:var(--text);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">🎵 音乐</span>
+          <button type="button" class="btn btn-ghost btn-sm" id="lyricMinBtn" title="最小化">—</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="lyricCloseBtn" title="关闭">✕</button>
+        </div>
+        <div id="lyricBody" style="height:220px;overflow:auto;padding:8px 12px;"></div>
+        <div style="display:flex;gap:6px;align-items:center;justify-content:center;padding:8px;border-top:1px solid var(--card-border);">
+          <button type="button" class="btn btn-ghost btn-sm" id="lyricPrevBtn" title="上一首">⏮</button>
+          <button type="button" class="btn btn-sm" id="lyricPlayBtn" title="播放/暂停">⏸</button>
+          <button type="button" class="btn btn-ghost btn-sm" id="lyricNextBtn" title="下一首">⏭</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1720,16 +1736,78 @@ export async function onRequest(context) {
     const prevBtn = document.getElementById('musicPrevBtn');
     const nextBtn = document.getElementById('musicNextBtn');
     const addBtn = document.getElementById('musicAddBtn');
+    const floatW = document.getElementById('lyricFloat');
+    const titleEl = document.getElementById('lyricTitle');
+    const bodyEl = document.getElementById('lyricBody');
+    const playBtn = document.getElementById('lyricPlayBtn');
+    const minBtn = document.getElementById('lyricMinBtn');
+    const closeBtn = document.getElementById('lyricCloseBtn');
+    const openBtn = document.getElementById('musicFloatBtn');
     if (!box || !audio || !prevBtn || !nextBtn || !addBtn) return;
     const list = ${musicJson};
     let idx = -1;
+    let lrc = [];
+    function escLrc(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function parseLrc(lrcText){
+      const out = [];
+      if (!lrcText) return out;
+      const lines = String(lrcText).split(String.fromCharCode(10));
+      for (let i = 0; i < lines.length; i++){
+        const ln = lines[i];
+        const m = ln.indexOf(']');
+        if (m < 2) continue;
+        const head = ln.slice(1, m);
+        const t = head.split(':');
+        if (t.length < 2) continue;
+        const mm = Number(t[0]);
+        const ss = Number(t[1]);
+        if (isNaN(mm) || isNaN(ss)) continue;
+        const text = ln.slice(m + 1).trim();
+        if (!text) continue;
+        out.push({ time: mm * 60 + ss, text: text });
+      }
+      out.sort(function(a, b){ return a.time - b.time; });
+      return out;
+    }
+    function renderLrc(){
+      if (!bodyEl) return;
+      if (!lrc.length){ bodyEl.innerHTML = '<div style="color:#888;font-size:12px;padding:10px;">暂无歌词，播放后显示</div>'; return; }
+      bodyEl.innerHTML = lrc.map(function(l, i){
+        return '<div class="lrc-line" data-i="' + i + '" style="padding:6px 0;font-size:13px;color:var(--text-dim);transition:color .2s,transform .2s;text-align:center;">' + escLrc(l.text) + '</div>';
+      }).join('');
+    }
+    function scrollLrc(sec){
+      if (!bodyEl || !lrc.length) return;
+      let active = 0;
+      for (let i = 0; i < lrc.length; i++){ if (lrc[i].time <= sec) active = i; else break; }
+      const lines = bodyEl.children;
+      for (let i = 0; i < lines.length; i++){
+        if (i === active){ lines[i].style.color = 'var(--accent)'; lines[i].style.transform = 'scale(1.08)'; }
+        else { lines[i].style.color = ''; lines[i].style.transform = ''; }
+      }
+      const line = lines[active];
+      if (line) bodyEl.scrollTop = line.offsetTop - bodyEl.clientHeight / 2;
+    }
+    function loadLrc(i){
+      const it = list[i];
+      lrc = (it && it.lyric) ? parseLrc(it.lyric) : [];
+      if (titleEl) titleEl.textContent = (it && it.name) ? it.name : '音乐';
+      renderLrc();
+      scrollLrc(0);
+    }
     function play(i){
       if (!list.length) return;
       if (i < 0) i = list.length - 1;
       if (i >= list.length) i = 0;
       idx = i;
-      audio.src = list[i].indexOf("http://") === 0 ? ("https://" + list[i].slice(7)) : list[i];
+      const it = list[i];
+      audio.src = it.url.indexOf("http://") === 0 ? ("https://" + it.url.slice(7)) : it.url;
+      loadLrc(i);
       audio.play().catch(function(){});
+      if (playBtn) playBtn.textContent = '⏸';
+    }
+    function setPlaying(p){
+      if (playBtn) playBtn.textContent = p ? '⏸' : '▶';
     }
     box.addEventListener('click', function(e){
       const b = e.target.closest('[data-play]');
@@ -1737,7 +1815,25 @@ export async function onRequest(context) {
     });
     prevBtn.addEventListener('click', function(){ play(idx - 1); });
     nextBtn.addEventListener('click', function(){ play(idx + 1); });
+    if (playBtn) playBtn.addEventListener('click', function(){
+      if (audio.paused){ audio.play().catch(function(){}); setPlaying(true); }
+      else { audio.pause(); setPlaying(false); }
+    });
+    const lprev = document.getElementById('lyricPrevBtn');
+    const lnext = document.getElementById('lyricNextBtn');
+    if (lprev) lprev.addEventListener('click', function(){ play(idx - 1); });
+    if (lnext) lnext.addEventListener('click', function(){ play(idx + 1); });
+    if (minBtn) minBtn.addEventListener('click', function(){
+      if (!bodyEl) return;
+      if (bodyEl.style.display === 'none'){ bodyEl.style.display = ''; minBtn.textContent = '—'; }
+      else { bodyEl.style.display = 'none'; minBtn.textContent = '▦'; }
+    });
+    if (closeBtn && floatW) closeBtn.addEventListener('click', function(){ floatW.style.display = 'none'; });
+    if (openBtn && floatW) openBtn.addEventListener('click', function(){ floatW.style.display = 'block'; });
+    audio.addEventListener('timeupdate', function(){ scrollLrc(audio.currentTime); });
     audio.addEventListener('ended', function(){ play(idx + 1); });
+    audio.addEventListener('play', function(){ setPlaying(true); });
+    audio.addEventListener('pause', function(){ setPlaying(false); });
     addBtn.addEventListener('click', function(){
       const name = (document.getElementById('musicName').value || '').trim();
       const url = (document.getElementById('musicUrl').value || '').trim();
@@ -1749,6 +1845,7 @@ export async function onRequest(context) {
         + '<input type="hidden" name="url" value="' + url.replace(/"/g, '&quot;') + '">';
       document.body.appendChild(f); f.submit();
     });
+    if (!lrc.length && bodyEl) bodyEl.innerHTML = '<div style="color:#888;font-size:12px;padding:10px;">暂无歌词，播放后显示</div>';
   })();
 
   (function(){
