@@ -1273,11 +1273,8 @@ export async function onRequest(context) {
     try {
     const num = Math.floor(Math.random() * 99) + 1;
     const egg = pickRandom(EGGS);
+    const date = getBeijingDate();
     let quote = pickRandom(QUOTES);
-    quote = quote.replace(/\{date\}/g, date.month + "月" + date.day + "日")
-                 .replace(/\{weekday\}/g, date.weekday)
-                 .replace(/\{year\}/g, String(date.year));
-    const coldTip = pickRandom(COLD_TIPS);
     try {
       const qRaw = await env.HOMEPAGE_KV.get("quote_custom");
       if (qRaw) {
@@ -1285,6 +1282,10 @@ export async function onRequest(context) {
         if (qList.length) quote = pickRandom(qList);
       }
     } catch (e) { /* 自定义一言读取失败忽略 */ }
+    quote = quote.replace(/\{date\}/g, date.month + "月" + date.day + "日")
+                 .replace(/\{weekday\}/g, date.weekday)
+                 .replace(/\{year\}/g, String(date.year));
+    const coldTip = pickRandom(COLD_TIPS);
     let serverAddr = "mc.hypixel.net";
     let serverEmail = "jklahhranget@163.com";
     try {
@@ -1297,7 +1298,6 @@ export async function onRequest(context) {
     } catch (e) { /* 服务器配置读取失败忽略 */ }
     const eggData = egg.title + "|" + egg.content;
 
-    const date = getBeijingDate();
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
     const today = date.dateStr;
 
