@@ -857,7 +857,18 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
   const icon = isDay
     ? "pack://application:,,,/images/Blocks/Grass.png"
     : "pack://application:,,,/images/Blocks/RedstoneBlock.png";
-  const tip = temp >= 30 ? "注意防暑" : temp <= 0 ? "注意保暖" : (wind >= 40 ? "风有点大" : "适合出门挖矿");
+  const _pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  let tip;
+  if (temp >= 30) tip = _pick(["注意防暑，别中暑了", "天太热，记得补水"]);
+  else if (temp <= 0) tip = _pick(["注意保暖，别冻坏了", "天冷，多穿点再出门"]);
+  else if (wind >= 40) tip = _pick(["风有点大，注意脚下", "风大，挖矿小心方块掉落"]);
+  else {
+    const d = String(desc || "");
+    if (/雨/.test(d)) tip = _pick(["雨天适合在家建房子", "雨天适合整理箱子", "雨天适合研究红石", "雨天在家研究附魔书"]);
+    else if (/雪/.test(d)) tip = _pick(["下雪了，适合堆雪人", "雪天适合在家烤面包", "雪天出门记得带火把"]);
+    else if (/雾/.test(d)) tip = _pick(["雾大，别跑太远", "雾天适合在家研究药水"]);
+    else tip = _pick(["适合出门挖矿", "适合探索新洞穴", "适合下矿寻宝", "适合扩建你的基地", "适合去钓鱼种田", "适合出门跑图探险", "适合挑战末影龙", "适合开荒新区域"]);
+  }
   return '<Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">'
     + '<StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">'
