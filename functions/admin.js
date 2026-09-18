@@ -577,6 +577,10 @@ export async function onRequest(context) {
           } else {
             await env.HOMEPAGE_KV.put('maint_mode_live', '0');
           }
+        } else if (action === "banner") {
+          const text = String(form.get("text") || "").trim();
+          const on = form.get("on") === "0" ? false : true;
+          await env.HOMEPAGE_KV.put('homepage_banner', JSON.stringify({ text, enabled: on && text ? true : false }));
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -610,12 +614,14 @@ export async function onRequest(context) {
       maintModeRaw,
       maintEtaRaw,
       maintReasonRaw,
+      bannerRaw,
     ] = await Promise.all([
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
       env.HOMEPAGE_KV.get("maint_mode_live"),
       env.HOMEPAGE_KV.get("maint_eta"),
       env.HOMEPAGE_KV.get("maint_reason"),
+      env.HOMEPAGE_KV.get("homepage_banner"),
     ]);
 
     // 从 D1 读取访问统计
@@ -640,6 +646,14 @@ export async function onRequest(context) {
         (dayRes.results || []).forEach((r) => { daysMap[r.d] = Number(r.c) || 0; });
       } catch (e) { console.error("[admin] D1 统计查询失败", e); }
     }
+    let kvTodayIp = 0;
+    if (env.STATS_DB) {
+      try {
+        const utcStart = Date.now() - (Date.now() % 86400000);
+        const kvRes = await env.STATS_DB.prepare("SELECT COUNT(DISTINCT ip) AS c FROM visits WHERE ts >= ?").bind(utcStart).first();
+        kvTodayIp = kvRes ? Number(kvRes.c) || 0 : 0;
+      } catch (e) { console.error("[admin] KV 估算查询失败", e); }
+    }
 
     let blockList = {};
     try { blockList = JSON.parse(blockRaw || "{}"); } catch { blockList = {}; }
@@ -650,6 +664,12 @@ export async function onRequest(context) {
     const maintOn = !!(maintMode && maintMode !== "0");
     const maintEta = maintEtaRaw || "";
     const maintReason = maintReasonRaw || "";
+    let bannerText = "", bannerOn = false;
+    try {
+      const b = JSON.parse(bannerRaw || "{}");
+      bannerText = b.text || "";
+      bannerOn = !!(b.enabled && b.text);
+    } catch { bannerText = ""; bannerOn = false; }
 
     const now = new Date(Date.now() + 8 * 60 * 60 * 1000);
     const dates = [];
@@ -667,6 +687,11 @@ export async function onRequest(context) {
     const quotaUsed = workers + pages;
     const quotaPct = Math.min(100, (quotaUsed / quotaLimit) * 100);
     const quotaColor = quotaPct >= 80 ? "#FF4444" : quotaPct >= 60 ? "#FFB020" : "#17DD62";
+    // KV 写入估算：天气缓存(每IP首次写) + 封禁/维护等低频
+    const kvUsed = Math.min(1000, kvTodayIp + 10);
+    const kvPct = (kvUsed / 1000) * 100;
+    const kvColor = kvPct >= 80 ? "#FF4444" : kvPct >= 50 ? "#FFB020" : "#17DD62";
+    const kvWarn = kvPct >= 80 ? '<span style="color:#FF4444;font-weight:600;">⚠ 接近上限，注意排查</span>' : '';
 
     const resetInfo = getResetCountdown();
     const maxDay = Math.max(1, ...days.map((d) => d.count));
@@ -1205,6 +1230,19 @@ export async function onRequest(context) {
       </div>
     </div>
 
+    <div class="quota" style="margin-top:14px;">
+      <div class="quota-head">
+        <span class="quota-title">KV 写入使用情况（估算）</span>
+        <span class="quota-sub">今日 · 上限 1,000 · 天气缓存按独立IP估算</span>
+      </div>
+      <div class="quota-bar">
+        <div class="quota-fill"
+             style="width:0%;background:${kvColor};color:${kvColor};"
+             data-width="${kvPct.toFixed(2)}%"></div>
+        <div class="quota-text">KV 写入估算: ${kvUsed.toLocaleString()} (${kvPct.toFixed(2)}%) ${kvWarn}</div>
+      </div>
+    </div>
+
     <div class="split-card">
       <div class="split-item">
         <div class="split-label">Workers 请求</div>
@@ -1248,6 +1286,20 @@ export async function onRequest(context) {
               <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th><th>最近访问</th></tr></thead>
               <tbody>${ipRows || '<tr><td colspan="5" class="empty">暂无记录</td></tr>'}</tbody>
             </table>
+      <div class="manage-card">
+        <div class="manage-title">📢 主页公告</div>
+        <p class="manage-desc">在主页顶部显示公告。当前：<b style="color:${bannerOn ? '#17DD62' : '#888'}">${bannerOn ? '已启用' : '已关闭'}</b></p>
+        <form method="post" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <input type="hidden" name="action" value="banner">
+          <input name="text" type="text" value="${escapeHtml(bannerText)}" placeholder="公告内容，如：服务器近期维护中" style="flex:1;min-width:200px;">
+          <button type="submit" class="btn btn-warn">保存公告</button>
+        </form>
+        <form method="post" style="margin-top:8px;">
+          <input type="hidden" name="action" value="banner">
+          <input type="hidden" name="on" value="0">
+          <button type="submit" class="btn btn-ghost">关闭公告</button>
+        </form>
+      </div>
           </div>
         </section>
         <section id="tab-manage" class="section" hidden>

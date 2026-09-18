@@ -1287,6 +1287,20 @@ export async function onRequest(context) {
     const countdownBody = buildCountdownXaml(date);
     const challengeBg = buildChallengeBg(challenge.diff);
     const weatherBody = await fetchWeather(env, ip);
+    let bannerBody = "";
+    try {
+      const bannerRaw = await env.HOMEPAGE_KV.get("homepage_banner");
+      if (bannerRaw) {
+        const bn = JSON.parse(bannerRaw);
+        if (bn && bn.enabled && bn.text && String(bn.text).trim()) {
+          bannerBody = '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
+            + '<StackPanel>'
+            + '<TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Text="' + escapeXaml(bn.text) + '" />'
+            + '</StackPanel>'
+            + '</local:MyCard>';
+        }
+      }
+    } catch (e) { /* 公告读取失败忽略 */ }
 
     xaml = xaml
       .replace(/__DATE_YEAR__/g, date.year)
@@ -1317,7 +1331,8 @@ export async function onRequest(context) {
       .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
       .replace(/<!--\s*__WEATHER_BODY__\s*-->|__WEATHER_BODY__/g, weatherBody)
       .replace(/<!--\s*__COUNTDOWN_BODY__\s*-->|__COUNTDOWN_BODY__/g, countdownBody)
-      .replace(/<!--\s*__CHALLENGE_BG__\s*-->|__CHALLENGE_BG__/g, challengeBg);
+      .replace(/<!--\s*__CHALLENGE_BG__\s*-->|__CHALLENGE_BG__/g, challengeBg)
+      .replace(/<!--\s*__BANNER__\s*-->|__BANNER__/g, bannerBody);
 
     return new Response(xaml, {
       headers: {

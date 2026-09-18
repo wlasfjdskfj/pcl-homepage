@@ -648,6 +648,7 @@ def build_xaml():
 
     lines = []
     lines.append('<StackPanel>')
+    lines.append('    <!-- __BANNER__ -->')
 
     # ========== 卡片 1：今日概览 ==========
     lines.append('    <local:MyCard Title="今日概览" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
