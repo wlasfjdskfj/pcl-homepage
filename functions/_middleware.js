@@ -1110,33 +1110,6 @@ function buildCountdownXaml(date, custom, extra) {
     + '</Border>';
 }
 
-// ============ 每日 MC 冷知识 ============
-const COLD_TIPS = [
-  "下界的 1 格等于主世界 8 格，造地狱交通能省 8 倍路程！",
-  "苦力怕怕猫，放只猫在身边能吓跑它。",
-  "TNT 在水中爆炸伤害减半，水下挖矿更安全。",
-  "用剪刀采蜂巢会激怒蜜蜂，但点火或铺地毯可以安全取蜜。",
-  "僵尸村民喂金苹果 + 虚弱药水可以治愈成普通村民。",
-  "末影珍珠投出后瞬移，但会掉 5 点血。",
-  "床在下界和末地会爆炸，主世界才能安全睡觉。",
-  "用锄头右键泥土 / 草方块能快速开垦耕地。",
-  "雪傀儡走过的地方会留下雪，还能帮你打怪。",
-  "红石信号沿导线衰减 15 格，超长要加中继器。",
-  "打掉末影水晶能阻止末影龙回血。",
-  "用钓鱼竿可以把其他玩家的物品或实体勾过来。",
-  "附魔台旁边放书架能提升附魔等级，最高 15 个书架。",
-  "雨天打雷时，引雷附魔的三叉戟能召唤闪电。",
-  "被淹死会掉经验，但物品会保留。",
-  "用桶右键牛能挤奶，牛奶可以消除大部分负面效果。",
-  "下界合金装备可以在岩浆上漂浮，不怕掉进去。",
-  "用骨粉能瞬间催熟作物和树苗。",
-  "潜行可以防止从方块边缘滑落摔下去。",
-  "萤石、南瓜灯和红石灯都不透光，适合做隐藏光源。",
-  "猫会掉落线，还能合成羊毛，苦力怕最怕猫。",
-  "活塞推不动箱子，但能推动船、矿车和大部分方块。",
-  "掠夺者前哨站顶部有铁傀儡，小心别被偷袭。",
-  "用精准采集的镐挖蘑菇可以带走整朵蘑菇。",
-];
 
 // ============ 随机挑战渐变背景（按难度配色） ============
 function buildChallengeBg(diff) {
@@ -1285,7 +1258,6 @@ export async function onRequest(context) {
     quote = quote.replace(/\{date\}/g, date.month + "月" + date.day + "日")
                  .replace(/\{weekday\}/g, date.weekday)
                  .replace(/\{year\}/g, String(date.year));
-    const coldTip = pickRandom(COLD_TIPS);
     let serverAddr = "mc.hypixel.net";
     let serverEmail = "jklahhranget@163.com";
     try {
@@ -1317,8 +1289,15 @@ export async function onRequest(context) {
 
     const challenge = pickRandom(CHALLENGES);
 
-    const seedIdx = deterministicIndex(ip, today, "seed", SEEDS.length);
+    const seedIdx = Math.floor(Math.random() * SEEDS.length);
     const seed = SEEDS[seedIdx];
+    // 种子选择列表（更多种子弹窗）
+    const SEED_PICKER_COUNT = 8;
+    const _pickerSeeds = [];
+    for (let _i = 0; _i < SEED_PICKER_COUNT; _i++) {
+      _pickerSeeds.push(SEEDS[Math.floor(Math.random() * SEEDS.length)]);
+    }
+    const seedPicker = "选择种子|" + _pickerSeeds.map((_s, _n) => (_n + 1) + ". " + _s.seed + " — " + _s.desc).join("&#xA;");
 
     const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
     const quiz = QUIZ[quizIdx];
@@ -1439,7 +1418,6 @@ export async function onRequest(context) {
       .replace(/__LUCKY_COLOR_HEX__/g, color.hex)
       .replace(/__EGG_DATA__/g, eggData)
       .replace(/__QUOTE__/g, quote)
-      .replace(/__COLD_TIP__/g, coldTip)
       .replace(/__SERVER_ADDR__/g, serverAddr)
       .replace(/__SERVER_EMAIL__/g, serverEmail)
       .replace(/__SCORE__/g, String(score))
@@ -1454,6 +1432,7 @@ export async function onRequest(context) {
       .replace(/__CHALLENGE_DIFF__/g, challenge.diff)
       .replace(/__SEED__/g, seed.seed)
       .replace(/__SEED_DESC__/g, seed.desc)
+      .replace(/__SEED_PICKER__/g, seedPicker)
       .replace(/__QUIZ_Q__/g, quiz.q)
       .replace(/__QUIZ_A__/g, quiz.a)
       .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)

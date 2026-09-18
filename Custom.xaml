@@ -251,7 +251,16 @@
                 </StackPanel>
             </Border>
             <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
-            <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="__SEED__" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,4,0" Height="38" Text="复制种子" ColorType="Highlight" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="复制文本" EventData="__SEED__" />
+                <local:MyIconTextButton Grid.Column="1" Margin="4,0,4,0" Height="38" Text="换一个" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
+                <local:MyIconTextButton Grid.Column="2" Margin="4,0,0,0" Height="38" Text="更多" LogoScale="0.9" Logo="M256 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M512 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M768 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z" EventType="弹出窗口" EventData="__SEED_PICKER__" />
+            </Grid>
             <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />
             <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True">
                 <Grid>
@@ -475,16 +484,6 @@
     </local:MyCard>
     <local:MyCard Title="MC 知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="每日冷知识" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22" Foreground="{DynamicResource ColorBrush1}" Text="__COLD_TIP__" />
-                </StackPanel>
-            </Border>
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
