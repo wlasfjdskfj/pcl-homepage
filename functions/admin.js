@@ -1800,6 +1800,7 @@ export async function onRequest(context) {
       if (i < 0) i = list.length - 1;
       if (i >= list.length) i = 0;
       idx = i;
+      try { localStorage.setItem('mIdx', String(i)); } catch (e) {}
       const it = list[i];
       audio.src = it.url.indexOf("http://") === 0 ? ("https://" + it.url.slice(7)) : it.url;
       loadLrc(i);
@@ -1846,6 +1847,12 @@ export async function onRequest(context) {
       document.body.appendChild(f); f.submit();
     });
     if (!lrc.length && bodyEl) bodyEl.innerHTML = '<div style="color:#888;font-size:12px;padding:10px;">暂无歌词，播放后显示</div>';
+    if (list.length){
+      let saved = -1;
+      try { saved = Number(localStorage.getItem('mIdx') || '-1'); } catch (e) { saved = -1; }
+      if (!isNaN(saved) && saved >= 0 && saved < list.length) play(saved);
+      else play(0);
+    }
   })();
 
   (function(){
