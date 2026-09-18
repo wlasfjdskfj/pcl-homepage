@@ -204,8 +204,55 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="随机挑战" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="今日运势" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
+            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <TextBlock Text="__SCORE__" FontSize="56" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,14" />
+            </StackPanel>
+            <!-- __SCORE_BAR__ -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
+                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
+                <TextBlock Text="__GRADE__" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+            </StackPanel>
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" CornerRadius="10" Padding="14,12" Margin="0,0,6,0" Background="#1F17DD62">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#17DD62" />
+                        </StackPanel>
+                        <TextBlock Text="__FORTUNE_GOOD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#17DD62" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" CornerRadius="10" Padding="14,12" Margin="6,0,0,0" Background="#1FFF5555">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
+                            <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#FF5555" />
+                        </StackPanel>
+                        <TextBlock Text="__FORTUNE_BAD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF5555" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="__COMMENT__" />
+            <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />
+            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel Orientation="Horizontal">
+                    <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="今日种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
+            <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="__SEED__" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />
             <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True">
                 <Grid>
                     <Border>
@@ -226,7 +273,6 @@
                 </Grid>
             </Border>
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
-            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="挑战由 Cloudflare Functions 随机生成，每次刷新都不一样。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
@@ -330,7 +376,7 @@
             </Grid>
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="常用链接" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="实用工具" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />
@@ -339,10 +385,7 @@
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
             <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="游戏指令速查" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
-        <StackPanel Margin="25,40,23,20">
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
@@ -487,104 +530,22 @@
                     </Grid>
                 </StackPanel>
             </Border>
-            <local:MyHint Theme="Yellow" Margin="0,14,0,10" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />
+            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />
             <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="彩蛋" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
-        <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="每次点开都不一样" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="看看你能抽到什么" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
-                    <local:CustomEventService.Events>
-                        <local:CustomEventCollection>
-                            <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
-                            <local:CustomEvent Type="刷新页面" Data="-" />
-                        </local:CustomEventCollection>
-                    </local:CustomEventService.Events>
-                </local:MyIconTextButton>
-                <local:MyIconTextButton Height="40" Padding="22,0,22,0" Text="刷新主页" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
-            </StackPanel>
-            <local:MyHint Theme="Yellow" Margin="0,16,0,0" Text="彩蛋由 Cloudflare Functions 动态生成，每次刷新都会换一个。" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="今日运势" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
-        <StackPanel Margin="25,40,23,20">
-            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <TextBlock Text="__SCORE__" FontSize="56" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                <TextBlock Text="分" FontSize="14" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,14" />
-            </StackPanel>
-            <!-- __SCORE_BAR__ -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">
-                <TextBlock Text="评级 " FontSize="13" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="__GRADE__" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-            </StackPanel>
-            <Grid Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" CornerRadius="10" Padding="14,12" Margin="0,0,6,0" Background="#1F17DD62">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                            <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#17DD62" />
-                        </StackPanel>
-                        <TextBlock Text="__FORTUNE_GOOD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#17DD62" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="1" CornerRadius="10" Padding="14,12" Margin="6,0,0,0" Background="#1FFF5555">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                            <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#FF5555" />
-                        </StackPanel>
-                        <TextBlock Text="__FORTUNE_BAD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF5555" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="__COMMENT__" />
-            <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="今日种子推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
-        <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
-            <local:MyButton Height="38" Text="复制种子" EventType="复制文本" EventData="__SEED__" />
-            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="创建新世界时，在「种子」栏粘贴即可。" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="每日冷知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
+    <local:MyCard Title="MC 知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                         <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="你知道 MC 里……" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
+                        <TextBlock Text="每日冷知识" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" FontSize="13" LineHeight="22" Foreground="{DynamicResource ColorBrush1}" Text="__COLD_TIP__" />
                 </StackPanel>
             </Border>
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="MC 知识小测" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">
-        <StackPanel Margin="25,40,23,20">
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
             <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
@@ -601,7 +562,26 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
-            <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="每天更新一道 MC 知识题，看看你能答对几道。" />
+            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,16,0,16" />
+            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
+                <StackPanel Orientation="Horizontal">
+                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="彩蛋" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="每次点开都不一样" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
+                    <local:CustomEventService.Events>
+                        <local:CustomEventCollection>
+                            <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                            <local:CustomEvent Type="刷新页面" Data="-" />
+                        </local:CustomEventCollection>
+                    </local:CustomEventService.Events>
+                </local:MyIconTextButton>
+            </StackPanel>
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="反馈" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">
