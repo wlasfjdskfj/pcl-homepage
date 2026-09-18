@@ -1557,7 +1557,7 @@ export async function onRequest(context) {
       </div>
       <div class="manage-card">
         <div class="manage-title">🎵 音乐播放</div>
-        <p class="manage-desc">后台摸鱼音乐，音频直链存于 KV，随后台加载。</p>
+        <p class="manage-desc">后台摸鱼音乐，音频直链存于 D1，随后台加载。</p>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <input type="text" id="musicName" placeholder="名称（可选）" style="flex:0 0 28%;min-width:0;background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;">
           <input type="text" id="musicUrl" placeholder="https://.../music.mp3" style="flex:1;min-width:0;background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;">
@@ -1683,7 +1683,7 @@ export async function onRequest(context) {
     addBtn.addEventListener('click', function(){
       const name = (document.getElementById('musicName').value || '').trim();
       const url = (document.getElementById('musicUrl').value || '').trim();
-      if (!/^https?:\/\//i.test(url)) { alert('请输入 http(s) 音频直链'); return; }
+      if (url.indexOf("://") === -1 || !/^https?:/i.test(url)) { alert('请输入 http(s) 音频直链'); return; }
       const f = document.createElement('form');
       f.method = 'post';
       f.innerHTML = '<input type="hidden" name="action" value="musicadd">'
