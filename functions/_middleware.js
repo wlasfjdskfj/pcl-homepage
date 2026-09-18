@@ -1144,7 +1144,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
 
   // 1. 版本号文件：每次请求返回新时间戳，强制 PCL 重新下载
-  if (url.pathname === '/Custom.xaml.version') {
+  if (url.pathname === '/Custom.xaml.version' || url.pathname === '/version') {
     return new Response(Date.now().toString(), {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
