@@ -455,6 +455,7 @@ async function ensureD1Table(env) {
     await env.STATS_DB.batch([
       env.STATS_DB.prepare("CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"),
       env.STATS_DB.prepare("CREATE TABLE IF NOT EXISTS admin_sessions (token TEXT PRIMARY KEY, expires INTEGER NOT NULL)"),
+      env.STATS_DB.prepare("CREATE TABLE IF NOT EXISTS admin_kv (key TEXT PRIMARY KEY, value TEXT)"),
     ]);
     d1TableReady = true;
   } catch (e) { /* 建表失败忽略，下次重试 */ }
@@ -617,6 +618,32 @@ export async function onRequest(context) {
         } else if (action === "kvdel") {
           const key = String(form.get("key") || "").trim();
           if (key) await env.HOMEPAGE_KV.delete(key);
+        } else if (action === "musicadd") {
+          const name = String(form.get("name") || "").trim();
+          const url = String(form.get("url") || "").trim();
+          if (url && /^https?:\/\//i.test(url)) {
+            let ml = [];
+            if (env.STATS_DB) {
+              try {
+                await ensureD1Table(env);
+                const mr = await env.STATS_DB.prepare("SELECT value FROM admin_kv WHERE key = ?").bind("admin_music").first();
+                if (mr && mr.value) ml = JSON.parse(mr.value) || [];
+              } catch (e) { ml = []; }
+            }
+            ml.push({ name: (name || "音乐 " + (ml.length + 1)), url });
+            if (env.STATS_DB) await env.STATS_DB.prepare("INSERT INTO admin_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind("admin_music", JSON.stringify(ml)).run();
+          }
+        } else if (action === "musicdel") {
+          const idx = parseInt(form.get("i") || "-1", 10);
+          let ml = [];
+          if (env.STATS_DB) {
+            try {
+              await ensureD1Table(env);
+              const mr = await env.STATS_DB.prepare("SELECT value FROM admin_kv WHERE key = ?").bind("admin_music").first();
+              if (mr && mr.value) ml = JSON.parse(mr.value) || [];
+            } catch (e) { ml = []; }
+          }
+          if (idx >= 0 && idx < ml.length) { ml.splice(idx, 1); if (env.STATS_DB) await env.STATS_DB.prepare("INSERT INTO admin_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind("admin_music", JSON.stringify(ml)).run(); }
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -698,6 +725,13 @@ export async function onRequest(context) {
         ).bind(weekAgo).all();
         (dayRes.results || []).forEach((r) => { daysMap[r.d] = Number(r.c) || 0; });
       } catch (e) { console.error("[admin] D1 统计查询失败", e); }
+    }
+    let musicRaw = "";
+    if (env.STATS_DB) {
+      try {
+        const mr = await env.STATS_DB.prepare("SELECT value FROM admin_kv WHERE key = ?").bind("admin_music").first();
+        musicRaw = mr ? String(mr.value || "") : "";
+      } catch (e) { console.error("[admin] D1 admin_kv 读取失败", e); musicRaw = ""; }
     }
     let kvTodayIp = 0;
     if (env.STATS_DB) {
@@ -806,6 +840,19 @@ export async function onRequest(context) {
           + '</td></tr>'
         ).join("")
       : '<tr><td colspan="2" class="empty">无 KV 键</td></tr>';
+
+    let musicList = [];
+    try { if (musicRaw) musicList = JSON.parse(musicRaw) || []; } catch (e) { musicList = []; }
+    const musicRows = musicList.length
+      ? musicList.map((m, i) =>
+          '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
+          + '<button type="button" class="btn btn-ghost btn-sm" data-play="' + i + '" title="播放">▶</button>'
+          + '<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(String(m.name || "")) + '</span>'
+          + '<form method="post" style="margin:0;"><input type="hidden" name="action" value="musicdel"><input type="hidden" name="i" value="' + i + '"><button type="submit" class="btn btn-ghost btn-sm">删</button></form>'
+          + '</div>'
+        ).join('')
+      : '<div style="color:#888;font-size:12px;margin-top:6px;">还没有音乐，添加音频直链（mp3 等）即可播放。</div>';
+    const musicJson = JSON.stringify(musicList.map((m) => String(m.url || "")));
 
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用（${escapeHtml(apiError)}），配额显示为 0</div>`
@@ -1508,6 +1555,21 @@ export async function onRequest(context) {
           </table>
         </div>
       </div>
+      <div class="manage-card">
+        <div class="manage-title">🎵 音乐播放</div>
+        <p class="manage-desc">后台摸鱼音乐，音频直链存于 KV，随后台加载。</p>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <input type="text" id="musicName" placeholder="名称（可选）" style="flex:0 0 28%;min-width:0;background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;">
+          <input type="text" id="musicUrl" placeholder="https://.../music.mp3" style="flex:1;min-width:0;background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn" id="musicAddBtn">添加</button>
+          <button type="button" class="btn btn-ghost" id="musicPrevBtn">⏮ 上一首</button>
+          <button type="button" class="btn btn-ghost" id="musicNextBtn">下一首 ⏭</button>
+        </div>
+        <audio id="adminAudio" controls style="width:100%;margin-top:10px;height:36px;"></audio>
+        <div id="musicListBox" style="margin-top:8px;">${musicRows}</div>
+      </div>
           </div>
         </section>
       </div>
@@ -1592,6 +1654,43 @@ export async function onRequest(context) {
       else el.textContent = "即将重置";
     }
     tick();
+  })();
+
+  (function(){
+    const box = document.getElementById('musicListBox');
+    const audio = document.getElementById('adminAudio');
+    const prevBtn = document.getElementById('musicPrevBtn');
+    const nextBtn = document.getElementById('musicNextBtn');
+    const addBtn = document.getElementById('musicAddBtn');
+    if (!box || !audio || !prevBtn || !nextBtn || !addBtn) return;
+    const list = ${musicJson};
+    let idx = -1;
+    function play(i){
+      if (!list.length) return;
+      if (i < 0) i = list.length - 1;
+      if (i >= list.length) i = 0;
+      idx = i;
+      audio.src = list[i];
+      audio.play().catch(function(){});
+    }
+    box.addEventListener('click', function(e){
+      const b = e.target.closest('[data-play]');
+      if (b) play(Number(b.dataset.play));
+    });
+    prevBtn.addEventListener('click', function(){ play(idx - 1); });
+    nextBtn.addEventListener('click', function(){ play(idx + 1); });
+    audio.addEventListener('ended', function(){ play(idx + 1); });
+    addBtn.addEventListener('click', function(){
+      const name = (document.getElementById('musicName').value || '').trim();
+      const url = (document.getElementById('musicUrl').value || '').trim();
+      if (!/^https?:\/\//i.test(url)) { alert('请输入 http(s) 音频直链'); return; }
+      const f = document.createElement('form');
+      f.method = 'post';
+      f.innerHTML = '<input type="hidden" name="action" value="musicadd">'
+        + '<input type="hidden" name="name" value="' + name.replace(/"/g, '&quot;') + '">'
+        + '<input type="hidden" name="url" value="' + url.replace(/"/g, '&quot;') + '">';
+      document.body.appendChild(f); f.submit();
+    });
   })();
 
   (function(){
