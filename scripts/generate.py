@@ -205,6 +205,23 @@ def fetch_wiki_changelog(version):
         return {"ok": False, "sections": [], "url": url}
 
 
+def _changelog_popup_data(version, changelog):
+    """把某版本的更新日志拼成弹窗 Data（标题|正文，正文换行，XAML 安全转义）。"""
+    if not changelog or not changelog.get("ok") or not changelog.get("sections"):
+        body = "该版本暂未抓取到中文更新日志，可到 Minecraft Wiki 查看原文。"
+    else:
+        parts = []
+        for sec in changelog["sections"]:
+            parts.append("【" + sec["heading"] + "】")
+            for item in sec["items"]:
+                parts.append("· " + item)
+        body = "\n".join(parts)
+        if len(body) > 1800:
+            body = body[:1800] + "\n…"
+    raw = version + " 更新总结|" + body
+    return escape_xaml_attr(raw).replace("\n", "&#xA;")
+
+
 # ============ 服务器列表（不查询状态） ============
 
 def fetch_server_list():
@@ -636,6 +653,13 @@ def build_xaml():
 
     recent_releases = fetch_recent_releases(5)
     wiki_changelog = fetch_wiki_changelog(main_version)
+    version_changelogs = {}
+    for _rel in (recent_releases or []):
+        _ver = _rel["version"]
+        if _ver == main_version:
+            version_changelogs[_ver] = wiki_changelog
+        else:
+            version_changelogs[_ver] = fetch_wiki_changelog(_ver)
     server_list = fetch_server_list()
 
     news_title = "当前最新版本 · " + main_version
@@ -980,11 +1004,11 @@ def build_xaml():
                 else:
                     days_text = str(rel["days_ago"]) + " 天前"
                 info_text = rel["date"] + " · " + days_text
-            lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="启动 ' + rel["version"] + '" Info="' + info_text + '" EventType="启动游戏" EventData="' + rel["version"] + '" />')
+            lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 ' + rel["version"] + '" Info="' + info_text + '" EventType="弹出窗口" EventData="' + _changelog_popup_data(rel["version"], version_changelogs.get(rel["version"])) + '" />')
     else:
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本可直接启动。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
 
     # ========== 更新内容 ==========
     lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
