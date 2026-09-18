@@ -802,7 +802,7 @@ export async function onRequest(context) {
           '<tr><td class="ip-text">' + escapeHtml(key) + '</td><td style="text-align:right;">'
           + (kvSafe.has(key)
               ? '<span style="color:#888;font-size:11px;">系统键</span>'
-              : '<form method="post" class="inline-form" onsubmit="return confirm('确定删除 KV 键 ' + escapeHtml(key) + '？');"><input type="hidden" name="action" value="kvdel"><input type="hidden" name="key" value="' + escapeHtml(key) + '"><button type="submit" class="btn btn-danger btn-sm">删除</button></form>')
+              : `<form method="post" class="inline-form" onsubmit="return confirm('确定删除 KV 键 ${escapeHtml(key)}？');"><input type="hidden" name="action" value="kvdel"><input type="hidden" name="key" value="${escapeHtml(key)}"><button type="submit" class="btn btn-danger btn-sm">删除</button></form>`)
           + '</td></tr>'
         ).join("")
       : '<tr><td colspan="2" class="empty">无 KV 键</td></tr>';
