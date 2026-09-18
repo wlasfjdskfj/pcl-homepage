@@ -1010,30 +1010,6 @@ def build_xaml():
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
 
-    # ========== 更新内容 ==========
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
-    lines.append('            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
-    lines.append('                <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
-    lines.append('                <TextBlock Text="更新内容" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('            </StackPanel>')
-
-    if wiki_changelog["ok"]:
-        for sec in wiki_changelog["sections"]:
-            escaped_heading = escape_xaml_attr(sec["heading"])
-            lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">')
-            lines.append('                <StackPanel>')
-            lines.append('                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">')
-            lines.append('                        <Border Width="3" Height="14" CornerRadius="1.5" Background="#FF4444" Margin="0,0,8,0" VerticalAlignment="Center" />')
-            lines.append('                        <TextBlock Text="' + escaped_heading + '" FontSize="14" FontWeight="Bold" Foreground="#FF4444" VerticalAlignment="Center" />')
-            lines.append('                    </StackPanel>')
-            for item in sec["items"]:
-                escaped_item = escape_xaml_attr(item)
-                lines.append('                    <TextBlock Text="· ' + escaped_item + '" FontSize="13" LineHeight="22" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,6" />')
-            lines.append('                </StackPanel>')
-            lines.append('            </Border>')
-    else:
-        lines.append('            <local:MyLoading Margin="0,8,0,14" Text="翻译施工中" />')
-
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
     lines.append('                    <ColumnDefinition Width="1*" />')
