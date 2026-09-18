@@ -890,12 +890,25 @@ export async function onRequest(context) {
 
     let musicList = [];
     try { if (musicRaw) musicList = JSON.parse(musicRaw) || []; } catch (e) { musicList = []; }
+    musicList = musicList.map(function(m, di){ return Object.assign({}, m, { d1Index: di }); });
+    try {
+      const mres = await fetch(new URL('/music/music.json', request.url).toString(), { headers: { "User-Agent": "PCL-Homepage" } });
+      if (mres && mres.ok) {
+        const arr = await mres.json();
+        if (Array.isArray(arr)) {
+          const extra = arr.filter(function(s){ return s && s.url; }).map(function(s){ return { name: String(s.name || "音乐"), url: String(s.url), d1Index: -1 }; });
+          musicList = extra.concat(musicList);
+        }
+      }
+    } catch (e) { /* 静态歌单加载失败仅用 D1 */ }
     const musicRows = musicList.length
       ? musicList.map((m, i) =>
           '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'
           + '<button type="button" class="btn btn-ghost btn-sm" data-play="' + i + '" title="播放">▶</button>'
           + '<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(String(m.name || "")) + '</span>'
-          + '<form method="post" style="margin:0;"><input type="hidden" name="action" value="musicdel"><input type="hidden" name="i" value="' + i + '"><button type="submit" class="btn btn-ghost btn-sm">删</button></form>'
+          + (m.d1Index >= 0
+              ? '<form method="post" style="margin:0;"><input type="hidden" name="action" value="musicdel"><input type="hidden" name="i" value="' + m.d1Index + '"><button type="submit" class="btn btn-ghost btn-sm">删</button></form>'
+              : '<span style="color:#888;font-size:11px;">内置</span>')
           + '</div>'
         ).join('')
       : '<div style="color:#888;font-size:12px;margin-top:6px;">还没有音乐，添加音频直链（mp3 等）即可播放。</div>';
@@ -913,6 +926,7 @@ export async function onRequest(context) {
 <script>${THEME_SCRIPT}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>访问统计</title>
 <style>
   ${THEME_CSS}
