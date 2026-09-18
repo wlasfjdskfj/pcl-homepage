@@ -1313,21 +1313,23 @@ export async function onRequest(context) {
           const bText = String(bn.text).trim();
           if (bText.length <= 40) {
             bannerBody = '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
-              + '<StackPanel>'
+              + '<StackPanel Margin="25,36,23,16">'
               + '<StackPanel.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard>'
               + '<DoubleAnimation Storyboard.TargetName="bqFade" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6"/>'
               + '</Storyboard></BeginStoryboard></EventTrigger></StackPanel.Triggers>'
-              + '<TextBlock x:Name="bqFade" TextWrapping="Wrap" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" Text="' + escapeXaml(bText) + '"/>'
+              + '<TextBlock x:Name="bqFade" TextWrapping="Wrap" FontSize="15" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" Text="' + escapeXaml(bText) + '"/>'
               + '</StackPanel>'
               + '</local:MyCard>';
           } else {
-            const bDur = Math.max(10, Math.min(30, Math.round(bText.length * 0.45)));
+            const bTextW = bText.length * 15;
+            const bTo = -(bTextW + 40);
+            const bDur = Math.max(8, Math.min(30, Math.round((500 - bTo) / 50)));
             bannerBody = '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
-              + '<StackPanel ClipToBounds="True" Height="26">'
-              + '<TextBlock Text="' + escapeXaml(bText) + '" FontSize="13" LineHeight="21" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center">'
+              + '<StackPanel Margin="25,36,23,16" ClipToBounds="True" Height="28">'
+              + '<TextBlock Text="' + escapeXaml(bText) + '" FontSize="15" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center">'
               + '<TextBlock.RenderTransform><TranslateTransform x:Name="bqMarquee" X="0"/></TextBlock.RenderTransform>'
               + '<TextBlock.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever">'
-              + '<DoubleAnimation Storyboard.TargetName="bqMarquee" Storyboard.TargetProperty="X" From="360" To="-360" Duration="0:0:' + bDur + '"/>'
+              + '<DoubleAnimation Storyboard.TargetName="bqMarquee" Storyboard.TargetProperty="X" From="500" To="' + bTo + '" Duration="0:0:' + bDur + '"/>'
               + '</Storyboard></BeginStoryboard></EventTrigger></TextBlock.Triggers>'
               + '</TextBlock>'
               + '</StackPanel>'
