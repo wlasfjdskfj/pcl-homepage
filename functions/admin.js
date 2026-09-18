@@ -510,6 +510,26 @@ export async function onRequest(context) {
     });
   }
 
+  if (isAdmin && request.method === "GET" && url.searchParams.get("action") === "musicsrc") {
+    const q = String(url.searchParams.get("q") || "").trim();
+    const pf = String(url.searchParams.get("pf") || "1");
+    const pmap = { "1": "wy.music", "2": "mg.music", "3": "bd.music" };
+    const pmusic = pmap[pf] || "wy.music";
+    let songs = [];
+    if (q) {
+      try {
+        const r = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(q) + "&num=8", { headers: { "User-Agent": "Mozilla/5.0" } });
+        const data = await r.json();
+        if (data && data.code === 0) {
+          const res = data.data;
+          const arr = Array.isArray(res) ? res : (res && res.music ? [res] : []);
+          songs = arr.filter((i) => i && (i.song || i.music)).map((i) => ({ song: String(i.song || "未知"), singer: String(i.singer || "未知") }));
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return new Response(JSON.stringify({ ok: true, songs }), { headers: securityHeaders({ "Content-Type": "application/json; charset=utf-8" }) });
+  }
+
   if (request.method === "POST") {
     let rawBody = "";
     try {
@@ -621,7 +641,25 @@ export async function onRequest(context) {
         } else if (action === "musicadd") {
           const name = String(form.get("name") || "").trim();
           const url = String(form.get("url") || "").trim();
-          if (url && /^https?:\/\//i.test(url)) {
+          const song = String(form.get("song") || "").trim();
+          const singer = String(form.get("singer") || "").trim();
+          const pf = String(form.get("pf") || "1");
+          const pmap = { "1": "wy.music", "2": "mg.music", "3": "bd.music" };
+          const pmusic = pmap[pf] || "wy.music";
+          let finalUrl = url;
+          let finalName = name;
+          if (!finalUrl && song) {
+            try {
+              const query = (singer && singer !== "未知") ? (song + " " + singer) : song;
+              const rr = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(query) + "&n=1", { headers: { "User-Agent": "Mozilla/5.0" } });
+              const dd = await rr.json();
+              if (dd && dd.code === 0 && dd.data && dd.data.music) {
+                finalUrl = String(dd.data.music);
+                if (!finalName) finalName = String(dd.data.song || song);
+              }
+            } catch (e) { /* ignore */ }
+          }
+          if (finalUrl && /^https?:/i.test(finalUrl)) {
             let ml = [];
             if (env.STATS_DB) {
               try {
@@ -630,7 +668,7 @@ export async function onRequest(context) {
                 if (mr && mr.value) ml = JSON.parse(mr.value) || [];
               } catch (e) { ml = []; }
             }
-            ml.push({ name: (name || "音乐 " + (ml.length + 1)), url });
+            ml.push({ name: (finalName || "音乐 " + (ml.length + 1)), url: finalUrl });
             if (env.STATS_DB) await env.STATS_DB.prepare("INSERT INTO admin_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind("admin_music", JSON.stringify(ml)).run();
           }
         } else if (action === "musicdel") {
@@ -647,6 +685,9 @@ export async function onRequest(context) {
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
+      }
+      if (form.get("ajax") === "1") {
+        return new Response(JSON.stringify({ ok: true }), { headers: securityHeaders({ "Content-Type": "application/json; charset=utf-8" }) });
       }
       return new Response(null, {
         status: 302,
@@ -1569,6 +1610,19 @@ export async function onRequest(context) {
         </div>
         <audio id="adminAudio" controls style="width:100%;margin-top:10px;height:36px;"></audio>
         <div id="musicListBox" style="margin-top:8px;">${musicRows}</div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--card-border);">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">🔍 搜索并添加（网易云/咪咕/波点，直链有有效期，失效重新加入即可）</div>
+          <div style="display:flex;gap:8px;">
+            <select id="musicPf" style="background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 8px;font-size:12px;outline:none;">
+              <option value="1">网易云</option>
+              <option value="2">咪咕</option>
+              <option value="3">波点</option>
+            </select>
+            <input type="text" id="musicQ" placeholder="歌名 / 歌手" style="flex:1;min-width:0;background:var(--quota-bg);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:7px 10px;font-size:12px;outline:none;">
+            <button type="button" class="btn" id="musicSearchBtn">搜索</button>
+          </div>
+          <div id="musicResult" style="margin-top:8px;max-height:220px;overflow:auto;"></div>
+        </div>
       </div>
           </div>
         </section>
@@ -1690,6 +1744,50 @@ export async function onRequest(context) {
         + '<input type="hidden" name="name" value="' + name.replace(/"/g, '&quot;') + '">'
         + '<input type="hidden" name="url" value="' + url.replace(/"/g, '&quot;') + '">';
       document.body.appendChild(f); f.submit();
+    });
+  })();
+
+  (function(){
+    const rbox = document.getElementById('musicResult');
+    const searchBtn = document.getElementById('musicSearchBtn');
+    const qIn = document.getElementById('musicQ');
+    const pfIn = document.getElementById('musicPf');
+    if (!rbox || !searchBtn || !qIn || !pfIn) return;
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    searchBtn.addEventListener('click', function(){
+      const kw = qIn.value.trim();
+      if (!kw) { rbox.innerHTML = '<div style="color:#888;font-size:12px;">请输入歌名或歌手</div>'; return; }
+      rbox.innerHTML = '<div style="color:#888;font-size:12px;">搜索中…</div>';
+      fetch('/admin?action=musicsrc&pf=' + encodeURIComponent(pfIn.value) + '&q=' + encodeURIComponent(kw))
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          if (!j || !j.ok || !j.songs || !j.songs.length) { rbox.innerHTML = '<div style="color:#888;font-size:12px;">未找到结果</div>'; return; }
+          rbox.innerHTML = j.songs.map(function(song){
+            return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+              + '<span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(song.song) + ' <span style="color:#888;font-size:11px;">' + esc(song.singer) + '</span></span>'
+              + '<button type="button" class="btn btn-ghost btn-sm" data-add="1" data-song="' + esc(song.song) + '" data-singer="' + esc(song.singer) + '" data-pf="' + esc(pfIn.value) + '">加入</button>'
+              + '</div>';
+          }).join('');
+        })
+        .catch(function(){ rbox.innerHTML = '<div style="color:#888;font-size:12px;">搜索失败</div>'; });
+    });
+    rbox.addEventListener('click', function(e){
+      const b = e.target.closest('[data-add]');
+      if (!b) return;
+      b.disabled = true; b.textContent = '获取中…';
+      const fd = new FormData();
+      fd.append('action', 'musicadd');
+      fd.append('song', b.dataset.song);
+      fd.append('singer', b.dataset.singer);
+      fd.append('pf', b.dataset.pf);
+      fd.append('ajax', '1');
+      fetch('/admin', { method: 'POST', body: fd })
+        .then(function(r){ return r.json(); })
+        .then(function(j){
+          if (j && j.ok) { b.textContent = '✓ 已加入'; b.disabled = false; setTimeout(function(){ b.textContent = '加入'; }, 1500); }
+          else { b.textContent = '加入失败'; b.disabled = false; }
+        })
+        .catch(function(){ b.textContent = '加入失败'; b.disabled = false; });
     });
   })();
 
