@@ -1629,7 +1629,7 @@ export async function onRequest(context) {
           <button type="button" class="btn btn-ghost" id="musicNextBtn">下一首 ⏭</button>
           <button type="button" class="btn btn-ghost" id="musicFloatBtn">↗ 歌词</button>
         </div>
-        <audio id="adminAudio" controls style="width:100%;margin-top:10px;height:36px;"></audio>
+        <audio id="adminAudio" controls preload="auto" style="width:100%;margin-top:10px;height:36px;"></audio>
         <div id="musicListBox" style="margin-top:8px;">${musicRows}</div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--card-border);">
           <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;">🔍 搜索并添加（网易云/咪咕/波点，直链有有效期，失效重新加入即可）</div>
