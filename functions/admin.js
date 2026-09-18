@@ -614,6 +614,9 @@ export async function onRequest(context) {
           const text = String(form.get("text") || "").trim();
           if (text) await env.HOMEPAGE_KV.put('banners', text);
           else await env.HOMEPAGE_KV.delete('banners');
+        } else if (action === "kvdel") {
+          const key = String(form.get("key") || "").trim();
+          if (key) await env.HOMEPAGE_KV.delete(key);
         }
       } catch (e) {
         console.error("[admin action]", action, e && e.message);
@@ -666,6 +669,13 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("custom_festivals"),
       env.HOMEPAGE_KV.get("banners"),
     ]);
+
+    // KV 键列表（用于存储管理）
+    let kvKeys = [];
+    try {
+      const kl = await env.HOMEPAGE_KV.list({ limit: 1000 });
+      kvKeys = (kl.keys || []).map((k) => String(k.name)).sort();
+    } catch (e) { console.error("[admin] KV list 失败", e); }
 
     // 从 D1 读取访问统计
     let total = 0;
@@ -803,6 +813,17 @@ export async function onRequest(context) {
           `<li class="block-item"><span class="block-ip">${escapeHtml(ip)}</span><span class="block-time">${escapeHtml(new Date(t).toLocaleString('zh-CN'))}</span><form method="post" class="inline-form"><input type="hidden" name="action" value="unblock"><input type="hidden" name="ip" value="${escapeHtml(ip)}"><button type="submit" class="btn btn-ghost btn-sm">解封</button></form></li>`
         ).join("")
       : '<li class="empty-block">暂无封禁 IP</li>';
+
+    const kvSafe = new Set(["block:list","weather_version","maint_mode_live","maint_eta","maint_reason","homepage_banner","server_cfg","quote_custom","custom_countdown","custom_festivals","banners","d1_last_cleanup"]);
+    const kvRows = kvKeys.length
+      ? kvKeys.map((key) =>
+          '<tr><td class="ip-text">' + escapeHtml(key) + '</td><td style="text-align:right;">'
+          + (kvSafe.has(key)
+              ? '<span style="color:#888;font-size:11px;">系统键</span>'
+              : '<form method="post" class="inline-form" onsubmit="return confirm('确定删除 KV 键 ' + escapeHtml(key) + '？');"><input type="hidden" name="action" value="kvdel"><input type="hidden" name="key" value="' + escapeHtml(key) + '"><button type="submit" class="btn btn-danger btn-sm">删除</button></form>')
+          + '</td></tr>'
+        ).join("")
+      : '<tr><td colspan="2" class="empty">无 KV 键</td></tr>';
 
     const chartHtml = days.map((d) => {
       const h = Math.max(3, Math.round((d.count / maxDay) * 100));
@@ -1257,7 +1278,8 @@ export async function onRequest(context) {
       <nav class="nav">
         <a class="nav-item active" data-tab="overview"><span class="nav-ico">📈</span>概览</a>
         <a class="nav-item" data-tab="visitors"><span class="nav-ico">🌍</span>访问记录</a>
-        <a class="nav-item" data-tab="manage"><span class="nav-ico">🛠</span>封禁管理</a>
+        <a class="nav-item" data-tab="content"><span class="nav-ico">📝</span>内容管理</a>
+        <a class="nav-item" data-tab="settings"><span class="nav-ico">🛠</span>系统设置</a>
       </nav>
       <div class="sidebar-foot">
         <button class="btn btn-ghost theme-toggle-btn" id="themeBtn" title="切换主题">🌙</button>
@@ -1378,6 +1400,11 @@ export async function onRequest(context) {
               <thead><tr><th>#</th><th>IP</th><th>国家/地区</th><th>次数</th><th>最近访问</th></tr></thead>
               <tbody>${ipRows || '<tr><td colspan="5" class="empty">暂无记录</td></tr>'}</tbody>
             </table>
+          </div>
+        </section>
+        <section id="tab-content" class="section" hidden>
+          <h2>内容管理</h2>
+          <div class="manage-grid">
       <div class="manage-card">
         <div class="manage-title">📢 主页公告</div>
         <p class="manage-desc">在主页顶部显示公告。当前：<b style="color:${bannerOn ? '#17DD62' : '#888'}">${bannerOn ? '已启用' : '已关闭'}</b></p>
@@ -1465,8 +1492,8 @@ export async function onRequest(context) {
       </div>
           </div>
         </section>
-        <section id="tab-manage" class="section" hidden>
-          <h2>管理</h2>
+        <section id="tab-settings" class="section" hidden>
+          <h2>系统设置</h2>
     <div class="manage-grid">
       <div class="manage-card">
         <div class="manage-title">🚫 IP 封禁</div>
@@ -1507,6 +1534,16 @@ export async function onRequest(context) {
           <button type="submit" class="btn btn-ghost">关闭</button>
         </form>
       </div>
+      <div class="manage-card">
+        <div class="manage-title">🗄 KV 存储</div>
+        <p class="manage-desc">共 ${kvKeys.length} 个键。系统关键键已锁定，其余键可删除（带确认）。</p>
+        <div class="table-wrap" style="max-height:280px;overflow:auto;">
+          <table>
+            <thead><tr><th>键名</th><th style="text-align:right;">操作</th></tr></thead>
+            <tbody>${kvRows}</tbody>
+          </table>
+        </div>
+      </div>
           </div>
         </section>
       </div>
@@ -1529,7 +1566,7 @@ export async function onRequest(context) {
   (function(){
     const navs = document.querySelectorAll('.nav-item');
     const title = document.getElementById('tabTitle');
-    const tabs = { overview:'概览', visitors:'访问记录', manage:'封禁管理' };
+    const tabs = { overview:'概览', visitors:'访问记录', content:'内容管理', settings:'系统设置' };
     navs.forEach(a => {
       a.addEventListener('click', () => {
         navs.forEach(x => x.classList.remove('active'));
