@@ -567,6 +567,7 @@ export async function onRequest(context) {
 
     if (isAdmin) {
       const action = String(form.get("action") || "");
+      let actionOk = true;
       try {
         if (action === "block") {
           const ip = String(form.get("ip") || "").trim();
@@ -670,6 +671,8 @@ export async function onRequest(context) {
             }
             ml.push({ name: (finalName || "音乐 " + (ml.length + 1)), url: finalUrl });
             if (env.STATS_DB) await env.STATS_DB.prepare("INSERT INTO admin_kv (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").bind("admin_music", JSON.stringify(ml)).run();
+          } else if (song) {
+            actionOk = false;
           }
         } else if (action === "musicdel") {
           const idx = parseInt(form.get("i") || "-1", 10);
@@ -687,7 +690,7 @@ export async function onRequest(context) {
         console.error("[admin action]", action, e && e.message);
       }
       if (form.get("ajax") === "1") {
-        return new Response(JSON.stringify({ ok: true }), { headers: securityHeaders({ "Content-Type": "application/json; charset=utf-8" }) });
+        return new Response(JSON.stringify({ ok: actionOk }), { headers: securityHeaders({ "Content-Type": "application/json; charset=utf-8" }) });
       }
       return new Response(null, {
         status: 302,
@@ -1775,7 +1778,7 @@ export async function onRequest(context) {
       const b = e.target.closest('[data-add]');
       if (!b) return;
       b.disabled = true; b.textContent = '获取中…';
-      const fd = new FormData();
+      const fd = new URLSearchParams();
       fd.append('action', 'musicadd');
       fd.append('song', b.dataset.song);
       fd.append('singer', b.dataset.singer);
