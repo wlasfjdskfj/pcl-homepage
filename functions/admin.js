@@ -926,7 +926,7 @@ export async function onRequest(context) {
 <script>${THEME_SCRIPT}</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" href="/favicon.png">
 <title>访问统计</title>
 <style>
   ${THEME_CSS}
@@ -1866,6 +1866,11 @@ export async function onRequest(context) {
       try { saved = Number(localStorage.getItem('mIdx') || '-1'); } catch (e) { saved = -1; }
       if (!isNaN(saved) && saved >= 0 && saved < list.length) play(saved);
       else play(0);
+      ['pointerdown','keydown','touchstart'].forEach(function(ev){
+        document.addEventListener(ev, function(){
+          if (audio.paused && list.length){ if (idx < 0) play(0); else audio.play().catch(function(){}); }
+        }, { once: true, passive: true });
+      });
     }
   })();
 
