@@ -903,7 +903,7 @@ def build_xaml():
     lines.append('                                </Border>')
     lines.append('                                <TextBlock Text="' + greeting + '，{user}！" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
     lines.append('                            </StackPanel>')
-    lines.append('                            <TextBlock Text="欢迎回来，今天也一起去冒险吧。" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />')
+    lines.append('                            <TextBlock Text="__GREETING_SUB__" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />')
     lines.append('                            <TextBlock Text="未显示玩家名？刷新页面即可" FontSize="9" Foreground="#99FFFFFF" Margin="0,3,0,0" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Border>')

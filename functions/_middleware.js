@@ -8,7 +8,7 @@
  */
 
 import {
-  QUOTES, EGGS, COLORS, FORTUNE_GOOD, FORTUNE_BAD, FORTUNE_TIPS,
+  QUOTES, EGGS, GREETING_SUBS, COLORS, FORTUNE_GOOD, FORTUNE_BAD, FORTUNE_TIPS,
   CHALLENGES, SEEDS, SCORE_COMMENTS,
 } from './_lib/content.js';
 import { QUIZ } from './_lib/quiz.js';
@@ -34,16 +34,16 @@ function getBeijingDate() {
   const hour = beijing.getUTCHours();
   const weekdayMap = ["日", "一", "二", "三", "四", "五", "六"];
   const dateStr = year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
-  let greeting;
-  if (hour < 6) greeting = "凌晨好";
-  else if (hour < 11) greeting = "早上好";
-  else if (hour < 14) greeting = "中午好";
-  else if (hour < 18) greeting = "下午好";
-  else if (hour < 23) greeting = "晚上好";
-  else greeting = "夜深了";
+  let greeting, period;
+  if (hour < 6) { greeting = "凌晨好"; period = "dawn"; }
+  else if (hour < 11) { greeting = "早上好"; period = "morning"; }
+  else if (hour < 14) { greeting = "中午好"; period = "noon"; }
+  else if (hour < 18) { greeting = "下午好"; period = "afternoon"; }
+  else if (hour < 23) { greeting = "晚上好"; period = "evening"; }
+  else { greeting = "夜深了"; period = "night"; }
   return {
     year: String(year), month: String(month), day: String(day),
-    weekday: weekdayMap[beijing.getUTCDay()], dateStr, greeting,
+    weekday: weekdayMap[beijing.getUTCDay()], dateStr, greeting, period,
   };
 }
 
@@ -213,6 +213,10 @@ export async function onRequest(context) {
       const today = date.dateStr;
       const heroUrl = heroUrlFor(date, url.origin);
 
+      // 欢迎语副标题（时段 + IP + 日期确定性，每天每时段自动换一句）
+      const subPool = GREETING_SUBS[date.period] || GREETING_SUBS.morning;
+      const greetingSub = subPool[deterministicIndex(ip, today, "greeting_" + date.period, subPool.length)];
+
       // 每日一言（IP+日期确定性下发，后台自定义优先；支持 {date}/{weekday}/{year} 占位）
       let quote = QUOTES[deterministicIndex(ip, today, "quote", QUOTES.length)];
       if (quoteRaw) {
@@ -294,6 +298,7 @@ export async function onRequest(context) {
         .replace(/__DATE_DAY__/g, date.day)
         .replace(/__DATE_WEEKDAY__/g, date.weekday)
         .replace(/__GREETING__/g, date.greeting)
+        .replace(/__GREETING_SUB__/g, escapeXaml(greetingSub))
         .replace(/__QUIZ_IMAGE__/g, heroUrl)
         .replace(/__USER_IP__/g, escapeXaml(ip))
         .replace(/__LUCKY_NUMBER__/g, String(num))
