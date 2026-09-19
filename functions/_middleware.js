@@ -213,11 +213,11 @@ export async function onRequest(context) {
       const today = date.dateStr;
       const heroUrl = heroUrlFor(date, url.origin);
 
-      // 每日一言（后台自定义优先，支持 {date}/{weekday}/{year} 占位）
-      let quote = pickRandom(QUOTES);
+      // 每日一言（IP+日期确定性下发，后台自定义优先；支持 {date}/{weekday}/{year} 占位）
+      let quote = QUOTES[deterministicIndex(ip, today, "quote", QUOTES.length)];
       if (quoteRaw) {
         const qList = quoteRaw.split(/\r?\n/).map((x) => x.trim()).filter((x) => x);
-        if (qList.length) quote = pickRandom(qList);
+        if (qList.length) quote = qList[deterministicIndex(ip, today, "quote", qList.length)];
       }
       quote = quote.replace(/\{date\}/g, date.month + "月" + date.day + "日")
                    .replace(/\{weekday\}/g, date.weekday)
