@@ -624,6 +624,8 @@ def build_xaml():
     seed_desc = "__SEED_DESC__"
     quiz_q = "__QUIZ_Q__"
     quiz_a = "__QUIZ_A__"
+    quiz_tag = "__QUIZ_TAG__"
+    quiz_no = "__QUIZ_NO__"
 
     server_address = SERVER_ADDRESS
 
@@ -1122,16 +1124,20 @@ def build_xaml():
     lines.append('    <local:MyCard Title="MC 知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
 
-    lines.append('            <Border CornerRadius="10" Padding="20,18" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    lines.append('            <Border CornerRadius="12" Padding="20,18" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">')
-    lines.append('                        <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />')
-    lines.append('                        <TextBlock Text="每日一题" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="' + quiz_q + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    <Grid Margin="0,0,0,12">')
+    lines.append('                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">')
+    lines.append('                            <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />')
+    lines.append('                            <TextBlock Text="每日一题" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush2}" VerticalAlignment="Center" />')
+    lines.append('                        </StackPanel>')
+    lines.append('                        <!-- ' + quiz_tag + ' -->')
+    lines.append('                    </Grid>')
+    lines.append('                    <TextBlock Text="' + quiz_q + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" LineHeight="25" Foreground="{DynamicResource ColorBrush1}" />')
+    lines.append('                    <TextBlock Text="今日专属 · ' + quiz_no + '" FontSize="10" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,10,0,0" />')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">')
     lines.append('                <local:CustomEventService.Events>')
     lines.append('                    <local:CustomEventCollection>')
     lines.append('                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|' + quiz_a + '" />')
@@ -1148,16 +1154,14 @@ def build_xaml():
     lines.append('                    </StackPanel>')
     lines.append('                </StackPanel>')
     lines.append('            </Border>')
-    lines.append('            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">')
-    lines.append('                <local:MyIconTextButton Margin="0,0,16,0" Height="40" Padding="22,0,22,0" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
-    lines.append('                    <local:CustomEventService.Events>')
-    lines.append('                        <local:CustomEventCollection>')
-    lines.append('                            <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
-    lines.append('                            <local:CustomEvent Type="刷新页面" Data="-" />')
-    lines.append('                        </local:CustomEventCollection>')
-    lines.append('                    </local:CustomEventService.Events>')
-    lines.append('                </local:MyIconTextButton>')
-    lines.append('            </StackPanel>')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
+    lines.append('                <local:CustomEventService.Events>')
+    lines.append('                    <local:CustomEventCollection>')
+    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
+    lines.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
+    lines.append('                    </local:CustomEventCollection>')
+    lines.append('                </local:CustomEventService.Events>')
+    lines.append('            </local:MyIconTextButton>')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
     # ========== 卡片 12：反馈 ==========

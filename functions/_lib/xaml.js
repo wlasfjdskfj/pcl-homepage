@@ -48,6 +48,24 @@ function buildScoreBar(score) {
   return bar;
 }
 
+// 每日一题分类徽章（按分类配色，返回 PCL 可渲染的 XAML pill）
+const QUIZ_CAT_COLORS = {
+  "战斗": "#FF5555",
+  "生存": "#17DD62",
+  "红石": "#FF6B52",
+  "机制": "#4C8DFF",
+  "生物": "#A78BFA",
+  "版本": "#22D3EE",
+};
+
+function buildQuizTag(cat) {
+  const label = cat || "综合";
+  const hex = QUIZ_CAT_COLORS[label] || "#4C8DFF";
+  return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="' + hex + '24">'
+    + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="' + hex + '" VerticalAlignment="Center"/>'
+    + '</Border>';
+}
+
 // 刷新按钮（兜底页复用）
 const REFRESH_BUTTON = '<local:MyIconTextButton Margin="0,24,0,0" Height="40" HorizontalAlignment="Center" Text="刷新页面" LogoScale="0.9" ColorType="Highlight" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />';
 
@@ -114,4 +132,4 @@ function buildFallbackXaml(title, message, eta, reason) {
     '</StackPanel>';
 }
 
-export { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml };
+export { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag };

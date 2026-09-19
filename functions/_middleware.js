@@ -9,11 +9,12 @@
 
 import {
   QUOTES, EGGS, COLORS, FORTUNE_GOOD, FORTUNE_BAD, FORTUNE_TIPS,
-  QUIZ, CHALLENGES, SEEDS, SCORE_COMMENTS,
+  CHALLENGES, SEEDS, SCORE_COMMENTS,
 } from './_lib/content.js';
+import { QUIZ } from './_lib/quiz.js';
 import { getFestival, buildFestivalBanner, buildCountdownXaml } from './_lib/lunar.js';
 import { fetchWeather } from './_lib/weather.js';
-import { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml } from './_lib/xaml.js';
+import { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag } from './_lib/xaml.js';
 import { buildMultiBanner, buildSingleBanner } from './_lib/banner.js';
 import { recordVisit } from './_lib/stats.js';
 import { kvGet, kvGetJson } from './_lib/kv.js';
@@ -237,8 +238,11 @@ export async function onRequest(context) {
       }
       const seedPicker = "选择种子|" + pickerSeeds.map((s, n) => (n + 1) + ". " + s.seed + " — " + s.desc).join("&#xA;");
 
-      // MC 知识题（IP+日期确定性）
-      const quiz = QUIZ[deterministicIndex(ip, today, "quiz", QUIZ.length)];
+      // MC 知识题（按 IP + 北京时间日期确定性抽取：同一玩家当天固定一题，不同玩家不同）
+      const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
+      const quiz = QUIZ[quizIdx];
+      const quizTag = buildQuizTag(quiz.cat);
+      const quizNo = "第 " + (quizIdx + 1) + " 题 / 共 " + QUIZ.length + " 题";
 
       // 节日 / 倒计时
       let extraFestivals = [];
@@ -284,6 +288,8 @@ export async function onRequest(context) {
         .replace(/__SEED_PICKER__/g, seedPicker)
         .replace(/__QUIZ_Q__/g, quiz.q)
         .replace(/__QUIZ_A__/g, quiz.a)
+        .replace(/<!--\s*__QUIZ_TAG__\s*-->|__QUIZ_TAG__/g, quizTag)
+        .replace(/__QUIZ_NO__/g, quizNo)
         .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
         .replace(/<!--\s*__WEATHER_BODY__\s*-->|__WEATHER_BODY__/g, weatherBody)
         .replace(/<!--\s*__COUNTDOWN_BODY__\s*-->|__COUNTDOWN_BODY__/g, countdownBody)

@@ -273,6 +273,14 @@ function loginPage(hasTried) {
     from { opacity:0; transform: translateY(20px) scale(.96); }
     to   { opacity:1; transform: translateY(0) scale(1); }
   }
+  .login-logo {
+    width:62px; height:62px; margin:0 auto 18px; border-radius:17px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; color:#fff;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 10px 26px rgba(255,68,68,.4);
+    animation: popIn .5s cubic-bezier(.2,.8,.2,1) both;
+  }
   h1 { font-size:20px; margin:0 0 24px; text-align:center; color:var(--accent); letter-spacing:.5px; }
   input {
     width:100%; padding:13px 14px; border:1px solid var(--card-border); border-radius:10px;
@@ -315,6 +323,7 @@ function loginPage(hasTried) {
   <div class="top-band" aria-hidden="true"></div>
   <button class="theme-toggle" id="themeBtn" title="切换主题">🌙</button>
   <div class="box">
+    <div class="login-logo">🔒</div>
     <h1>管理员登录</h1>
     <form method="post">
       <input type="password" name="pwd" placeholder="请输入密码" autofocus autocomplete="current-password">
@@ -1091,21 +1100,37 @@ export async function onRequest(context) {
     transition: transform .3s, border-color .3s, box-shadow .3s, background .4s;
     animation: fadeUp .6s cubic-bezier(.2,.8,.2,1) both;
   }
-  .card:nth-child(1) { animation-delay:.05s; }
-  .card:nth-child(2) { animation-delay:.12s; }
-  .card:nth-child(3) { animation-delay:.19s; }
+  .card:nth-child(1) { animation-delay:.05s; --cc:#5b9dff; --cc-bg:rgba(91,157,255,.15); }
+  .card:nth-child(2) { animation-delay:.12s; --cc:#17DD62; --cc-bg:rgba(23,221,98,.15); }
+  .card:nth-child(3) { animation-delay:.19s; --cc:#a78bfa; --cc-bg:rgba(167,139,250,.17); }
+  .card:nth-child(4) { animation-delay:.26s; --cc:#FFB020; --cc-bg:rgba(255,176,32,.17); }
+  .card:nth-child(5) { animation-delay:.33s; --cc:#FF5555; --cc-bg:rgba(255,85,85,.17); }
+  .card::before {
+    content:""; position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--cc), transparent 78%);
+    opacity:0; transition: opacity .3s;
+  }
   .card:hover {
     transform: translateY(-4px);
-    border-color: rgba(255,68,68,.3);
-    box-shadow: var(--shadow-card), 0 0 0 1px rgba(255,68,68,.1);
+    border-color: var(--cc);
+    box-shadow: var(--shadow-card), 0 10px 28px var(--cc-bg);
   }
+  .card:hover::before { opacity:1; }
+  .card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .card .label {
-    font-size:12px; color: var(--text-dim); margin-bottom:10px;
+    font-size:12px; color: var(--text-dim);
     letter-spacing:.5px; text-transform:uppercase;
   }
+  .card .ico {
+    width:38px; height:38px; border-radius:10px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; background: var(--cc-bg); line-height:1;
+    transition: transform .3s;
+  }
+  .card:hover .ico { transform: scale(1.08) rotate(-5deg); }
   .card .value {
     font-size:36px; font-weight:700; font-variant-numeric: tabular-nums;
-    background: linear-gradient(135deg, var(--text-strong), var(--accent-2));
+    background: linear-gradient(135deg, var(--text-strong), var(--cc));
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height:1.1;
@@ -1401,23 +1426,23 @@ export async function onRequest(context) {
 
     <div class="cards">
       <div class="card">
-        <div class="label">总计访问</div>
+        <div class="card-top"><div class="label">总计访问</div><div class="ico">👥</div></div>
         <div class="value" data-count="${escapeHtml(total)}">0</div>
       </div>
       <div class="card">
-        <div class="label">今日人数</div>
+        <div class="card-top"><div class="label">今日人数</div><div class="ico">🔥</div></div>
         <div class="value" data-count="${days[0]?.count || 0}">0</div>
       </div>
       <div class="card">
-        <div class="label">独立 IP 数</div>
+        <div class="card-top"><div class="label">独立 IP 数</div><div class="ico">🌐</div></div>
         <div class="value" data-count="${entries.length}">0</div>
       </div>
       <div class="card">
-        <div class="label">近7天峰值</div>
+        <div class="card-top"><div class="label">近7天峰值</div><div class="ico">📈</div></div>
         <div class="value" data-count="${maxDay}">0</div>
       </div>
       <div class="card">
-        <div class="label">封禁 IP 数</div>
+        <div class="card-top"><div class="label">封禁 IP 数</div><div class="ico">🚫</div></div>
         <div class="value" data-count="${blockCount}">0</div>
       </div>
     </div>
