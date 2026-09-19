@@ -132,7 +132,7 @@ export async function onRequest(context) {
     // 封禁检查
     if (ip && ip !== 'unknown') {
       let blockList = {};
-      try { blockList = JSON.parse(blockRaw || '{}'); } catch (e) { /* 封禁列表损坏则放行 */ }
+      try { blockList = JSON.parse(blockRaw || '{}'); } catch (e) { console.error('[Middleware] 封禁列表解析失败，本次放行：', e); }
       if (blockList[ip]) {
         return xamlResponse(buildFallbackXaml('访问被拒绝', '你的 IP 已被管理员禁止访问本主页。'));
       }
@@ -269,7 +269,7 @@ export async function onRequest(context) {
         .replace(/__DATE_DAY__/g, date.day)
         .replace(/__DATE_WEEKDAY__/g, date.weekday)
         .replace(/__GREETING__/g, date.greeting)
-        .replace(/__USER_IP__/g, ip)
+        .replace(/__USER_IP__/g, escapeXaml(ip))
         .replace(/__LUCKY_NUMBER__/g, String(num))
         .replace(/__LUCKY_COLOR_NAME__/g, color.name)
         .replace(/__LUCKY_COLOR_HEX__/g, color.hex)

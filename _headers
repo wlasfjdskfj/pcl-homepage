@@ -1,3 +1,9 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
+  X-Frame-Options: DENY
+
 /music/music.json
   Cache-Control: public, max-age=60, s-maxage=60
 
