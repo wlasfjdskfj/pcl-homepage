@@ -307,7 +307,6 @@
                 <local:CustomEventService.Events>
                     <local:CustomEventCollection>
                         <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
-                        <local:CustomEvent Type="刷新页面" Data="-" />
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>

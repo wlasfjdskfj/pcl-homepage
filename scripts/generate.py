@@ -758,7 +758,6 @@ def build_panel_xaml(server_list):
     p.append('                <local:CustomEventService.Events>')
     p.append('                    <local:CustomEventCollection>')
     p.append('                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />')
-    p.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
     p.append('                    </local:CustomEventCollection>')
     p.append('                </local:CustomEventService.Events>')
     p.append('            </local:MyIconTextButton>')
