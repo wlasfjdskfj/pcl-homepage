@@ -113,7 +113,7 @@
                             <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
                         </StackPanel>
                     </Grid>
-                    <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />
+                    <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -156,7 +156,7 @@
             </Border>
             <TextBlock Text="最新快照：26.3" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,14" />
             <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
+            <Border Height="1" Margin="0,0,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
                 <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
                 <StackPanel Orientation="Horizontal">
@@ -234,7 +234,7 @@
             </Grid>
             <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="__COMMENT__" />
             <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />
+            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel Orientation="Horizontal">
                     <local:MyImage Width="36" Height="36" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
@@ -255,7 +255,7 @@
                 <local:MyIconTextButton Grid.Column="1" Margin="4,0,4,0" Height="38" Text="换一个" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
                 <local:MyIconTextButton Grid.Column="2" Margin="4,0,0,0" Height="38" Text="更多" LogoScale="0.9" Logo="M256 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M512 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M768 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z" EventType="弹出窗口" EventData="__SEED_PICKER__" />
             </Grid>
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />
+            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True">
                 <Grid>
                     <Border>
@@ -269,7 +269,7 @@
                             <TextBlock Text="本次挑战" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#CCFF5555" CornerRadius="10" Padding="10,4,10,4">
+                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#80000000" CornerRadius="10" Padding="10,4,10,4">
                         <TextBlock Text="__CHALLENGE_DIFF__" FontSize="10" FontWeight="Bold" Foreground="White" />
                     </Border>
                     <TextBlock Text="__CHALLENGE__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />
@@ -287,7 +287,7 @@
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
             <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />
+            <Border Height="1" Margin="0,0,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
@@ -547,7 +547,7 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
-            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,16,0,16" />
+            <Border Height="1" Margin="0,16,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
                 <StackPanel Orientation="Horizontal">
                     <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />
