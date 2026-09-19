@@ -631,9 +631,7 @@ def build_xaml():
 
     clean_old_images()
 
-    # Hero 门面图：不在生成时固定，写入占位符，由中间件按北京时间日期
-    # 从 images/hero/ 的 MC 场景图库中每日轮换（新增图片只需在中间件 HERO_FILES 加文件名）
-    wallpaper_url = "__HERO_IMAGE__"
+    wallpaper_url = fetch_bing_wallpaper()
 
     manifest = fetch_version_manifest()
     ver = fetch_latest_version(manifest)
