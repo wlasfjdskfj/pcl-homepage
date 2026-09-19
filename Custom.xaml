@@ -170,7 +170,7 @@
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.1.1" Info="2026-04-01 · 171 天前" EventType="弹出窗口" EventData="26.1.1 更新总结|该版本暂未抓取到中文更新日志，可到 Minecraft Wiki 查看原文。" />
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.1" Info="2026-03-24 · 179 天前" EventType="弹出窗口" EventData="26.1 更新总结|【新内容】&#xA;· 一种新的花，可用于阻止幼年动物成长。&#xA;· 对已被阻止成长的幼年动物使用时，将使其重新开始成长。&#xA;· 无法对幼年僵尸马和幼年骷髅马使用。&#xA;· 使用时会在该生物周围释放绿色粒子，向下表示停止生长，向上表示恢复生长。&#xA;· 使用1个蒲公英和8个金粒合成。&#xA;· 可用于合成黄色染料。&#xA;· 可用于合成谜之炖菜，给予玩家饱和效果。&#xA;· 可放入花盆中。&#xA;· 加入了新的音色“小号”（Trumpet），对应的乐器方块为铜块、雕纹铜块、切制铜块、切制铜楼梯、切制铜台阶及其氧化和涂蜡变种。&#xA;· 加入了合成配方，即用1张纸和1个任意金属颗粒合成1个命名牌：&#xA;· 加入了新的成年音效变种：&#xA;· 原先的音效变种被称为classic。&#xA;· 已有生物的音效变种会是所有变种中的随机一种。&#xA;· 所有变种均有独特的喂食音效。&#xA;· 新的命令，允许手臂摆动。&#xA;· 并非所有实体都支持摆动，命令可能会返回成功，但客户端只会在允许的情况下显示动画。&#xA;· 例如，这可以使玩家模型摆动手臂。&#xA;· 返回实体的数量。&#xA;· 加入了entity子命令，用于输出世界中实体的档案信息。&#xA;· 如果选中的实体没有档案（目前只有玩家和玩家模型有），命令会执行失败。&#xA;【更改】&#xA;· 圣诞节期间不再使用圣诞节礼物纹理。&#xA;· 更改了顶面纹理以匹配基岩版。&#xA;· 现在装有的水是透明的。&#xA;· 现在当滴水石锥附着于下表面的滴水石块上方为含水方块时，下方的滴水石锥可以生长。&#xA;· 现在石头可在切石机中直接制作圆石及其不同形状的变种。&#xA;· 现在深板岩可在切石机中直接制作深板岩圆石、磨制深板岩、深板岩砖、深板岩瓦、雕纹深板岩以及它们不同形状的变种。&#xA;· 现在幼年人形生物拥有独特的盔甲模型。&#xA;· 幼年人形生物装备的盔甲不再会渲染盔甲纹饰。&#xA;· 更改了矛冲锋攻击使受击者脱离骑乘状态的速度阈值，以匹配基岩版。&#xA;· 更改了幼年个体的纹理和模型。&#xA;· 为幼年个体加入了单独的音效。&#xA;· 幼年狼身上的狼铠现在不再渲染。&#xA;· 幼年猪身上的鞍现在不再渲染。&#xA;· 更改了纹理和模型。&#xA;· 现在拥有了新动画。&#xA;· 为幼年美西螈加入了装死的动画。&#xA;· 幼年骆驼身上的鞍现在不再渲染。&#xA;· 现在会跟随骑乘鹦鹉螺的玩家，以匹配基岩版。&#xA;· 现在骑乘在红色纹理炽足兽上的炽足兽也会是红色纹理，以匹配基岩版。&#xA;· 调整了幼年个体的边界箱以匹配其新模型。&#xA;【更改（实验性）】&#xA;· 大师等级的图书管理员不再出售命名牌。&#xA;· 大师等级的图书管理员现在会以3个绿宝石的价格出售红色蜡烛或黄色蜡烛。&#xA;· 从战利品表中移除了命名牌。&#xA;· 移除了下列标签：&#xA;· trades/jungle_special&#xA;· trades/plains_special&#xA;· trades/savanna_special&#xA;· trades/snow_special&#xA;· trades/swamp_special&#xA;· trades/taiga_special&#xA;· 移除了所有实验性的魔咒提供器。" />
             <local:MyHint Theme="Blue" Margin="0,6,0,10" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />
-            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Bookshelf.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.xaml" />
+            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.xaml" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
@@ -557,7 +557,7 @@
                         <Grid Margin="18,0,18,0">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                                 <Border Width="4" Height="20" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />
-                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />
+                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                                 <TextBlock Text="每日一题" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                             </StackPanel>
                             <!-- __QUIZ_TAG__ -->

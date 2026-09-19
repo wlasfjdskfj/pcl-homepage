@@ -937,7 +937,7 @@ def build_xaml():
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,10" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Bookshelf.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.xaml" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.xaml" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -1183,7 +1183,7 @@ def build_xaml():
     lines.append('                        <Grid Margin="18,0,18,0">')
     lines.append('                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">')
     lines.append('                                <Border Width="4" Height="20" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />')
-    lines.append('                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Bookshelf.png" />')
+    lines.append('                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
     lines.append('                                <TextBlock Text="每日一题" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />')
     lines.append('                            </StackPanel>')
     lines.append('                            <!-- ' + quiz_tag + ' -->')
