@@ -14,7 +14,7 @@ import {
 import { QUIZ } from './_lib/quiz.js';
 import { getFestival, buildFestivalBanner, buildCountdownXaml } from './_lib/lunar.js';
 import { fetchWeather } from './_lib/weather.js';
-import { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag } from './_lib/xaml.js';
+import { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent } from './_lib/xaml.js';
 import { buildMultiBanner, buildSingleBanner } from './_lib/banner.js';
 import { recordVisit } from './_lib/stats.js';
 import { kvGet, kvGetJson } from './_lib/kv.js';
@@ -216,6 +216,12 @@ export async function onRequest(context) {
       const score = deterministicIndex(ip, today, "score", 100) + 1;
       const info = getScoreInfo(score);
       const scoreBar = buildScoreBar(score);
+      let scoreColor;
+      if (score >= 95) scoreColor = "#FFD34D";
+      else if (score >= 80) scoreColor = "#17DD62";
+      else if (score >= 60) scoreColor = "#4C8DFF";
+      else if (score >= 40) scoreColor = "#FFB020";
+      else scoreColor = "#FF5555";
 
       // 幸运颜色
       const color = COLORS[deterministicIndex(ip, today, "color", COLORS.length)];
@@ -242,6 +248,8 @@ export async function onRequest(context) {
       const quizIdx = deterministicIndex(ip, today, "quiz", QUIZ.length);
       const quiz = QUIZ[quizIdx];
       const quizTag = buildQuizTag(quiz.cat);
+      const quizBg = buildQuizBg(quiz.cat);
+      const quizAccentHex = quizAccent(quiz.cat);
       const quizNo = "第 " + (quizIdx + 1) + " 题 / 共 " + QUIZ.length + " 题";
 
       // 节日 / 倒计时
@@ -275,6 +283,7 @@ export async function onRequest(context) {
         .replace(/__SERVER_ADDR__/g, serverAddrSafe)
         .replace(/__SERVER_EMAIL__/g, serverEmailSafe)
         .replace(/__SCORE__/g, String(score))
+        .replace(/__SCORE_COLOR__/g, scoreColor)
         .replace(/__COMMENT__/g, info.comment)
         .replace(/__GRADE__/g, info.grade)
         .replace(/<!--\s*__SCORE_BAR__\s*-->|__SCORE_BAR__/g, scoreBar)
@@ -289,6 +298,8 @@ export async function onRequest(context) {
         .replace(/__QUIZ_Q__/g, quiz.q)
         .replace(/__QUIZ_A__/g, quiz.a)
         .replace(/<!--\s*__QUIZ_TAG__\s*-->|__QUIZ_TAG__/g, quizTag)
+        .replace(/<!--\s*__QUIZ_BG__\s*-->|__QUIZ_BG__/g, quizBg)
+        .replace(/__QUIZ_ACCENT__/g, quizAccentHex)
         .replace(/__QUIZ_NO__/g, quizNo)
         .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
         .replace(/<!--\s*__WEATHER_BODY__\s*-->|__WEATHER_BODY__/g, weatherBody)

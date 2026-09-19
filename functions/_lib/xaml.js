@@ -58,12 +58,22 @@ const QUIZ_CAT_COLORS = {
   "版本": "#22D3EE",
 };
 
+function quizAccent(cat) {
+  return QUIZ_CAT_COLORS[cat] || "#4C8DFF";
+}
+
 function buildQuizTag(cat) {
   const label = cat || "综合";
-  const hex = QUIZ_CAT_COLORS[label] || "#4C8DFF";
+  const hex = quizAccent(label);
   return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="' + hex + '24">'
     + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="' + hex + '" VerticalAlignment="Center"/>'
     + '</Border>';
+}
+
+// 每日一题整卡背景：分类色淡彩 SolidColorBrush（约 7% 透明度，浅/深主题都协调）
+function buildQuizBg(cat) {
+  const hex = quizAccent(cat);
+  return '<SolidColorBrush Color="#12' + hex.slice(1) + '"/>';
 }
 
 // 刷新按钮（兜底页复用）
@@ -132,4 +142,4 @@ function buildFallbackXaml(title, message, eta, reason) {
     '</StackPanel>';
 }
 
-export { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag };
+export { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent, QUIZ_CAT_COLORS };
