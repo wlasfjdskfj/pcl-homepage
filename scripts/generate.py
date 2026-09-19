@@ -597,6 +597,37 @@ def escape_xaml_attr(text):
 
 # ============ XAML 生成 ============
 
+def build_panel_xaml(archive_releases, version_changelogs):
+    """构建"历史版本更新日志"子页面（PCL"打开帮助"事件加载；独立 StackPanel 需自带命名空间）。"""
+    p = []
+    p.append('<StackPanel Margin="0,-10,0,0"')
+    p.append('    xmlns:sys="clr-namespace:System;assembly=mscorlib"')
+    p.append('    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"')
+    p.append('    xmlns:local="clr-namespace:PCL;assembly=Plain Craft Launcher 2">')
+    p.append('    <local:MyCard Title="历史版本更新日志" Margin="0,0,0,12">')
+    p.append('        <StackPanel Margin="20,16,20,18">')
+    p.append('            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="收录最近的正式版，点击任意版本查看其中文更新总结。" />')
+    if archive_releases:
+        for rel in archive_releases:
+            ver = rel["version"]
+            days = rel["days_ago"]
+            if days == 0:
+                ago = "今天"
+            elif days == 1:
+                ago = "昨天"
+            else:
+                ago = str(days) + " 天前"
+            info_text = rel["date"] + " · " + ago
+            popup = _changelog_popup_data(ver, version_changelogs.get(ver))
+            p.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 ' + ver + '" Info="' + info_text + '" EventType="弹出窗口" EventData="' + popup + '" />')
+    else:
+        p.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
+    p.append('        </StackPanel>')
+    p.append('    </local:MyCard>')
+    p.append('</StackPanel>')
+    return "\n".join(p) + "\n"
+
+
 def build_xaml():
     now = datetime.now()
     month = "__DATE_MONTH__"
@@ -666,9 +697,11 @@ def build_xaml():
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     recent_releases = fetch_recent_releases(5, manifest)
-    # 汇总需要抓更新总结的版本：主版本卡片 + 最近正式版，去重后并发抓取
+    # 历史版本面板（"打开帮助"子页面）展示更多正式版
+    archive_releases = fetch_recent_releases(18, manifest)
+    # 汇总需要抓更新总结的版本：历史面板 + 主版本卡片，去重后并发抓取
     changelog_versions = []
-    for _rel in (recent_releases or []):
+    for _rel in (archive_releases or recent_releases or []):
         _ver = _rel["version"]
         if _ver not in changelog_versions:
             changelog_versions.append(_ver)
@@ -677,7 +710,7 @@ def build_xaml():
     version_changelogs = {}
     if changelog_versions:
         from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=min(6, len(changelog_versions))) as _ex:
+        with ThreadPoolExecutor(max_workers=min(8, len(changelog_versions))) as _ex:
             _results = list(_ex.map(fetch_wiki_changelog, changelog_versions))
         version_changelogs = dict(zip(changelog_versions, _results))
     wiki_changelog = version_changelogs.get(main_version)
@@ -903,7 +936,8 @@ def build_xaml():
     else:
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,10" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Bookshelf.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.xaml" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -1205,16 +1239,22 @@ def build_xaml():
 
     lines.append('</StackPanel>')
 
-    return "\n".join(lines) + "\n"
+    panel_xaml = build_panel_xaml(archive_releases, version_changelogs)
+
+    return "\n".join(lines) + "\n", panel_xaml
 
 
 def main():
     base_dir = Path(__file__).resolve().parent.parent
     output = base_dir / "Custom.xaml"
 
-    xaml = build_xaml()
+    xaml, panel_xaml = build_xaml()
     output.write_text(xaml, encoding="utf-8")
     print("已生成：" + str(output))
+
+    panel_output = base_dir / "panel.xaml"
+    panel_output.write_text(panel_xaml, encoding="utf-8")
+    print("已生成：" + str(panel_output))
 
     version_file = base_dir / "Custom.xaml.version"
     version_str = "0"
