@@ -9,8 +9,8 @@
                     <!-- __QUIZ_BG__ -->
                 </Border.Background>
                 <StackPanel>
-                    <Grid Height="150">
-                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <Grid Height="150" ClipToBounds="True">
+                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Center" Stretch="UniformToFill" />
                         <Border>
                             <Border.Background>
                                 <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
