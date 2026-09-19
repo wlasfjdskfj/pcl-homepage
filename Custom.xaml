@@ -210,7 +210,10 @@
                     </Border.Background>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                            <Path Data="M180 540l120 120 240-240" Stroke="#17DD62" StrokeThickness="40" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0" />
+                            <Grid Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center">
+                                <Ellipse Fill="#17DD62" />
+                                <Path Data="M382 732L160 510l-72 72 294 294 576-576-72-72z" Fill="White" Stretch="Uniform" Margin="4" />
+                            </Grid>
                             <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#17DD62" VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock Text="__FORTUNE_GOOD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#17DD62" />
@@ -225,7 +228,10 @@
                     </Border.Background>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,6">
-                            <Path Data="M200 200 L800 800 M800 200 L200 800" Stroke="#FF5555" StrokeThickness="40" StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="14" Height="14" Stretch="Uniform" Margin="0,0,6,0" />
+                            <Grid Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center">
+                                <Ellipse Fill="#FF5555" />
+                                <Path Data="M712 256L512 456 312 256l-56 56 200 200-200 200 56 56 200-200 200 200 56-56-200-200 200-200z" Fill="White" Stretch="Uniform" Margin="4" />
+                            </Grid>
                             <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#FF5555" VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock Text="__FORTUNE_BAD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#FF5555" />
