@@ -394,8 +394,8 @@ export async function onRequest(context) {
         if (serverCfg.email) serverEmail = String(serverCfg.email);
       }
 
-      // 彩蛋（每次打开面板随机）
-      const egg = pickRandom(EGGS);
+      // 彩蛋（IP + 北京时间日期确定性：每天每个 IP 一条，次日自动换新）
+      const egg = EGGS[deterministicIndex(ip, today, "egg", EGGS.length)];
       const eggData = egg.title + '|' + egg.content;
 
       panel = panel
