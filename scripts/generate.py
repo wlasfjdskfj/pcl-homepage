@@ -12,6 +12,7 @@ PCL 主页生成脚本
 
 import time
 import re
+import json
 import requests
 from datetime import datetime
 from pathlib import Path
@@ -937,7 +938,7 @@ def build_xaml():
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
     lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,10" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.xaml" />')
+    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.json" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -1255,6 +1256,14 @@ def main():
     panel_output = base_dir / "panel.xaml"
     panel_output.write_text(panel_xaml, encoding="utf-8")
     print("已生成：" + str(panel_output))
+
+    panel_meta = json.dumps(
+        {"Title": "历史版本更新日志", "Description": "Minecraft Java 版最近正式版的中文更新总结"},
+        ensure_ascii=False,
+    )
+    panel_json = base_dir / "panel.json"
+    panel_json.write_text(panel_meta, encoding="utf-8")
+    print("已生成：" + str(panel_json))
 
     version_file = base_dir / "Custom.xaml.version"
     version_str = "0"

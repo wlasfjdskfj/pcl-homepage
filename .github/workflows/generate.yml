@@ -49,6 +49,7 @@ jobs:
           git add Custom.xaml
           git add Custom.xaml.version || true
           git add panel.xaml || true
+          git add panel.json || true
           git add images/ || true
           if git diff --staged --quiet; then
             echo "内容无变化，跳过提交"
