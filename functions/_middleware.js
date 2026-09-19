@@ -143,11 +143,12 @@ export async function onRequest(context) {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
     // 2.1 第一批：封禁 + 维护（决定是否直接拦截，4 个 KV 并行读）
-    const [blockRaw, maintRaw, maintEta, maintReason] = await Promise.all([
+    const [blockRaw, maintRaw, maintEta, maintReason, maintWlRaw] = await Promise.all([
       kvGet(env, 'block:list', '{}'),
       kvGet(env, 'maint_mode_live', ''),
       kvGet(env, 'maint_eta', ''),
       kvGet(env, 'maint_reason', ''),
+      kvGet(env, 'maint_whitelist', '{}'),
     ]);
 
     // 封禁检查
@@ -158,8 +159,10 @@ export async function onRequest(context) {
         return xamlResponse(buildFallbackXaml('访问被拒绝', '你的 IP 已被管理员禁止访问本主页。'));
       }
     }
-    // 维护模式
-    if (maintRaw && maintRaw !== '0') {
+    // 维护模式（白名单 IP 放行，方便管理员维护期间查看；后台 /admin 始终可访问）
+    let maintWhitelist = {};
+    try { maintWhitelist = JSON.parse(maintWlRaw || '{}'); } catch (e) { console.error('[Middleware] 维护白名单解析失败：', e); }
+    if (maintRaw && maintRaw !== '0' && !(ip && maintWhitelist[ip])) {
       return maintenanceResponse(maintEta, maintReason);
     }
 

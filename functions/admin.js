@@ -619,6 +619,20 @@ export async function onRequest(context) {
           } else {
             await env.HOMEPAGE_KV.put('maint_mode_live', '0');
           }
+        } else if (action === "maintwladd") {
+          const wlip = String(form.get("ip") || "").trim() || (request.headers.get("CF-Connecting-IP") || "").trim();
+          if (wlip) {
+            const wl = JSON.parse((await env.HOMEPAGE_KV.get('maint_whitelist')) || '{}');
+            wl[wlip] = Date.now();
+            await env.HOMEPAGE_KV.put('maint_whitelist', JSON.stringify(wl));
+          }
+        } else if (action === "maintwldel") {
+          const wlip = String(form.get("ip") || "").trim();
+          if (wlip) {
+            const wl = JSON.parse((await env.HOMEPAGE_KV.get('maint_whitelist')) || '{}');
+            delete wl[wlip];
+            await env.HOMEPAGE_KV.put('maint_whitelist', JSON.stringify(wl));
+          }
         } else if (action === "banner") {
           const text = String(form.get("text") || "").trim();
           const on = form.get("on") === "0" ? false : true;
@@ -753,6 +767,7 @@ export async function onRequest(context) {
       countdownRaw,
       festivalsRaw,
       bannersRaw,
+      maintWlRaw,
     ] = await Promise.all([
       env.HOMEPAGE_KV.get("block:list"),
       env.HOMEPAGE_KV.get("weather_version"),
@@ -765,6 +780,7 @@ export async function onRequest(context) {
       env.HOMEPAGE_KV.get("custom_countdown"),
       env.HOMEPAGE_KV.get("custom_festivals"),
       env.HOMEPAGE_KV.get("banners"),
+      env.HOMEPAGE_KV.get("maint_whitelist"),
     ]);
 
     // KV 键列表（用于存储管理）
@@ -821,6 +837,15 @@ export async function onRequest(context) {
     const maintOn = !!(maintMode && maintMode !== "0");
     const maintEta = maintEtaRaw || "";
     const maintReason = maintReasonRaw || "";
+    let maintWhitelist = {};
+    try { maintWhitelist = JSON.parse(maintWlRaw || "{}"); } catch { maintWhitelist = {}; }
+    const myIp = (request.headers.get("CF-Connecting-IP") || "").trim();
+    const myIpWhitelisted = !!(myIp && maintWhitelist[myIp]);
+    const maintWlRows = Object.keys(maintWhitelist).length
+      ? Object.entries(maintWhitelist).map(([wip, t]) =>
+          `<li class="block-item"><span class="block-ip">${escapeHtml(wip)}${wip === myIp ? ' <span style="color:#17DD62;">（你）</span>' : ''}</span><span class="block-time">${escapeHtml(new Date(t).toLocaleString('zh-CN'))}</span><form method="post" class="inline-form"><input type="hidden" name="action" value="maintwldel"><input type="hidden" name="ip" value="${escapeHtml(wip)}"><button type="submit" class="btn btn-ghost btn-sm">移除</button></form></li>`
+        ).join("")
+      : '<li class="empty-block">暂无放行 IP</li>';
     let bannerText = "", bannerOn = false;
     try {
       const b = JSON.parse(bannerRaw || "{}");
@@ -900,7 +925,7 @@ export async function onRequest(context) {
         ).join("")
       : '<li class="empty-block">暂无封禁 IP</li>';
 
-    const kvSafe = new Set(["block:list","weather_version","maint_mode_live","maint_eta","maint_reason","homepage_banner","server_cfg","quote_custom","custom_countdown","custom_festivals","banners","d1_last_cleanup"]);
+    const kvSafe = new Set(["block:list","weather_version","maint_mode_live","maint_eta","maint_reason","maint_whitelist","homepage_banner","server_cfg","quote_custom","custom_countdown","custom_festivals","banners","d1_last_cleanup"]);
     const kvRows = kvKeys.length
       ? kvKeys.map((key) =>
           '<tr><td class="ip-text">' + escapeHtml(key) + '</td><td style="text-align:right;">'
@@ -1644,6 +1669,16 @@ export async function onRequest(context) {
           <input type="hidden" name="on" value="0">
           <button type="submit" class="btn btn-ghost">关闭</button>
         </form>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--card-border);">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:6px;line-height:1.7;">🚪 维护期间<b>白名单</b>：仅这些 IP 能看到正常主页，其他人看到更新页（后台 /admin 始终可访问，不会被锁在外面）。</div>
+          <div style="font-size:12px;margin-bottom:6px;">你的当前 IP：<b>${escapeHtml(myIp) || '未知'}</b>${myIpWhitelisted ? ' <span style="color:#17DD62;">已放行 ✓</span>' : ''}</div>
+          <form method="post" style="margin-bottom:8px;">
+            <input type="hidden" name="action" value="maintwladd">
+            <input type="hidden" name="ip" value="${escapeHtml(myIp)}">
+            <button type="submit" class="btn btn-ghost btn-sm"${myIpWhitelisted ? ' disabled' : ''}>＋ 维护期间允许我访问</button>
+          </form>
+          <ul class="block-list">${maintWlRows}</ul>
+        </div>
       </div>
       <div class="manage-card">
         <div class="manage-title">🗄 KV 存储</div>
