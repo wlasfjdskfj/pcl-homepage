@@ -23,25 +23,23 @@ function buildChallengeBg(diff) {
     + '</LinearGradientBrush>';
 }
 
-// 人品分数条（10 格，红→黄→绿）
+// 人品分数配色（SSR 金 / SR 绿 / R 蓝 / N 琥珀 / N-- 红），进度条、分数、评级统一用
+function scoreColor(score) {
+  if (score >= 95) return '#FFD34D';
+  if (score >= 80) return '#17DD62';
+  if (score >= 60) return '#4C8DFF';
+  if (score >= 40) return '#FFB020';
+  return '#FF5555';
+}
+
+// 人品分数条（10 格，填充格统一使用当前分数等级色，空格灰色，避免高分却显示一片红）
 function buildScoreBar(score) {
   const blocks = 10;
   const filled = Math.floor(score / 10);
+  const color = scoreColor(score);
   let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
   for (let i = 0; i < blocks; i++) {
-    let bg;
-    if (i >= filled) {
-      bg = '{DynamicResource ColorBrush7}';
-    } else {
-      const pos = i / blocks;
-      if (pos < 0.4) {
-        bg = '#FF6B6B';
-      } else if (pos < 0.7) {
-        bg = '#FFC93C';
-      } else {
-        bg = '#4ADE80';
-      }
-    }
+    const bg = i >= filled ? '{DynamicResource ColorBrush7}' : color;
     bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
   }
   bar += '</StackPanel>';
@@ -142,4 +140,4 @@ function buildFallbackXaml(title, message, eta, reason) {
     '</StackPanel>';
 }
 
-export { escapeXaml, buildChallengeBg, buildScoreBar, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent, QUIZ_CAT_COLORS };
+export { escapeXaml, buildChallengeBg, buildScoreBar, scoreColor, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent, QUIZ_CAT_COLORS };
