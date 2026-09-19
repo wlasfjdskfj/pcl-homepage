@@ -63,7 +63,7 @@ function quizAccent(cat) {
 function buildQuizTag(cat) {
   const label = cat || "综合";
   const hex = quizAccent(label);
-  return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="' + hex + '24">'
+  return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#99000000">'
     + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="' + hex + '" VerticalAlignment="Center"/>'
     + '</Border>';
 }

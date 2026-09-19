@@ -294,7 +294,7 @@ export async function onRequest(context) {
         .replace(/__DATE_DAY__/g, date.day)
         .replace(/__DATE_WEEKDAY__/g, date.weekday)
         .replace(/__GREETING__/g, date.greeting)
-        .replace(/__HERO_IMAGE__/g, heroUrl)
+        .replace(/__QUIZ_IMAGE__/g, heroUrl)
         .replace(/__USER_IP__/g, escapeXaml(ip))
         .replace(/__LUCKY_NUMBER__/g, String(num))
         .replace(/__LUCKY_COLOR_NAME__/g, color.name)
