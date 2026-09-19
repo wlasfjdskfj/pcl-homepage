@@ -612,7 +612,7 @@ def build_panel_xaml(server_list):
     p.append('    <local:MyCard Title="MC 知识" Margin="0,0,0,12">')
     p.append('        <StackPanel Margin="25,40,23,20">')
     p.append('            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">')
-    p.append('                <Grid Height="200" ClipToBounds="True">')
+    p.append('                <Grid Height="260" ClipToBounds="True">')
     p.append('                    <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Center" Stretch="UniformToFill" />')
     p.append('                    <Border>')
     p.append('                        <Border.Background>')

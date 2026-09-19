@@ -5,7 +5,7 @@
     <local:MyCard Title="MC 知识" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,20">
             <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
-                <Grid Height="200" ClipToBounds="True">
+                <Grid Height="260" ClipToBounds="True">
                     <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Center" Stretch="UniformToFill" />
                     <Border>
                         <Border.Background>
