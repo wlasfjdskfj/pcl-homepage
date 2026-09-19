@@ -53,7 +53,18 @@ HEADERS = {
 
 # ============ 版本信息获取 ============
 
-def fetch_latest_version():
+def fetch_version_manifest():
+    """拉取 Mojang 版本清单（latest + 全部版本元数据），失败返回 None。"""
+    try:
+        resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print("[Version] 版本清单请求失败：" + str(e))
+        return None
+
+
+def fetch_latest_version(manifest=None):
     default = {
         "release": "1.21",
         "snapshot": "",
@@ -65,9 +76,9 @@ def fetch_latest_version():
     }
 
     try:
-        resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
+        data = manifest if manifest is not None else fetch_version_manifest()
+        if not data:
+            raise ValueError("版本清单为空")
 
         latest = data.get("latest", {})
         default["release"] = latest.get("release", default["release"])
@@ -92,12 +103,12 @@ def fetch_latest_version():
 
 # ============ 最近 5 个正式版 ============
 
-def fetch_recent_releases(count=5):
+def fetch_recent_releases(count=5, manifest=None):
     """获取最近 N 个正式版（release），返回 [{version, date, days_ago}, ...]"""
     try:
-        resp = requests.get(VERSION_API, timeout=REQUEST_TIMEOUT, headers=HEADERS)
-        resp.raise_for_status()
-        data = resp.json()
+        data = manifest if manifest is not None else fetch_version_manifest()
+        if not data:
+            raise ValueError("版本清单为空")
         versions = data.get("versions", [])
 
         today = datetime.now().date()
@@ -620,7 +631,8 @@ def build_xaml():
 
     wallpaper_url = fetch_bing_wallpaper()
 
-    ver = fetch_latest_version()
+    manifest = fetch_version_manifest()
+    ver = fetch_latest_version(manifest)
     release = ver["release"]
     snapshot = ver["snapshot"]
     release_date = ver["release_date"] if ver["release_date"] else now.strftime("%Y-%m-%d")
@@ -651,15 +663,22 @@ def build_xaml():
         else:
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
-    recent_releases = fetch_recent_releases(5)
-    wiki_changelog = fetch_wiki_changelog(main_version)
-    version_changelogs = {}
+    recent_releases = fetch_recent_releases(5, manifest)
+    # 汇总需要抓更新总结的版本：主版本卡片 + 最近正式版，去重后并发抓取
+    changelog_versions = []
     for _rel in (recent_releases or []):
         _ver = _rel["version"]
-        if _ver == main_version:
-            version_changelogs[_ver] = wiki_changelog
-        else:
-            version_changelogs[_ver] = fetch_wiki_changelog(_ver)
+        if _ver not in changelog_versions:
+            changelog_versions.append(_ver)
+    if main_version not in changelog_versions:
+        changelog_versions.append(main_version)
+    version_changelogs = {}
+    if changelog_versions:
+        from concurrent.futures import ThreadPoolExecutor
+        with ThreadPoolExecutor(max_workers=min(6, len(changelog_versions))) as _ex:
+            _results = list(_ex.map(fetch_wiki_changelog, changelog_versions))
+        version_changelogs = dict(zip(changelog_versions, _results))
+    wiki_changelog = version_changelogs.get(main_version)
     server_list = fetch_server_list()
 
     news_title = "当前最新版本 · " + main_version
@@ -800,7 +819,7 @@ def build_xaml():
     lines.append('                            <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Grid>')
-    lines.append('                    <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,12" />')
+    lines.append('                    <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
     lines.append('                    <Grid>')
     lines.append('                        <Grid.ColumnDefinitions>')
     lines.append('                            <ColumnDefinition Width="Auto" />')
@@ -855,7 +874,7 @@ def build_xaml():
 
     lines.append('            <TextBlock Text="最后更新 ' + main_date + '" FontSize="11" Foreground="#FFAA00" HorizontalAlignment="Right" Margin="0,0,0,14" />')
 
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+    lines.append('            <Border Height="1" Margin="0,0,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
 
     lines.append('            <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">')
     lines.append('                <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>')
@@ -953,7 +972,7 @@ def build_xaml():
     lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="' + comment + '" />')
     lines.append('            <local:MyHint Theme="Yellow" Text="小贴士：' + fortune_tip + '" />')
 
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />')
+    lines.append('            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
 
     lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel Orientation="Horizontal">')
@@ -976,7 +995,7 @@ def build_xaml():
     lines.append('                <local:MyIconTextButton Grid.Column="2" Margin="4,0,0,0" Height="38" Text="更多" LogoScale="0.9" Logo="M256 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M512 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M768 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z" EventType="弹出窗口" EventData="__SEED_PICKER__" />')
     lines.append('            </Grid>')
 
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,16" />')
+    lines.append('            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
 
     lines.append('            <Border CornerRadius="12" Height="160" Margin="0,0,0,14" ClipToBounds="True">')
     lines.append('                <Grid>')
@@ -991,7 +1010,7 @@ def build_xaml():
     lines.append('                            <TextBlock Text="本次挑战" FontSize="10" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />')
     lines.append('                        </StackPanel>')
     lines.append('                    </Border>')
-    lines.append('                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#CCFF5555" CornerRadius="10" Padding="10,4,10,4">')
+    lines.append('                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#80000000" CornerRadius="10" Padding="10,4,10,4">')
     lines.append('                        <TextBlock Text="' + challenge_diff + '" FontSize="10" FontWeight="Bold" Foreground="White" />')
     lines.append('                    </Border>')
     lines.append('                    <TextBlock Text="' + challenge + '" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="White" Margin="24,0" TextAlignment="Center" />')
@@ -1011,7 +1030,7 @@ def build_xaml():
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />')
     lines.append('            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />')
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,0,0,14" />')
+    lines.append('            <Border Height="1" Margin="0,0,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
     for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
         margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
         bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
@@ -1119,7 +1138,7 @@ def build_xaml():
     lines.append('                    </local:CustomEventCollection>')
     lines.append('                </local:CustomEventService.Events>')
     lines.append('            </local:MyIconTextButton>')
-    lines.append('            <Border Height="1" Background="{DynamicResource ColorBrush6}" Margin="0,16,0,16" />')
+    lines.append('            <Border Height="1" Margin="0,16,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
     lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
     lines.append('                <StackPanel Orientation="Horizontal">')
     lines.append('                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />')
