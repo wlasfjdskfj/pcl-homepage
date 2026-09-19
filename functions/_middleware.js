@@ -73,9 +73,17 @@ function getScoreInfo(score) {
 
 // ============ 响应工具 ============
 
+const BASE_SECURITY_HEADERS = {
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'no-referrer',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
+};
+
 const XAML_HEADERS = {
   'Content-Type': 'application/xml; charset=utf-8',
   'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  ...BASE_SECURITY_HEADERS,
 };
 
 const XAML_HEADERS_NO_STORE = {
@@ -85,6 +93,7 @@ const XAML_HEADERS_NO_STORE = {
   'Expires': '0',
   'CDN-Cache-Control': 'no-store',
   'Cloudflare-CDN-Cache-Control': 'no-store',
+  ...BASE_SECURITY_HEADERS,
 };
 
 function xamlResponse(body, headers) {

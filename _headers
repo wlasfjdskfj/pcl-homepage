@@ -7,5 +7,5 @@
 /music/music.json
   Cache-Control: public, max-age=60, s-maxage=60
 
-/music/*
+/music/*.mp3
   Cache-Control: public, max-age=604800, s-maxage=604800
