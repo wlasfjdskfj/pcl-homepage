@@ -2,6 +2,79 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:PCL;assembly=Plain Craft Launcher 2">
+    <local:MyCard Title="MC 知识" Margin="0,0,0,12">
+        <StackPanel Margin="25,40,23,20">
+            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
+                <Border.Background>
+                    <!-- __QUIZ_BG__ -->
+                </Border.Background>
+                <StackPanel>
+                    <Grid Height="150">
+                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                        <Border>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#80000000" Offset="0" />
+                                    <GradientStop Color="#33000000" Offset="0.45" />
+                                    <GradientStop Color="#B3000000" Offset="1" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <Grid Margin="18,0,18,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <Border Width="4" Height="22" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />
+                                <local:MyImage Width="22" Height="22" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                                <TextBlock Text="每日一题" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <!-- __QUIZ_TAG__ -->
+                        </Grid>
+                    </Grid>
+                    <StackPanel Margin="20,16,20,18">
+                        <TextBlock Text="__QUIZ_Q__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" LineHeight="26" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="今日专属 · __QUIZ_NO__" FontSize="10" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,12,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|__QUIZ_A__" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyIconTextButton>
+            <Border Height="1" Margin="0,18,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#5B21B6" Offset="0" />
+                        <GradientStop Color="#9333EA" Offset="0.5" />
+                        <GradientStop Color="#F59E0B" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Grid Margin="18,15">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="神秘彩蛋" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" />
+                        <TextBlock Text="每次点开都不一样，试试手气" FontSize="10" Foreground="#D9FFFFFF" Margin="0,4,0,0" />
+                    </StackPanel>
+                    <Grid Grid.Column="1" Width="46" Height="46" VerticalAlignment="Center">
+                        <Border CornerRadius="23" Background="#33FFFFFF" />
+                        <local:MyImage Width="30" Height="30" Source="pack://application:,,,/images/Blocks/Egg.png" />
+                    </Grid>
+                </Grid>
+            </Border>
+            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
+                <local:CustomEventService.Events>
+                    <local:CustomEventCollection>
+                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                    </local:CustomEventCollection>
+                </local:CustomEventService.Events>
+            </local:MyIconTextButton>
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="实用工具" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,20">
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
@@ -251,65 +324,6 @@
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
             <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="MC 知识" Margin="0,0,0,12">
-        <StackPanel Margin="25,40,23,20">
-            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
-                <Border.Background>
-                    <!-- __QUIZ_BG__ -->
-                </Border.Background>
-                <StackPanel>
-                    <Grid Height="108">
-                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
-                        <Border>
-                            <Border.Background>
-                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                    <GradientStop Color="#66000000" Offset="0" />
-                                    <GradientStop Color="#4D000000" Offset="0.5" />
-                                    <GradientStop Color="#B3000000" Offset="1" />
-                                </LinearGradientBrush>
-                            </Border.Background>
-                        </Border>
-                        <Grid Margin="18,0,18,0">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
-                                <Border Width="4" Height="20" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />
-                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                                <TextBlock Text="每日一题" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
-                            </StackPanel>
-                            <!-- __QUIZ_TAG__ -->
-                        </Grid>
-                    </Grid>
-                    <StackPanel Margin="20,16,20,18">
-                        <TextBlock Text="__QUIZ_Q__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" LineHeight="26" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="今日专属 · __QUIZ_NO__" FontSize="10" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,12,0,0" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|__QUIZ_A__" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyIconTextButton>
-            <Border Height="1" Margin="0,16,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
-            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">
-                <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="彩蛋" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="每次点开都不一样" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyIconTextButton>
         </StackPanel>
     </local:MyCard>
 </StackPanel>
