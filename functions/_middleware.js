@@ -61,6 +61,18 @@ function deterministicIndex(ip, date, salt, max) {
   return hashCode(ip + '|' + date + '|' + salt) % max;
 }
 
+// 每日轮换的 Hero 门面图（全局一致，按北京时间日期切换；新增图片只需把文件放进 images/hero/ 并在此加文件名）
+const HERO_FILES = [
+  "hero-01.jpg", "hero-02.jpg", "hero-03.jpg", "hero-04.jpg", "hero-05.jpg",
+  "hero-06.jpg", "hero-07.jpg", "hero-08.jpg", "hero-09.jpg", "hero-10.jpg",
+];
+const HERO_VERSION = "h1";
+function heroUrlFor(date, origin) {
+  const dayNumber = Math.floor(Date.UTC(Number(date.year), Number(date.month) - 1, Number(date.day)) / 86400000);
+  const idx = ((dayNumber % HERO_FILES.length) + HERO_FILES.length) % HERO_FILES.length;
+  return origin + "/images/hero/" + HERO_FILES[idx] + "?v=" + HERO_VERSION;
+}
+
 function getScoreInfo(score) {
   let grade, comments;
   if (score >= 95) { grade = "SSR"; comments = SCORE_COMMENTS.SSR; }
@@ -196,6 +208,7 @@ export async function onRequest(context) {
       const egg = pickRandom(EGGS);
       const date = getBeijingDate();
       const today = date.dateStr;
+      const heroUrl = heroUrlFor(date, url.origin);
 
       // 每日一言（后台自定义优先，支持 {date}/{weekday}/{year} 占位）
       let quote = pickRandom(QUOTES);
@@ -278,6 +291,7 @@ export async function onRequest(context) {
         .replace(/__DATE_DAY__/g, date.day)
         .replace(/__DATE_WEEKDAY__/g, date.weekday)
         .replace(/__GREETING__/g, date.greeting)
+        .replace(/__HERO_IMAGE__/g, heroUrl)
         .replace(/__USER_IP__/g, escapeXaml(ip))
         .replace(/__LUCKY_NUMBER__/g, String(num))
         .replace(/__LUCKY_COLOR_NAME__/g, color.name)
