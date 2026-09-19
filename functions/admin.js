@@ -59,6 +59,17 @@ function securityHeaders(extra = {}) {
   };
 }
 
+// 带超时的 fetch（第三方音乐接口可能挂起，避免卡死后台）
+async function fetchWithTimeout(url, opts, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms || 6000);
+  try {
+    return await fetch(url, Object.assign({ signal: ctrl.signal }, opts || {}));
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function ccToFlag(cc) {
   if (!cc || !/^[A-Za-z]{2}$/.test(cc)) return "🌐";
   const OFFSET = 127397;
@@ -518,7 +529,7 @@ export async function onRequest(context) {
     let songs = [];
     if (q) {
       try {
-        const r = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(q) + "&num=8", { headers: { "User-Agent": "Mozilla/5.0" } });
+        const r = await fetchWithTimeout("https://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(q) + "&num=8", { headers: { "User-Agent": "Mozilla/5.0" } }, 6000);
         const data = await r.json();
         if (data && data.code === 0) {
           const res = data.data;
@@ -653,7 +664,7 @@ export async function onRequest(context) {
           if (!finalUrl && song) {
             try {
               const query = (singer && singer !== "未知") ? (song + " " + singer) : song;
-              const rr = await fetch("http://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(query) + "&n=1&gc=1", { headers: { "User-Agent": "Mozilla/5.0" } });
+              const rr = await fetchWithTimeout("https://a.aa.cab/" + pmusic + "?msg=" + encodeURIComponent(query) + "&n=1&gc=1", { headers: { "User-Agent": "Mozilla/5.0" } }, 6000);
               const dd = await rr.json();
               if (dd && dd.code === 0 && dd.data && dd.data.music) {
                 finalUrl = String(dd.data.music);
@@ -695,9 +706,12 @@ export async function onRequest(context) {
       if (form.get("ajax") === "1") {
         return new Response(JSON.stringify({ ok: actionOk }), { headers: securityHeaders({ "Content-Type": "application/json; charset=utf-8" }) });
       }
+      // 表单提交时前端把当前标签页放在 URL（?tab=xxx），302 必须带回去，否则会跳回概览
+      const postTab = url.searchParams.get("tab");
+      const safeTab = /^(overview|visitors|content|settings)$/.test(postTab || "") ? postTab : "";
       return new Response(null, {
         status: 302,
-        headers: securityHeaders({ Location: "/admin" }),
+        headers: securityHeaders({ Location: safeTab ? ("/admin?tab=" + safeTab) : "/admin" }),
       });
     }
 
@@ -912,7 +926,7 @@ export async function onRequest(context) {
           + '</div>'
         ).join('')
       : '<div style="color:#888;font-size:12px;margin-top:6px;">还没有音乐，添加音频直链（mp3 等）即可播放。</div>';
-    const musicJson = JSON.stringify(musicList.map((m) => ({ name: String(m.name || ""), url: String(m.url || ""), lyric: String(m.lyric || "") })));
+    const musicJson = JSON.stringify(musicList.map((m) => ({ name: String(m.name || ""), url: String(m.url || ""), lyric: String(m.lyric || "") }))).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 
     const warnHtml = apiError
       ? `<div class="warn animate-in">ℹ Cloudflare 请求数据暂不可用（${escapeHtml(apiError)}），配额显示为 0</div>`
