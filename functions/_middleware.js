@@ -337,5 +337,87 @@ export async function onRequest(context) {
     }
   }
 
+  // 3. 子页面 panel.xaml（"更多功能"：实用工具 / 服务器推荐 / MC 知识）
+  //    静态面板经"打开帮助"加载，再按访问者 IP 动态替换每日一题、服务器地址、彩蛋；不做天气/节日/访问统计
+  if (url.pathname === '/panel.xaml') {
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    // 封禁列表 + 服务器配置 + 静态面板模板，并行读取
+    const [blockRaw, serverCfg, assetResp] = await Promise.all([
+      kvGet(env, 'block:list', '{}'),
+      kvGetJson(env, 'server_cfg', null),
+      env.ASSETS.fetch(new URL('/panel.xaml', url.origin)).catch((e) => {
+        console.error('[Middleware] 获取面板静态资源失败：', e);
+        return null;
+      }),
+    ]);
+
+    // 封禁检查（与主页一致）
+    if (ip && ip !== 'unknown') {
+      let blockList = {};
+      try { blockList = JSON.parse(blockRaw || '{}'); } catch (e) { console.error('[Middleware] 面板封禁列表解析失败：', e); }
+      if (blockList[ip]) {
+        return xamlResponse(buildFallbackXaml('访问被拒绝', '你的 IP 已被管理员禁止访问本主页。'));
+      }
+    }
+
+    if (!assetResp || !assetResp.ok) {
+      console.error('[Middleware] 面板静态资源返回错误：', assetResp && assetResp.status);
+      return maintenanceResponse();
+    }
+    let panel;
+    try {
+      panel = await assetResp.text();
+    } catch (e) {
+      console.error('[Middleware] 读取面板文本失败：', e);
+      return maintenanceResponse();
+    }
+    if (!panel || panel.trim().length < 50) {
+      return maintenanceResponse();
+    }
+
+    try {
+      const date = getBeijingDate();
+      const today = date.dateStr;
+      const heroUrl = heroUrlFor(date, url.origin);
+
+      // 每日一题（与主页完全一致：IP + 北京时间日期确定性抽取）
+      const quizIdx = deterministicIndex(ip, today, 'quiz', QUIZ.length);
+      const quiz = QUIZ[quizIdx];
+      const quizNo = '第 ' + (quizIdx + 1) + ' 题 / 共 ' + QUIZ.length + ' 题';
+
+      // 服务器推荐配置（后台可改）
+      let serverAddr = 'mc.hypixel.net';
+      let serverEmail = 'jklahhranget@163.com';
+      if (serverCfg) {
+        if (serverCfg.addr) serverAddr = String(serverCfg.addr);
+        if (serverCfg.email) serverEmail = String(serverCfg.email);
+      }
+
+      // 彩蛋（每次打开面板随机）
+      const egg = pickRandom(EGGS);
+      const eggData = egg.title + '|' + egg.content;
+
+      panel = panel
+        .replace(/__QUIZ_IMAGE__/g, heroUrl)
+        .replace(/__SERVER_ADDR__/g, escapeXaml(serverAddr))
+        .replace(/__SERVER_EMAIL__/g, escapeXaml(serverEmail))
+        .replace(/__EGG_DATA__/g, eggData)
+        .replace(/__QUIZ_Q__/g, quiz.q)
+        .replace(/__QUIZ_A__/g, quiz.a)
+        .replace(/<!--\s*__QUIZ_TAG__\s*-->|__QUIZ_TAG__/g, buildQuizTag(quiz.cat))
+        .replace(/<!--\s*__QUIZ_BG__\s*-->|__QUIZ_BG__/g, buildQuizBg(quiz.cat))
+        .replace(/__QUIZ_ACCENT__/g, quizAccent(quiz.cat))
+        .replace(/__QUIZ_NO__/g, quizNo);
+
+      return new Response(panel, {
+        headers: Object.assign({}, XAML_HEADERS_NO_STORE, { 'Vary': 'CF-Connecting-IP' }),
+      });
+    } catch (e) {
+      console.error('[Middleware] 面板组装失败，返回更新占位：', e);
+      return maintenanceResponse();
+    }
+  }
+
   return context.next();
 }

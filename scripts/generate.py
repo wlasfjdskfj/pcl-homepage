@@ -598,33 +598,173 @@ def escape_xaml_attr(text):
 
 # ============ XAML 生成 ============
 
-def build_panel_xaml(archive_releases, version_changelogs):
-    """构建"历史版本更新日志"子页面（PCL"打开帮助"事件加载；独立 StackPanel 需自带命名空间）。"""
+def build_panel_xaml(server_list):
+    """构建"更多功能"子页面（实用工具 / 服务器推荐 / MC 知识）。
+    由 PCL"打开帮助"事件经 panel.json 加载；__SERVER_*__、__QUIZ_*__、__EGG_DATA__
+    等动态占位符由 Cloudflare 中间件按访问者 IP 实时替换。独立 StackPanel 需自带命名空间。"""
     p = []
     p.append('<StackPanel Margin="0,-10,0,0"')
     p.append('    xmlns:sys="clr-namespace:System;assembly=mscorlib"')
     p.append('    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"')
     p.append('    xmlns:local="clr-namespace:PCL;assembly=Plain Craft Launcher 2">')
-    p.append('    <local:MyCard Title="历史版本更新日志" Margin="0,0,0,12">')
-    p.append('        <StackPanel Margin="20,16,20,18">')
-    p.append('            <local:MyHint Theme="Blue" Margin="0,0,0,10" Text="收录最近的正式版，点击任意版本查看其中文更新总结。" />')
-    if archive_releases:
-        for rel in archive_releases:
-            ver = rel["version"]
-            days = rel["days_ago"]
-            if days == 0:
-                ago = "今天"
-            elif days == 1:
-                ago = "昨天"
-            else:
-                ago = str(days) + " 天前"
-            info_text = rel["date"] + " · " + ago
-            popup = _changelog_popup_data(ver, version_changelogs.get(ver))
-            p.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 ' + ver + '" Info="' + info_text + '" EventType="弹出窗口" EventData="' + popup + '" />')
-    else:
-        p.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
+
+    # ===== 卡片 1：实用工具（常用链接 + 指令速查） =====
+    p.append('    <local:MyCard Title="实用工具" Margin="0,0,0,12">')
+    p.append('        <StackPanel Margin="25,40,23,20">')
+    tools = [
+        ("pack://application:,,,/images/Blocks/Grass.png", "Minecraft Wiki", "查阅方块、生物与游戏机制", "https://zh.minecraft.wiki/"),
+        ("pack://application:,,,/images/Blocks/RedstoneBlock.png", "苦力怕论坛", "Minecraft 中文资源与交流社区", "https://klpbbs.com/"),
+        ("pack://application:,,,/images/Blocks/GoldBlock.png", "Hypixel", "全球最大的 Minecraft 小游戏服务器", "https://hypixel.net/"),
+        ("pack://application:,,,/images/Blocks/Anvil.png", "Modrinth", "下载模组、整合包与资源包", "https://modrinth.com/"),
+        ("https://www.mcmod.cn/images/favicon.ico", "MC百科", "最大的 Minecraft 中文 MOD 百科", "https://www.mcmod.cn/"),
+        ("pack://application:,,,/images/Blocks/CommandBlock.png", "MCDoctor", "AI 崩溃日志分析，自动诊断崩溃原因", "https://mcdoctor.ai/"),
+        ("https://s.namemc.com/img/favicon-128.png", "NameMC", "查询 Minecraft 皮肤与用户名", "https://namemc.com/"),
+    ]
+    for t_idx, (logo, title, info, link) in enumerate(tools):
+        bottom = "0" if t_idx == len(tools) - 1 else "6"
+        p.append('            <local:MyListItem Margin="-5,0,-5,' + bottom + '" Type="Clickable" Logo="' + logo + '" Title="' + title + '" Info="' + info + '" EventType="打开网页" EventData="' + link + '" />')
+    p.append('            <Border Height="1" Margin="0,14,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
+    for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
+        margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
+        bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
+        p.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
+        p.append('                <StackPanel>')
+        p.append('                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">')
+        p.append('                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>')
+        p.append('                        <StackPanel Orientation="Horizontal">')
+        p.append('                            <Border Width="3" Height="10" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
+        p.append('                            <TextBlock Text="' + group_title + '" FontSize="11" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
+        p.append('                        </StackPanel>')
+        p.append('                    </Border>')
+        p.append('                    <Grid>')
+        p.append('                        <Grid.ColumnDefinitions>')
+        p.append('                            <ColumnDefinition Width="1*" />')
+        p.append('                            <ColumnDefinition Width="1*" />')
+        p.append('                            <ColumnDefinition Width="1*" />')
+        p.append('                        </Grid.ColumnDefinitions>')
+        for i, (btn_text, cmd, tip) in enumerate(cmds):
+            margin = ' Margin="0,0,8,0"' if i < 2 else ''
+            escaped_cmd = escape_xaml_attr(cmd)
+            escaped_tip = escape_xaml_attr(tip)
+            p.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
+        p.append('                    </Grid>')
+        p.append('                </StackPanel>')
+        p.append('            </Border>')
+    p.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />')
+    p.append('            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />')
     p.append('        </StackPanel>')
     p.append('    </local:MyCard>')
+
+    # ===== 卡片 2：服务器推荐（__SERVER_ADDR__ / __SERVER_EMAIL__ 中间件替换） =====
+    p.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,12">')
+    p.append('        <StackPanel Margin="25,40,23,20">')
+    p.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
+    p.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    p.append('                <StackPanel>')
+    p.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
+    p.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
+    p.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    p.append('                    </StackPanel>')
+    p.append('                    <TextBlock Text="__SERVER_ADDR__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />')
+    p.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="__SERVER_ADDR__" />')
+    p.append('                </StackPanel>')
+    p.append('            </Border>')
+    p.append('            <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">')
+    p.append('                <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>')
+    p.append('                <StackPanel Orientation="Horizontal">')
+    p.append('                    <Border Width="3" Height="9" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
+    p.append('                    <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
+    p.append('                </StackPanel>')
+    p.append('            </Border>')
+    for srv in server_list:
+        srv_name = srv["name"]
+        srv_addr = srv["address"]
+        p.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
+        p.append('                <Grid>')
+        p.append('                    <Grid.ColumnDefinitions>')
+        p.append('                        <ColumnDefinition Width="*" />')
+        p.append('                        <ColumnDefinition Width="Auto" />')
+        p.append('                    </Grid.ColumnDefinitions>')
+        p.append('                    <StackPanel Grid.Column="0" VerticalAlignment="Center">')
+        p.append('                        <TextBlock Text="' + srv_name + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+        p.append('                        <TextBlock Text="' + srv_addr + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />')
+        p.append('                    </StackPanel>')
+        p.append('                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + srv_addr + '" />')
+        p.append('                </Grid>')
+        p.append('            </Border>')
+    p.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
+    p.append('                <local:CustomEventService.Events>')
+    p.append('                    <local:CustomEventCollection>')
+    p.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;__SERVER_EMAIL__&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
+    p.append('                    </local:CustomEventCollection>')
+    p.append('                </local:CustomEventService.Events>')
+    p.append('            </local:MyIconTextButton>')
+    p.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
+    p.append('        </StackPanel>')
+    p.append('    </local:MyCard>')
+
+    # ===== 卡片 3：MC 知识（每日一题 + 彩蛋，__QUIZ_*__ / __EGG_DATA__ 按 IP 替换） =====
+    p.append('    <local:MyCard Title="MC 知识" Margin="0,0,0,12">')
+    p.append('        <StackPanel Margin="25,40,23,20">')
+    p.append('            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">')
+    p.append('                <Border.Background>')
+    p.append('                    <!-- __QUIZ_BG__ -->')
+    p.append('                </Border.Background>')
+    p.append('                <StackPanel>')
+    p.append('                    <Grid Height="108">')
+    p.append('                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
+    p.append('                        <Border>')
+    p.append('                            <Border.Background>')
+    p.append('                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">')
+    p.append('                                    <GradientStop Color="#66000000" Offset="0" />')
+    p.append('                                    <GradientStop Color="#4D000000" Offset="0.5" />')
+    p.append('                                    <GradientStop Color="#B3000000" Offset="1" />')
+    p.append('                                </LinearGradientBrush>')
+    p.append('                            </Border.Background>')
+    p.append('                        </Border>')
+    p.append('                        <Grid Margin="18,0,18,0">')
+    p.append('                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">')
+    p.append('                                <Border Width="4" Height="20" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />')
+    p.append('                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
+    p.append('                                <TextBlock Text="每日一题" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />')
+    p.append('                            </StackPanel>')
+    p.append('                            <!-- __QUIZ_TAG__ -->')
+    p.append('                        </Grid>')
+    p.append('                    </Grid>')
+    p.append('                    <StackPanel Margin="20,16,20,18">')
+    p.append('                        <TextBlock Text="__QUIZ_Q__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" LineHeight="26" Foreground="{DynamicResource ColorBrush1}" />')
+    p.append('                        <TextBlock Text="今日专属 · __QUIZ_NO__" FontSize="10" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,12,0,0" />')
+    p.append('                    </StackPanel>')
+    p.append('                </StackPanel>')
+    p.append('            </Border>')
+    p.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">')
+    p.append('                <local:CustomEventService.Events>')
+    p.append('                    <local:CustomEventCollection>')
+    p.append('                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|__QUIZ_A__" />')
+    p.append('                    </local:CustomEventCollection>')
+    p.append('                </local:CustomEventService.Events>')
+    p.append('            </local:MyIconTextButton>')
+    p.append('            <Border Height="1" Margin="0,16,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
+    p.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
+    p.append('                <StackPanel Orientation="Horizontal">')
+    p.append('                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />')
+    p.append('                    <StackPanel VerticalAlignment="Center">')
+    p.append('                        <TextBlock Text="彩蛋" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
+    p.append('                        <TextBlock Text="每次点开都不一样" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />')
+    p.append('                    </StackPanel>')
+    p.append('                </StackPanel>')
+    p.append('            </Border>')
+    p.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
+    p.append('                <local:CustomEventService.Events>')
+    p.append('                    <local:CustomEventCollection>')
+    p.append('                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />')
+    p.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
+    p.append('                    </local:CustomEventCollection>')
+    p.append('                </local:CustomEventService.Events>')
+    p.append('            </local:MyIconTextButton>')
+    p.append('        </StackPanel>')
+    p.append('    </local:MyCard>')
+
     p.append('</StackPanel>')
     return "\n".join(p) + "\n"
 
@@ -698,11 +838,9 @@ def build_xaml():
             version_image_source = "pack://application:,,,/images/Blocks/CommandBlock.png"
 
     recent_releases = fetch_recent_releases(5, manifest)
-    # 历史版本面板（"打开帮助"子页面）展示更多正式版
-    archive_releases = fetch_recent_releases(18, manifest)
-    # 汇总需要抓更新总结的版本：历史面板 + 主版本卡片，去重后并发抓取
+    # 汇总需要抓更新总结的版本：主版本卡片 + 最近正式版，去重后并发抓取
     changelog_versions = []
-    for _rel in (archive_releases or recent_releases or []):
+    for _rel in (recent_releases or []):
         _ver = _rel["version"]
         if _ver not in changelog_versions:
             changelog_versions.append(_ver)
@@ -711,7 +849,7 @@ def build_xaml():
     version_changelogs = {}
     if changelog_versions:
         from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=min(8, len(changelog_versions))) as _ex:
+        with ThreadPoolExecutor(max_workers=min(6, len(changelog_versions))) as _ex:
             _results = list(_ex.map(fetch_wiki_changelog, changelog_versions))
         version_changelogs = dict(zip(changelog_versions, _results))
     wiki_changelog = version_changelogs.get(main_version)
@@ -937,8 +1075,7 @@ def build_xaml():
     else:
         lines.append('            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />')
 
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,10" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,10" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="历史版本更新日志" Info="在独立窗口查看更多正式版的更新总结" EventType="打开帮助" EventData="' + BASE_URL + '/panel.json" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,6,0,14" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />')
 
     lines.append('            <Grid>')
     lines.append('                <Grid.ColumnDefinitions>')
@@ -1063,164 +1200,11 @@ def build_xaml():
 
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
-    # ========== 卡片：实用工具（常用链接 + 指令速查） ==========
-    lines.append('    <local:MyCard Title="实用工具" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
+    # ========== 卡片：更多功能（独立子页面：实用工具 / 服务器推荐 / MC 知识） ==========
+    lines.append('    <local:MyCard Title="更多功能" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">')
     lines.append('        <StackPanel Margin="25,40,23,20">')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/GoldBlock.png" Title="Hypixel" Info="全球最大的 Minecraft 小游戏服务器" EventType="打开网页" EventData="https://hypixel.net/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Anvil.png" Title="Modrinth" Info="下载模组、整合包与资源包" EventType="打开网页" EventData="https://modrinth.com/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />')
-    lines.append('            <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />')
-    lines.append('            <Border Height="1" Margin="0,0,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
-    for group_idx, (group_title, cmds) in enumerate(CMD_GROUPS):
-        margin_bottom = "0" if group_idx == len(CMD_GROUPS) - 1 else "12"
-        bar_color = "{DynamicResource ColorBrush1}" if "1.20.5" in group_title or "1.13" in group_title else "{DynamicResource ColorBrush3}"
-        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,' + margin_bottom + '" Background="{DynamicResource ColorBrush7}">')
-        lines.append('                <StackPanel>')
-        lines.append('                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">')
-        lines.append('                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>')
-        lines.append('                        <StackPanel Orientation="Horizontal">')
-        lines.append('                            <Border Width="3" Height="10" CornerRadius="1.5" Background="' + bar_color + '" Margin="0,0,8,0" VerticalAlignment="Center" />')
-        lines.append('                            <TextBlock Text="' + group_title + '" FontSize="11" FontWeight="Bold" Foreground="' + bar_color + '" VerticalAlignment="Center" />')
-        lines.append('                        </StackPanel>')
-        lines.append('                    </Border>')
-        lines.append('                    <Grid>')
-        lines.append('                        <Grid.ColumnDefinitions>')
-        lines.append('                            <ColumnDefinition Width="1*" />')
-        lines.append('                            <ColumnDefinition Width="1*" />')
-        lines.append('                            <ColumnDefinition Width="1*" />')
-        lines.append('                        </Grid.ColumnDefinitions>')
-        for i, (btn_text, cmd, tip) in enumerate(cmds):
-            margin = ' Margin="0,0,8,0"' if i < 2 else ''
-            escaped_cmd = escape_xaml_attr(cmd)
-            escaped_tip = escape_xaml_attr(tip)
-            lines.append('                        <local:MyIconTextButton Grid.Column="' + str(i) + '"' + margin + ' Height="38" Text="' + btn_text + '" ToolTip="' + escaped_tip + '" LogoScale="0.9" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + escaped_cmd + '" />')
-        lines.append('                    </Grid>')
-        lines.append('                </StackPanel>')
-        lines.append('            </Border>')
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="指令适用于 Java 版 1.13 及以上。&#xA;玩家头颅指令按版本分为两组，请根据自己的游戏版本选择。" />')
-    lines.append('            <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-    # ========== 卡片：服务器推荐 ==========
-    lines.append('    <local:MyCard Title="服务器推荐" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-
-    lines.append('            <local:MyHint Theme="Blue" Margin="0,0,0,14" Text="推荐服务器。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />')
-
-    # 主推服务器大卡
-    lines.append('            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel>')
-    lines.append('                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">')
-    lines.append('                        <local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />')
-    lines.append('                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                    <TextBlock Text="__SERVER_ADDR__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,14" />')
-    lines.append('                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="__SERVER_ADDR__" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-
-    # 其他服务器列表
-    lines.append('            <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">')
-    lines.append('                <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>')
-    lines.append('                <StackPanel Orientation="Horizontal">')
-    lines.append('                    <Border Width="3" Height="9" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />')
-    lines.append('                    <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-
-    for srv in server_list:
-        srv_name = srv["name"]
-        srv_addr = srv["address"]
-
-        lines.append('            <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">')
-        lines.append('                <Grid>')
-        lines.append('                    <Grid.ColumnDefinitions>')
-        lines.append('                        <ColumnDefinition Width="*" />')
-        lines.append('                        <ColumnDefinition Width="Auto" />')
-        lines.append('                    </Grid.ColumnDefinitions>')
-        lines.append('                    <StackPanel Grid.Column="0" VerticalAlignment="Center">')
-        lines.append('                        <TextBlock Text="' + srv_name + '" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-        lines.append('                        <TextBlock Text="' + srv_addr + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />')
-        lines.append('                    </StackPanel>')
-        lines.append('                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="' + srv_addr + '" />')
-        lines.append('                </Grid>')
-        lines.append('            </Border>')
-
-    # 推荐按钮
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">')
-    lines.append('                <local:CustomEventService.Events>')
-    lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;__SERVER_EMAIL__&#xA;&#xA;邮件标题请注明「服务器推荐」。" />')
-    lines.append('                    </local:CustomEventCollection>')
-    lines.append('                </local:CustomEventService.Events>')
-    lines.append('            </local:MyIconTextButton>')
-
-    lines.append('            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />')
-    lines.append('        </StackPanel>')
-    lines.append('    </local:MyCard>')
-    # ========== 卡片：MC 知识（小测 + 彩蛋） ==========
-    lines.append('    <local:MyCard Title="MC 知识" Margin="0,0,0,15" CanSwap="True" IsSwapped="True">')
-    lines.append('        <StackPanel Margin="25,40,23,20">')
-
-    lines.append('            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">')
-    lines.append('                <Border.Background>')
-    lines.append('                    <!-- __QUIZ_BG__ -->')
-    lines.append('                </Border.Background>')
-    lines.append('                <StackPanel>')
-    lines.append('                    <Grid Height="108">')
-    lines.append('                        <local:MyImage Source="__QUIZ_IMAGE__" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />')
-    lines.append('                        <Border>')
-    lines.append('                            <Border.Background>')
-    lines.append('                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">')
-    lines.append('                                    <GradientStop Color="#66000000" Offset="0" />')
-    lines.append('                                    <GradientStop Color="#4D000000" Offset="0.5" />')
-    lines.append('                                    <GradientStop Color="#B3000000" Offset="1" />')
-    lines.append('                                </LinearGradientBrush>')
-    lines.append('                            </Border.Background>')
-    lines.append('                        </Border>')
-    lines.append('                        <Grid Margin="18,0,18,0">')
-    lines.append('                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">')
-    lines.append('                                <Border Width="4" Height="20" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,9,0" />')
-    lines.append('                                <local:MyImage Width="20" Height="20" Margin="0,0,7,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />')
-    lines.append('                                <TextBlock Text="每日一题" FontSize="14" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />')
-    lines.append('                            </StackPanel>')
-    lines.append('                            <!-- ' + quiz_tag + ' -->')
-    lines.append('                        </Grid>')
-    lines.append('                    </Grid>')
-    lines.append('                    <StackPanel Margin="20,16,20,18">')
-    lines.append('                        <TextBlock Text="' + quiz_q + '" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" LineHeight="26" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text="今日专属 · ' + quiz_no + '" FontSize="10" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,12,0,0" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="查看答案" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M512 320a128 128 0 0 1 128 128c0 64-64 96-96 128v32h-64v-48c0-64 96-80 96-112a64 64 0 1 0-128 0h-64a128 128 0 0 1 128-128z M480 640h64v64h-64z">')
-    lines.append('                <local:CustomEventService.Events>')
-    lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="每日一题 · 答案|' + quiz_a + '" />')
-    lines.append('                    </local:CustomEventCollection>')
-    lines.append('                </local:CustomEventService.Events>')
-    lines.append('            </local:MyIconTextButton>')
-    lines.append('            <Border Height="1" Margin="0,16,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>')
-    lines.append('            <Border CornerRadius="10" Padding="16,14" Margin="0,0,0,14" Background="{DynamicResource ColorBrush7}">')
-    lines.append('                <StackPanel Orientation="Horizontal">')
-    lines.append('                    <local:MyImage Width="40" Height="40" Margin="0,0,14,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Egg.png" />')
-    lines.append('                    <StackPanel VerticalAlignment="Center">')
-    lines.append('                        <TextBlock Text="彩蛋" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />')
-    lines.append('                        <TextBlock Text="每次点开都不一样" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />')
-    lines.append('                    </StackPanel>')
-    lines.append('                </StackPanel>')
-    lines.append('            </Border>')
-    lines.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">')
-    lines.append('                <local:CustomEventService.Events>')
-    lines.append('                    <local:CustomEventCollection>')
-    lines.append('                        <local:CustomEvent Type="弹出窗口" Data="' + egg_data + '" />')
-    lines.append('                        <local:CustomEvent Type="刷新页面" Data="-" />')
-    lines.append('                    </local:CustomEventCollection>')
-    lines.append('                </local:CustomEventService.Events>')
-    lines.append('            </local:MyIconTextButton>')
+    lines.append('            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="46" Text="实用工具 · 服务器推荐 · MC 知识" ColorType="Highlight" LogoScale="0.9" Logo="M160 160h256v256H160z M608 160h256v256H608z M160 608h256v256H160z M608 608h256v256H608z" EventType="打开帮助" EventData="' + BASE_URL + '/panel.json" />')
+    lines.append('            <local:MyHint Theme="Blue" Margin="0,12,0,0" Text="点击在独立窗口中打开：常用网站与指令速查、推荐服务器、每日一题与彩蛋。" />')
     lines.append('        </StackPanel>')
     lines.append('    </local:MyCard>')
     # ========== 卡片 12：反馈 ==========
@@ -1240,7 +1224,7 @@ def build_xaml():
 
     lines.append('</StackPanel>')
 
-    panel_xaml = build_panel_xaml(archive_releases, version_changelogs)
+    panel_xaml = build_panel_xaml(server_list)
 
     return "\n".join(lines) + "\n", panel_xaml
 
@@ -1258,7 +1242,7 @@ def main():
     print("已生成：" + str(panel_output))
 
     panel_meta = json.dumps(
-        {"Title": "历史版本更新日志", "Description": "Minecraft Java 版最近正式版的中文更新总结"},
+        {"Title": "更多功能", "Description": "实用工具 · 服务器推荐 · MC 知识"},
         ensure_ascii=False,
     )
     panel_json = base_dir / "panel.json"
