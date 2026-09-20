@@ -1,7 +1,8 @@
 /**
  * Cloudflare Pages Functions 中间件
  * - /Custom.xaml：动态替换日期、幸运数字、幸运颜色、彩蛋、每日一言、人品分数、用户 IP、天气、节日等
- * - /version、/Custom.xaml.version：每次返回时间戳，强制 PCL 重新下载主页
+ * - /version、/Custom.xaml.version、/Custom.xaml.ini：每次返回时间戳，强制 PCL 重新下载主页
+ * - 来源守卫：仅 PCL2 客户端与真实浏览器可访问动态数据端点，扫描器/爬虫直接拦截
  * - 访问统计：异步写入 D1（recordVisit），数据在 /admin 页面查看
  *
  * 数据与构建函数已拆分到 ./_lib/*，本文件只保留路由与组装逻辑。
@@ -119,14 +120,45 @@ function maintenanceResponse(eta, reason) {
   );
 }
 
+// 只放行 PCL 客户端与真实浏览器（供人工测试），拦截扫描器 / 爬虫 UA，避免它们拖慢服务、污染访问统计
+function isTrustedClient(ua, referer) {
+  // PCL 启动器自身请求（UA 形如 PCL2/2.13.x）
+  if (/PCL2/i.test(ua)) return true;
+  // PCL 帮助页等内部跳转带的 Referer
+  if (/pcl2\.server|pcl2\.open\.server/i.test(referer || '')) return true;
+  // 空 UA 一律视为扫描器
+  if (!ua) return false;
+  // 常见爬虫 / 脚本库 / 扫描器特征（即使伪装成 Mozilla 也拦截）
+  const bad = /bot|crawler|spider|scrapy|python-requests|python-urllib|aiohttp|httpx|python\/|curl\/|wget|go-http-client|okhttp|libwww|httpclient|node-fetch|axios|headless|facebookexternalhit|petalbot|semrush|ahrefs|mj12|dotbot|censys|zmap|masscan|nmap|zgrab|java\/|ruby|php\//i;
+  if (bad.test(ua)) return false;
+  // 其余带 Mozilla 的真实浏览器放行（用户 / 管理员浏览器测试与预览）
+  if (/mozilla/i.test(ua)) return true;
+  // 未知 UA 一律拦截
+  return false;
+}
+
+// 动态数据端点：主页、面板、帮助元数据、根路径
+const DATA_ENDPOINTS = ['/Custom.xaml', '/panel.xaml', '/panel.json', '/'];
+
 // ============ 中间件 ============
 
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
+  const ua = request.headers.get('user-agent') || '';
+  const referer = request.headers.get('referer') || '';
+  const isVersionPath = url.pathname === '/Custom.xaml.version' || url.pathname === '/Custom.xaml.ini' || url.pathname === '/version';
+
+  // 0. 来源守卫：仅 PCL 客户端与真实浏览器可访问动态数据端点；扫描器/爬虫直接返回占位，不计数、不调外部接口
+  if ((DATA_ENDPOINTS.indexOf(url.pathname) !== -1 || isVersionPath) && !isTrustedClient(ua, referer)) {
+    return xamlResponse(
+      buildFallbackXaml('访问被拒绝', '检测到异常访问（爬虫或扫描器）。如需使用本主页，请在 PCL2 启动器中打开。')
+    );
+  }
 
   // 1. 版本号：每次请求返回新时间戳，强制 PCL 后台静默重新下载
-  if (url.pathname === '/Custom.xaml.version' || url.pathname === '/version') {
+  //    兼容 .xaml 结尾地址（PCL 请求 Custom.xaml.ini）、.version 与根路径 /version
+  if (isVersionPath) {
     return new Response(Date.now().toString(), {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',

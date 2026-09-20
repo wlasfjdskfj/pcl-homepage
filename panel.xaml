@@ -3,9 +3,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:PCL;assembly=Plain Craft Launcher 2">
     <TextBlock Text="更多功能"
-               FontSize="26" FontWeight="Bold"
+               FontSize="22" FontWeight="SemiBold"
                HorizontalAlignment="Center"
-               Margin="0,12,0,14">
+               Margin="0,10,0,12">
         <TextBlock.Foreground>
             <SolidColorBrush x:Name="PanelTitleBrush" Color="#58A6FF" />
         </TextBlock.Foreground>
@@ -17,11 +17,10 @@
                             Storyboard.TargetName="PanelTitleBrush"
                             Storyboard.TargetProperty="Color">
                             <LinearColorKeyFrame Value="#58A6FF" KeyTime="0:0:0" />
-                            <LinearColorKeyFrame Value="#A371F7" KeyTime="0:0:1.5" />
-                            <LinearColorKeyFrame Value="#F778BA" KeyTime="0:0:3" />
-                            <LinearColorKeyFrame Value="#3FB950" KeyTime="0:0:4.5" />
-                            <LinearColorKeyFrame Value="#E3B341" KeyTime="0:0:6" />
-                            <LinearColorKeyFrame Value="#58A6FF" KeyTime="0:0:7.5" />
+                            <LinearColorKeyFrame Value="#79C0FF" KeyTime="0:0:2" />
+                            <LinearColorKeyFrame Value="#39C5CF" KeyTime="0:0:4" />
+                            <LinearColorKeyFrame Value="#A371F7" KeyTime="0:0:6" />
+                            <LinearColorKeyFrame Value="#58A6FF" KeyTime="0:0:8" />
                         </ColorAnimationUsingKeyFrames>
                     </Storyboard>
                 </BeginStoryboard>
