@@ -346,19 +346,21 @@ export async function onRequest(context) {
   }
 
   // 3. 子页面 panel.xaml（"更多功能"：实用工具 / 服务器推荐 / MC 知识）
-  //    静态面板经"打开帮助"加载，再按访问者 IP 动态替换每日一题、服务器地址、彩蛋；不做天气/节日/访问统计
+  //    静态面板经"打开帮助"加载，再按访问者 IP 动态替换每日一题、服务器地址、彩蛋；不做节日/访问统计；天气仅用于横幅选图（命中1小时缓存，主页已取过不重复外呼）
   if (url.pathname === '/panel.xaml') {
     const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
 
     // 封禁列表 + 服务器配置 + 静态面板模板，并行读取
-    const [blockRaw, serverCfg, assetResp] = await Promise.all([
+    const [blockRaw, serverCfg, assetResp, weather] = await Promise.all([
       kvGet(env, 'block:list', '{}'),
       kvGetJson(env, 'server_cfg', null),
       env.ASSETS.fetch(new URL('/panel.xaml', url.origin)).catch((e) => {
         console.error('[Middleware] 获取面板静态资源失败：', e);
         return null;
       }),
+      fetchWeather(env, ip),
     ]);
+    const weatherKind = (weather && weather.kind) || null;
 
     // 封禁检查（与主页一致）
     if (ip && ip !== 'unknown') {
@@ -387,7 +389,7 @@ export async function onRequest(context) {
     try {
       const date = getBeijingDate();
       const today = date.dateStr;
-      const heroUrl = heroUrlFor(date, url.origin);
+      const heroUrl = quizImageFor(weatherKind, date, url.origin);
 
       // 每日一题（与主页完全一致：IP + 北京时间日期确定性抽取）
       const quizIdx = deterministicIndex(ip, today, 'quiz', QUIZ.length);
