@@ -8,19 +8,10 @@ function escapeXaml(str) {
     .replace(/>/g, "&gt;");
 }
 
-// 随机挑战渐变背景（按难度配色）
-function buildChallengeBg(diff) {
-  const d = diff || "";
-  let c;
-  if (/噩梦|地狱/.test(d)) c = ["#4A148C", "#AD1457"];
-  else if (/困难/.test(d)) c = ["#B71C1C", "#F57C00"];
-  else if (/专家/.test(d)) c = ["#5E35B1", "#D81B60"];
-  else if (/简单/.test(d)) c = ["#1B6B3A", "#66BB6A"];
-  else c = ["#1565C0", "#42A5F5"];
-  return '<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">'
-    + '<GradientStop Color="' + c[0] + '" Offset="0" />'
-    + '<GradientStop Color="' + c[1] + '" Offset="1" />'
-    + '</LinearGradientBrush>';
+// 挑战卡已改为 PCL 主题纯色（generate.py 中 ColorBrush7 背景），不再注入渐变；
+// 保留函数返回空，避免旧占位符残留时出现彩色底。
+function buildChallengeBg() {
+  return '';
 }
 
 // 人品分数配色（SSR 金 / SR 绿 / R 蓝 / N 琥珀 / N-- 红），进度条、分数、评级统一用
@@ -32,14 +23,13 @@ function scoreColor(score) {
   return '#FF5555';
 }
 
-// 人品分数条（10 格，填充格统一使用当前分数等级色，空格灰色，避免高分却显示一片红）
+// 人品分数条（10 格，单色克制：填充用主前景色，空格用卡片次级面，避免按等级堆砌高饱和色）
 function buildScoreBar(score) {
   const blocks = 10;
   const filled = Math.floor(score / 10);
-  const color = scoreColor(score);
   let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
   for (let i = 0; i < blocks; i++) {
-    const bg = i >= filled ? '{DynamicResource ColorBrush7}' : color;
+    const bg = i >= filled ? '{DynamicResource ColorBrush7}' : '{DynamicResource ColorBrush1}';
     bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
   }
   bar += '</StackPanel>';
@@ -56,15 +46,15 @@ const QUIZ_CAT_COLORS = {
   "版本": "#22D3EE",
 };
 
-function quizAccent(cat) {
-  return QUIZ_CAT_COLORS[cat] || "#4C8DFF";
+// 每日一题分类徽章（横幅压在图片上，统一白色，不随分类用高饱和彩色）
+function quizAccent() {
+  return '#FFFFFF';
 }
 
 function buildQuizTag(cat) {
   const label = cat || "综合";
-  const hex = quizAccent(label);
   return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#99000000">'
-    + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="' + hex + '" VerticalAlignment="Center"/>'
+    + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>'
     + '</Border>';
 }
 

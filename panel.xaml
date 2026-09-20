@@ -62,27 +62,19 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
-            <Border Height="1" Margin="0,18,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
-            <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                        <GradientStop Color="#5B21B6" Offset="0" />
-                        <GradientStop Color="#9333EA" Offset="0.5" />
-                        <GradientStop Color="#F59E0B" Offset="1" />
-                    </LinearGradientBrush>
-                </Border.Background>
+            <Border Height="1" Margin="0,18,0,14" Background="{DynamicResource ColorBrush4}" />
+            <Border CornerRadius="12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <Grid Margin="18,15">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="神秘彩蛋" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" />
-                        <TextBlock Text="今天属于你的彩蛋，明天自动换新" FontSize="10" Foreground="#D9FFFFFF" Margin="0,4,0,0" />
+                        <TextBlock Text="神秘彩蛋" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
+                        <TextBlock Text="今天属于你的彩蛋，明天自动换新" FontSize="10" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
                     </StackPanel>
                     <Grid Grid.Column="1" Width="46" Height="46" VerticalAlignment="Center">
-                        <Border CornerRadius="23" Background="#33FFFFFF" />
-                        <local:MyImage Width="30" Height="30" Source="pack://application:,,,/images/Blocks/Egg.png" />
+                        <local:MyImage Width="36" Height="36" Source="pack://application:,,,/images/Blocks/Egg.png" />
                     </Grid>
                 </Grid>
             </Border>
@@ -104,16 +96,13 @@
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
             <local:MyListItem Margin="-5,0,-5,6" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
             <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
-            <Border Height="1" Margin="0,14,0,14"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00555555" Offset="0" /><GradientStop Color="#55555555" Offset="0.5" /><GradientStop Color="#00555555" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,14,0,14" Background="{DynamicResource ColorBrush4}" />
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="基础模式" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="基础模式" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -128,13 +117,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="环境控制" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="环境控制" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -149,13 +135,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="实用效果" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="实用效果" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -170,13 +153,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="物品获取" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="物品获取" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -191,13 +171,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="玩家头颅 · 1.20.5+" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="玩家头颅 · 1.20.5+" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -212,13 +189,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="玩家头颅 · 1.13-1.20.4" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="玩家头颅 · 1.13-1.20.4" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -233,13 +207,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="传送定位" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="传送定位" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -254,13 +225,10 @@
             </Border>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,0" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
-                    <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                        <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" Height="10" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                            <TextBlock Text="世界规则" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                        <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="世界规则" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+                    </StackPanel>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*" />
@@ -290,13 +258,10 @@
                     <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="__SERVER_ADDR__" />
                 </StackPanel>
             </Border>
-            <Border CornerRadius="6" Padding="8,3" Margin="0,0,0,10">
-                <Border.Background><SolidColorBrush Color="#15FFFFFF" /></Border.Background>
-                <StackPanel Orientation="Horizontal">
-                    <Border Width="3" Height="9" CornerRadius="1.5" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="其他服务器" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" Margin="2,0,0,10">
+                <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="其他服务器" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+            </StackPanel>
             <Border CornerRadius="10" Padding="14,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
                 <Grid>
                     <Grid.ColumnDefinitions>
