@@ -17,6 +17,29 @@ const WCODE = {
   95: "雷雨", 96: "雷雨伴冰雹", 99: "雷暴冰雹",
 };
 
+// 标准化天气类别（用于每日一题横幅选图）：thunder 雷雨 > snow 雪 > rain 雨 > fog 雾 > cloudy 多云 > clear 晴；无法判断返回 null
+function classifyWeather(code, desc) {
+  if (code !== null && code !== undefined && code !== "") {
+    const c = Number(code);
+    if (!Number.isNaN(c)) {
+      if (c >= 95) return "thunder";
+      if (c === 71 || c === 73 || c === 75 || c === 77 || c === 85 || c === 86) return "snow";
+      if (c === 51 || c === 53 || c === 55 || c === 56 || c === 57 || c === 61 || c === 63 || c === 65 || c === 66 || c === 67 || c === 80 || c === 81 || c === 82) return "rain";
+      if (c === 45 || c === 48) return "fog";
+      if (c === 2 || c === 3) return "cloudy";
+      if (c === 0 || c === 1) return "clear";
+    }
+  }
+  const d = String(desc || "");
+  if (/雷|雹|电/.test(d)) return "thunder";
+  if (/雪|凇|霜|冰粒/.test(d)) return "snow";
+  if (/雨/.test(d)) return "rain";
+  if (/雾|霾|沙尘/.test(d)) return "fog";
+  if (/阴|云/.test(d)) return "cloudy";
+  if (/晴|朗/.test(d)) return "clear";
+  return null;
+}
+
 function buildWeatherUnavailable() {
   return '<local:MyHint Theme="Yellow" Margin="0,0,0,0" Text="天气获取失败，请稍后刷新重试。" />';
 }
@@ -71,7 +94,7 @@ async function fetchApihzWeather(env, ip) {
     if (cached) {
       try {
         const d = JSON.parse(cached);
-        return buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。");
+        return { body: buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。"), kind: classifyWeather(null, d.desc) };
       } catch (e) { /* 缓存解析失败 → 走 API */ }
     }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
@@ -94,7 +117,7 @@ async function fetchApihzWeather(env, ip) {
     try {
       await env.HOMEPAGE_KV.put(cacheKey, JSON.stringify({ city, temp, desc, wind, source }), { expirationTtl: 3600 });
     } catch (e) { /* 缓存失败忽略 */ }
-    return buildWeatherXaml(city, temp, desc, wind, true, source);
+    return { body: buildWeatherXaml(city, temp, desc, wind, true, source), kind: classifyWeather(null, desc) };
   } catch (e) {
     console.error("[Weather] 接口盒子失败：", e);
     return null;
@@ -135,21 +158,22 @@ async function fetchWeather(env, ip) {
   // 降级：Open-Meteo（定位 + 天气，全部带超时）
   try {
     const geo = await fetchGeo(ip);
-    if (!geo) return buildWeatherUnavailable();
+    if (!geo) return { body: buildWeatherUnavailable(), kind: null };
     const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + geo.lat + "&longitude=" + geo.lon
       + "&current=temperature_2m,weather_code,wind_speed_10m,is_day&timezone=auto";
     const wRes = await fetchWithTimeout(wUrl, { headers: { "User-Agent": "PCL-Homepage" } }, 4000);
-    if (!wRes.ok) return buildWeatherUnavailable();
+    if (!wRes.ok) return { body: buildWeatherUnavailable(), kind: null };
     const w = await wRes.json();
     const cw = (w && w.current) || {};
     const temp = Math.round(cw.temperature_2m);
     const wind = Math.round(cw.wind_speed_10m);
     const desc = WCODE[cw.weather_code] || "未知";
-    return buildWeatherXaml(geo.city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。");
+    const kind = classifyWeather(cw.weather_code, desc);
+    return { body: buildWeatherXaml(geo.city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。"), kind: kind };
   } catch (e) {
     console.error("[Weather] 获取天气失败：", e);
-    return buildWeatherUnavailable();
+    return { body: buildWeatherUnavailable(), kind: null };
   }
 }
 
-export { fetchWeather, buildWeatherXaml, buildWeatherUnavailable };
+export { fetchWeather, buildWeatherXaml, buildWeatherUnavailable, classifyWeather };

@@ -14,6 +14,7 @@ import {
 import { QUIZ } from './_lib/quiz.js';
 import { getFestival, buildFestivalBanner, buildCountdownXaml } from './_lib/lunar.js';
 import { fetchWeather } from './_lib/weather.js';
+import { quizImageFor } from './_lib/quizimage.js';
 import { escapeXaml, buildChallengeBg, buildScoreBar, scoreColor, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent } from './_lib/xaml.js';
 import { buildMultiBanner, buildSingleBanner } from './_lib/banner.js';
 import { recordVisit } from './_lib/stats.js';
@@ -171,7 +172,7 @@ export async function onRequest(context) {
 
     // 2.3 第二批：静态资源 + 全部配置 KV + 天气，三类 IO 并行
     const assetUrl = new URL('/Custom.xaml', url.origin);
-    const [assetResp, cfg, weatherBody] = await Promise.all([
+    const [assetResp, cfg, weather] = await Promise.all([
       env.ASSETS.fetch(assetUrl).catch((e) => {
         console.error('[Middleware] 获取静态资源失败：', e);
         return null;
@@ -186,6 +187,8 @@ export async function onRequest(context) {
       ]),
       fetchWeather(env, ip),
     ]);
+    const weatherBody = (weather && weather.body) || "";
+    const weatherKind = (weather && weather.kind) || null;
 
     if (!assetResp || !assetResp.ok) {
       console.error('[Middleware] 静态资源返回错误：', assetResp && assetResp.status);
@@ -211,7 +214,7 @@ export async function onRequest(context) {
       const egg = pickRandom(EGGS);
       const date = getBeijingDate();
       const today = date.dateStr;
-      const heroUrl = heroUrlFor(date, url.origin);
+      const heroUrl = quizImageFor(weatherKind, date, url.origin);
 
       // 欢迎语副标题（时段 + IP + 日期确定性，每天每时段自动换一句）
       const subPool = GREETING_SUBS[date.period] || GREETING_SUBS.morning;
