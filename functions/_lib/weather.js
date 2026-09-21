@@ -62,15 +62,15 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source) {
     else if (/雾/.test(d)) tip = _pick(["雾大，别跑太远", "雾天适合在家研究药水", "大雾弥漫看不清路，注意安全", "雾天出门记得带指南针"]);
     else tip = _pick(["适合出门挖矿", "适合探索新洞穴", "适合下矿寻宝", "适合扩建你的基地", "适合去钓鱼种田", "适合出门跑图探险", "适合挑战末影龙", "适合开荒新区域", "适合修一座红石机关", "适合去林地府邸探险", "适合驯一匹新马", "适合造一艘船去远航", "适合给基地装个自动农场", "适合带上藏宝图去寻宝", "适合去打一次凋灵试试"]);
   }
-  return '<Border CornerRadius="10" Padding="16,14" Margin="0,0,0,10" Background="{DynamicResource ColorBrush7}">'
+  return '<Border CornerRadius="10" Padding="16,16" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">'
     + '<StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">'
     + '<local:MyImage Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" Source="' + icon + '" />'
     + '<TextBlock Text="' + escapeXaml(city) + ' · 当前天气" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />'
     + '</StackPanel>'
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
-    + '<TextBlock Text="' + temp + '°" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
-    + '<TextBlock Text="' + escapeXaml(desc) + '" FontSize="16" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,8" />'
+    + '<TextBlock Text="' + temp + '°" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
+    + '<TextBlock Text="' + escapeXaml(desc) + '" FontSize="15" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,8" />'
     + '</StackPanel>'
     + '<TextBlock Text="风力 ' + wind + ' km/h · ' + escapeXaml(tip) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,8,0,0" />'
     + '</StackPanel>'

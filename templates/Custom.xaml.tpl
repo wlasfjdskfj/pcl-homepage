@@ -5,7 +5,7 @@
             <!-- __FESTIVAL_BANNER__ -->
             <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.bing.com/th?id=OHR.GroomingOtter_ZH-CN6969472572_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <local:MyImage Source="{{WALLPAPER_URL}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -127,31 +127,27 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="当前最新版本 · 26.3" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="当前最新版本 · {{MAIN_VERSION}}" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <Border CornerRadius="12" Height="200" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.mkejga.de5.net/images/version.png?v=26.3" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
+                    <local:MyImage Source="{{VERSION_IMAGE_SOURCE}}" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
                     <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">
                         <StackPanel Orientation="Horizontal">
                             <Border Width="6" Height="6" CornerRadius="3" Background="#FFFFFF" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock Text="26.3" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                            <TextBlock Text="{{SNAP_VERSION}}" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </Grid>
             </Border>
-            <TextBlock Text="最新快照：26.3" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
-            <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
+            <TextBlock Text="最新快照：{{SNAP_VERSION}}" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
+            <TextBlock Text="最后更新 {{MAIN_DATE}}" FontSize="11" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
             <Border Height="1" Margin="0,0,0,12" Background="{DynamicResource ColorBrush4}" />
             <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
                 <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="最近正式版" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
             </StackPanel>
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.3" Info="2026-09-15 · 6 天前 · 最新" EventType="弹出窗口" EventData="26.3 更新总结|【新内容】&#xA;· 随杨树生成的自然方块。&#xA;· 有红色、橙色、黄色三种颜色。&#xA;· 一种新的树苗，由杨树树叶掉落。&#xA;· 可以与流浪商人交易获得。&#xA;· 有对应的去皮变种。&#xA;· 由4个杨木原木合成。&#xA;· 一种新的木板。&#xA;· 可用于合成对应的按钮、门、栅栏、栅栏门、压力板、告示牌、台阶、楼梯、活板门、船和运输船。&#xA;· 会生成在杨树和倒下的杨树的树干上。&#xA;· 有小型和大型两种尺寸。&#xA;· 大型层孔菇被破坏后会掉落两个层孔菇。&#xA;· 可用于合成蘑菇煲。&#xA;· 类似于床，具有一定的弹性，摔落其上可减免50%摔落高度的摔落伤害。&#xA;· 使用后可使玩家通过睡觉来跳过夜晚，但不会设置重生点。&#xA;· 只能使用一次，使用后会被摧毁。&#xA;· 无法在下界和末地中使用，如果试图在那里睡觉，则麦秆床会被破坏而不掉落自身，不会爆炸或生成火。&#xA;· 使用3个干草捆合成4个麦秆床。&#xA;· 合适的挖掘工具是锄。&#xA;· 可用于堆肥，有85%的概率使堆肥层数增加一层。&#xA;· 会在斑驳森林中以斑块形式自然生成。&#xA;【更改】&#xA;· 现在村民升级时解锁的新交易能在交易界面中刷新。&#xA;· 现在处于骑乘状态时会受到弹射物伤害。&#xA;· 不再会传送到基岩上、危险的方块上和世界边界外。&#xA;· 现在浸没在流体中的犰狳不会再尝试蜷缩。&#xA;· 不再会传送到基岩上。&#xA;· 现在传送时会产生一条指向传送后位置的粒子效果拖尾。&#xA;· 移除了纹理中的多余像素。&#xA;· 现在不再会产生落叶粒子。&#xA;· 更改了部分间歇泉粒子的纹理。&#xA;· 食用紫颂果不再会传送到世界边界外。&#xA;· 现在生物食用后传送时会产生一条指向传送后位置的粒子效果拖尾。&#xA;· 更改了合成配方，现在可任意搭配两个红色蘑菇、棕色蘑菇或层孔菇合成。&#xA;· 现在可以使用层孔菇合成兔肉煲。&#xA;· 现在空地图和部分探险家地图可以在废弃营地的箱子或氧化的铜箱子中找到。&#xA;· 更改了地图和已有探险家地图的物品纹理。&#xA;· 更改了玩家指针的纹理，现在位于范围外的玩家指针也会指示方向。&#xA;· 加入了5个新的地图图标。&#xA;· 现在探险家地图各自使用独立的ID。&#xA;· 重命名了以下探险家地图：&#xA;· 沼泽探险家地图 → 沼泽小屋地图" />
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.2" Info="2026-06-16 · 97 天前" EventType="弹出窗口" EventData="26.2 更新总结|【新内容】&#xA;· 在硫黄洞穴中自然生成。&#xA;· 有楼梯、台阶和墙变种。&#xA;· 有磨制、砖和雕纹变种。&#xA;· 合适挖掘工具是镐。&#xA;· 硫黄的磨制变种。&#xA;· 硫黄的砖变种。&#xA;· 硫黄的雕纹变种。&#xA;· 在硫黄洞穴的硫黄池及硫黄涌泉中自然生成。&#xA;· 在上方的4格水源方块中生成气泡。&#xA;· 可以用9个硫黄合成。&#xA;· 当放置在岩浆块或熔岩上方，处于1-4格高的水源、含水脚手架或无碰撞体积的含水方块下方，且水的上方1格为空气或无碰撞体积的方块时，水面会形成间歇泉。间歇泉喷发时类似涌流气泡柱，会将其上方的实体向上推动。&#xA;· 当放置在熔岩源上方时，间歇泉会连续喷发，但声音比下方是岩浆块喷发时稍弱。&#xA;· 朱砂的磨制变种。&#xA;· 朱砂的砖变种。&#xA;· 朱砂的雕纹变种。&#xA;· 一种类似于滴水石锥的方块。&#xA;· 在硫黄洞穴生物群系中的硫黄上自然生成。&#xA;· 放置在方块下表面时为钟乳石形态，放置在上表面为石笋形态。&#xA;· 满足特定条件时，钟乳石形态上方为硫黄时会缓慢生长，并会使下方的方块上开始缓慢生长石笋，钟乳石最多长到两格高。&#xA;· 邻近的石笋末端和钟乳石末端会连接为石柱形态，但如果是按住⇧ Shift时放置则不会。&#xA;【更改】&#xA;· 现在对其使用骨粉不再需要上方一格为空气且在建造界限内。&#xA;· 将弹性从66%提高至75%，以匹配基岩版。&#xA;· 现在会出售硫黄尖锥。&#xA;· 更改了幼年个体的背部纹理，现在其背部的鬃毛纹理分布于单侧而非两侧。&#xA;· 不再能在和平难度下生成。&#xA;· 现在会在和平难度下消失。&#xA;· 将幼年疣猪兽的边界箱从宽0.6982422格、高0.7格改为宽0.75格、高0.85格，以匹配基岩版。&#xA;· 将幼年疣猪兽的视平线高度从0.595格改为0.625格。&#xA;· 将幼年疣猪兽的乘客高度从0.746875格改为0.875格。&#xA;· 将幼年犰狳的视平线高度从0.156格改为0.21875格。&#xA;· 将幼年美西螈的边界箱宽度从宽0.5格、高0.25格改为宽0.21格、高0.375格，以匹配基岩版。&#xA;· 将幼年美西螈的视平线高度从0.2格改为0.09375格。&#xA;· 将幼年美西螈的乘客高度从0.25格改为0.1875格。&#xA;· 将幼年骆驼的边界箱从宽1.02格、高1.425格改为宽0.95格、高1.4格。&#xA;· 将幼年骆驼的视平线高度从1.365格改为1.38格。&#xA;· 更改了鸡变种的受伤和死亡音效。&#xA;· 将幼年鸡的视平线高度从0.28格改为0.28125格。&#xA;· 将幼年鸡的乘客高度从0.4格改为0.375格。&#xA;· 将幼年牛和幼年哞菇的视平线高度从0.65格改为0.69格。&#xA;· 将幼年牛和幼年哞菇的乘客高度从0.7格改为0.75格。" />
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.1.2" Info="2026-04-09 · 165 天前" EventType="弹出窗口" EventData="26.1.2 更新总结|【更改】&#xA;· 现在复选框的消息提示框仅在文本超过2行溢出时才会显示。&#xA;· “举报玩家”界面中的确认复选框，现在会显示与消息文本一致的提示框。" />
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.1.1" Info="2026-04-01 · 173 天前" EventType="弹出窗口" EventData="26.1.1 更新总结|该版本暂未抓取到中文更新日志，可到 Minecraft Wiki 查看原文。" />
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 26.1" Info="2026-03-24 · 181 天前" EventType="弹出窗口" EventData="26.1 更新总结|【新内容】&#xA;· 一种新的花，可用于阻止幼年动物成长。&#xA;· 对已被阻止成长的幼年动物使用时，将使其重新开始成长。&#xA;· 无法对幼年僵尸马和幼年骷髅马使用。&#xA;· 使用时会在该生物周围释放绿色粒子，向下表示停止生长，向上表示恢复生长。&#xA;· 使用1个蒲公英和8个金粒合成。&#xA;· 可用于合成黄色染料。&#xA;· 可用于合成谜之炖菜，给予玩家饱和效果。&#xA;· 可放入花盆中。&#xA;· 加入了新的音色“小号”（Trumpet），对应的乐器方块为铜块、雕纹铜块、切制铜块、切制铜楼梯、切制铜台阶及其氧化和涂蜡变种。&#xA;· 加入了合成配方，即用1张纸和1个任意金属颗粒合成1个命名牌：&#xA;· 加入了新的成年音效变种：&#xA;· 原先的音效变种被称为classic。&#xA;· 已有生物的音效变种会是所有变种中的随机一种。&#xA;· 所有变种均有独特的喂食音效。&#xA;· 新的命令，允许手臂摆动。&#xA;· 并非所有实体都支持摆动，命令可能会返回成功，但客户端只会在允许的情况下显示动画。&#xA;· 例如，这可以使玩家模型摆动手臂。&#xA;· 返回实体的数量。&#xA;· 加入了entity子命令，用于输出世界中实体的档案信息。&#xA;· 如果选中的实体没有档案（目前只有玩家和玩家模型有），命令会执行失败。&#xA;【更改】&#xA;· 圣诞节期间不再使用圣诞节礼物纹理。&#xA;· 更改了顶面纹理以匹配基岩版。&#xA;· 现在装有的水是透明的。&#xA;· 现在当滴水石锥附着于下表面的滴水石块上方为含水方块时，下方的滴水石锥可以生长。&#xA;· 现在石头可在切石机中直接制作圆石及其不同形状的变种。&#xA;· 现在深板岩可在切石机中直接制作深板岩圆石、磨制深板岩、深板岩砖、深板岩瓦、雕纹深板岩以及它们不同形状的变种。&#xA;· 现在幼年人形生物拥有独特的盔甲模型。&#xA;· 幼年人形生物装备的盔甲不再会渲染盔甲纹饰。&#xA;· 更改了矛冲锋攻击使受击者脱离骑乘状态的速度阈值，以匹配基岩版。&#xA;· 更改了幼年个体的纹理和模型。&#xA;· 为幼年个体加入了单独的音效。&#xA;· 幼年狼身上的狼铠现在不再渲染。&#xA;· 幼年猪身上的鞍现在不再渲染。&#xA;· 更改了纹理和模型。&#xA;· 现在拥有了新动画。&#xA;· 为幼年美西螈加入了装死的动画。&#xA;· 幼年骆驼身上的鞍现在不再渲染。&#xA;· 现在会跟随骑乘鹦鹉螺的玩家，以匹配基岩版。&#xA;· 现在骑乘在红色纹理炽足兽上的炽足兽也会是红色纹理，以匹配基岩版。&#xA;· 调整了幼年个体的边界箱以匹配其新模型。&#xA;【更改（实验性）】&#xA;· 大师等级的图书管理员不再出售命名牌。&#xA;· 大师等级的图书管理员现在会以3个绿宝石的价格出售红色蜡烛或黄色蜡烛。&#xA;· 从战利品表中移除了命名牌。&#xA;· 移除了下列标签：&#xA;· trades/jungle_special&#xA;· trades/plains_special&#xA;· trades/savanna_special&#xA;· trades/snow_special&#xA;· trades/swamp_special&#xA;· trades/taiga_special&#xA;· 移除了所有实验性的魔咒提供器。" />
+{{RELEASE_ITEMS}}
             <local:MyHint Theme="Blue" Margin="0,6,0,12" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -163,7 +159,7 @@
                 <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
                 <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
                 <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="https://zh.minecraft.wiki/w/Java版26.3" />
+                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="{{WIKI_VERSION_URL}}" />
             </Grid>
         </StackPanel>
     </local:MyCard>
@@ -248,7 +244,7 @@
     </local:MyCard>
     <local:MyCard Title="更多功能" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.json" />
+            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="{{BASE_URL}}/panel.json" />
             <local:MyHint Theme="Blue" Text="点击上面这一行，在独立窗口中打开：每日一题与彩蛋、常用网站与指令速查、推荐服务器。" />
         </StackPanel>
     </local:MyCard>

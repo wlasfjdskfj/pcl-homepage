@@ -1,0 +1,32 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---- Node ----
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# ---- Cloudflare / Wrangler ----
+.wrangler/
+.dev.vars
+
+# ---- 本地诊断与临时产物 ----
+_proc_out.txt
+_git_push.ps1
+_baseline/
+_verify_out/
+
+# ---- 操作系统 / 编辑器 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# 注意：Custom.xaml、panel.xaml、panel.json 由 scripts/generate.py 生成，
+# 但线上直接由 Cloudflare Pages 托管，必须入库，因此不在此忽略。

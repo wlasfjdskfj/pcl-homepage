@@ -262,45 +262,7 @@
                 <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="其他服务器" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
             </StackPanel>
-            <Border CornerRadius="10" Padding="12,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Hypixel" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="mc.hypixel.net" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mc.hypixel.net" />
-                </Grid>
-            </Border>
-            <Border CornerRadius="10" Padding="12,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="2B2T" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="connect.2b2t.org" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="connect.2b2t.org" />
-                </Grid>
-            </Border>
-            <Border CornerRadius="10" Padding="12,12" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock Text="Mineplex" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                        <TextBlock Text="mineplex.com" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />
-                    </StackPanel>
-                    <local:MyIconTextButton Grid.Column="1" Height="32" Padding="12,0,12,0" Text="复制" LogoScale="0.8" ColorType="Highlight" Logo="M320 128h384c35 0 64 29 64 64v384c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v384h384V192H320z M256 320H192c-35 0-64 29-64 64v384c0 35 29 64 64 64h384c35 0 64-29 64-64v-64h-64v64H192V384h64V320z" EventType="复制文本" EventData="mineplex.com" />
-                </Grid>
-            </Border>
+{{SERVER_ITEMS}}
             <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
                 <local:CustomEventService.Events>
                     <local:CustomEventCollection>

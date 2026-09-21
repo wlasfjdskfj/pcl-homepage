@@ -1,0 +1,1 @@
+<local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="更新总结 {{VERSION}}" Info="{{INFO_TEXT}}" EventType="弹出窗口" EventData="{{POPUP_DATA}}" />

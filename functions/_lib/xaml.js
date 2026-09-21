@@ -27,7 +27,7 @@ function scoreColor(score) {
 function buildScoreBar(score) {
   const blocks = 10;
   const filled = Math.floor(score / 10);
-  let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,14">';
+  let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">';
   for (let i = 0; i < blocks; i++) {
     const bg = i >= filled ? '{DynamicResource ColorBrush7}' : '{DynamicResource ColorBrush1}';
     bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
@@ -54,7 +54,7 @@ function quizAccent() {
 function buildQuizTag(cat) {
   const label = cat || "综合";
   return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#99000000">'
-    + '<TextBlock Text="' + label + '" FontSize="10" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>'
+    + '<TextBlock Text="' + label + '" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>'
     + '</Border>';
 }
 
@@ -74,14 +74,14 @@ function buildFallbackXaml(title, message, eta, reason) {
   // 简单场景（如访问被拒绝）：红圈禁止图标 + 居中标题 + 说明 + 刷新按钮
   if (!showLoading) {
     return '<StackPanel>' +
-      '<local:MyCard Title="" Margin="0,0,0,15">' +
+      '<local:MyCard Title="" Margin="0,0,0,12">' +
       '<StackPanel Margin="30,40,30,32">' +
       '<Grid Width="64" Height="64" HorizontalAlignment="Center">' +
       '<Ellipse Width="64" Height="64" Fill="#FFE5484D"/>' +
       '<Path Data="M20,20 L44,44" Stroke="#FFFFFFFF" StrokeThickness="8" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>' +
       '</Grid>' +
       '<TextBlock Text="' + escapeXaml(title) + '" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,18,0,0"/>' +
-      '<TextBlock Text="' + escapeXaml(message) + '" FontSize="14" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420" HorizontalAlignment="Center" LineHeight="24" Margin="0,10,0,0"/>' +
+      '<TextBlock Text="' + escapeXaml(message) + '" FontSize="15" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="420" HorizontalAlignment="Center" LineHeight="24" Margin="0,10,0,0"/>' +
       REFRESH_BUTTON +
       '</StackPanel>' +
       '</local:MyCard>' +
@@ -107,16 +107,16 @@ function buildFallbackXaml(title, message, eta, reason) {
 
   let etaLine = '';
   if (eta && eta !== '0') {
-    etaLine = '<TextBlock Text="预计 ' + escapeXaml(eta) + ' 更新完成" FontSize="14" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,16,0,0"/>';
+    etaLine = '<TextBlock Text="预计 ' + escapeXaml(eta) + ' 更新完成" FontSize="15" Foreground="{DynamicResource ColorBrush3}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,16,0,0"/>';
   }
   let reasonLine = '';
   if (reason && reason.trim()) {
-    reasonLine = '<TextBlock Text="原因：' + escapeXaml(reason) + '" FontSize="13" Foreground="{DynamicResource ColorBrush2}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="440" HorizontalAlignment="Center" LineHeight="22" Margin="0,8,0,0"/>';
+    reasonLine = '<TextBlock Text="原因：' + escapeXaml(reason) + '" FontSize="12" Foreground="{DynamicResource ColorBrush2}" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="440" HorizontalAlignment="Center" LineHeight="22" Margin="0,8,0,0"/>';
   }
 
   return '<StackPanel>' +
-    '    <local:MyCard Title="" Margin="0,0,0,15">' +
-    '        <StackPanel Margin="30,42,30,34">' +
+    '    <local:MyCard Title="" Margin="0,0,0,12">' +
+    '        <StackPanel Margin="30,40,30,32">' +
     spinner +
     '            <TextBlock Text="服务器正在更新" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" TextAlignment="Center" HorizontalAlignment="Center" Margin="0,20,0,0"/>' +
     statusLine +

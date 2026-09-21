@@ -107,7 +107,7 @@ function getFestival(date, extra) {
 function buildFestivalBanner(festival) {
   if (!festival) return "";
   const text = escapeXaml("今天是 " + festival.name + "！" + festival.msg);
-  return '<local:MyHint Theme="Red" Margin="0,0,0,14" Text="' + text + '" />';
+  return '<local:MyHint Theme="Red" Margin="0,0,0,12" Text="' + text + '" />';
 }
 
 // 节日/纪念日倒计时（右上角胶囊）；custom 为后台自定义倒计时目标
@@ -123,7 +123,7 @@ function buildCountdownXaml(date, custom, extra) {
       const cline = cdiff === 0
         ? "今天就是 " + escapeXaml(custom.name) + "！"
         : escapeXaml(custom.name) + " · 还有 " + cdiff + " 天";
-      return '<Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#59000000" CornerRadius="12" Padding="12,8,12,8">'
+      return '<Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0" Background="#59000000" CornerRadius="12" Padding="12,8,12,8">'
         + '<TextBlock Text="' + cline + '" FontSize="12" FontWeight="Bold" Foreground="White" />'
         + '</Border>';
     }
@@ -147,7 +147,7 @@ function buildCountdownXaml(date, custom, extra) {
   const line = best.diff === 0
     ? "今天就是 " + escapeXaml(best.name) + "！"
     : escapeXaml(best.name) + " · 还有 " + best.diff + " 天";
-  return '<Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,18,0" Background="#59000000" CornerRadius="12" Padding="12,8,12,8">'
+  return '<Border HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,16,0" Background="#59000000" CornerRadius="12" Padding="12,8,12,8">'
     + '<TextBlock Text="' + line + '" FontSize="12" FontWeight="Bold" Foreground="White" />'
     + '</Border>';
 }

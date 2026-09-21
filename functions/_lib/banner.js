@@ -15,7 +15,7 @@ function buildMultiBanner(mbRaw) {
     anims += '<DoubleAnimation Storyboard.TargetName="mb' + i + '" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:1" BeginTime="0:0:' + on0 + '"/>'
       + '<DoubleAnimation Storyboard.TargetName="mb' + i + '" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:1" BeginTime="0:0:' + off0 + '"/>';
   }
-  return '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
+  return '<local:MyCard Title="公告" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">'
     + '<StackPanel Margin="25,36,23,16" ClipToBounds="True" Height="28">'
     + '<Grid>'
     + '<Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard RepeatBehavior="Forever">' + anims + '</Storyboard></BeginStoryboard></EventTrigger></Grid.Triggers>'
@@ -30,7 +30,7 @@ function buildSingleBanner(bn) {
   if (!bn || !bn.enabled || !bn.text || !String(bn.text).trim()) return "";
   const bText = String(bn.text).trim();
   if (bText.length <= 40) {
-    return '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
+    return '<local:MyCard Title="公告" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">'
       + '<StackPanel Margin="25,36,23,16">'
       + '<StackPanel.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard><Storyboard>'
       + '<DoubleAnimation Storyboard.TargetName="bqFade" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.6"/>'
@@ -42,7 +42,7 @@ function buildSingleBanner(bn) {
   const bTextW = bText.length * 15;
   const bTo = -(bTextW + 40);
   const bDur = Math.max(8, Math.min(30, Math.round((500 - bTo) / 50)));
-  return '<local:MyCard Title="公告" Margin="0,0,0,15" CanSwap="True" IsSwapped="False">'
+  return '<local:MyCard Title="公告" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">'
     + '<StackPanel Margin="25,36,23,16" ClipToBounds="True" Height="28">'
     + '<TextBlock Text="' + escapeXaml(bText) + '" FontSize="15" LineHeight="24" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center">'
     + '<TextBlock.RenderTransform><TranslateTransform x:Name="bqMarquee" X="0"/></TextBlock.RenderTransform>'

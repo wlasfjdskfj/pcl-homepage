@@ -23,31 +23,34 @@
 
 ## ✨ 功能特性
 
-### 🎯 动态内容（每次刷新都变）
-
-| 功能 | 说明 |
-|---|---|
-| 🎲 **幸运数字** | 每次刷新随机生成 1-99 之间的数字 |
-| 🎨 **幸运颜色** | 每次刷新随机从 24 种主题色中挑选 |
-| 🥚 **彩蛋** | 50 个 Minecraft 主题小彩蛋随机抽取 |
-| 💬 **每日一言** | 80 条挖矿、生存、冷知识，点按钮换一句 |
-
-### 👤 个性化内容（每人不同）
+### 👤 个性化内容（按 IP + 北京时间日期确定性生成，每人每天一份）
 
 | 功能 | 说明 |
 |---|---|
 | 🌐 **公网 IP** | 从 Cloudflare 请求头读取，展示用户自己的 IP |
-| 📊 **人品测试** | 用 IP + 日期做 hash，同一天同一 IP 分数固定，不同人不同 |
-| 🎨 **幸运颜色** | 同样按 IP 区分，每人每天一个颜色 |
+| 🎲 **幸运数字** | 用 IP + 日期做 hash 取值，同一天同一 IP 固定，不同人不同 |
+| 🎨 **幸运颜色** | 从 24 种主题色中按 IP+日期挑选，每人每天一个颜色 |
+| 📊 **人品测试** | 同样是 IP + 日期 hash，分数固定且带评级与评语 |
+| 💬 **每日一言** | 68 条挖矿、生存与冷知识，每人每天一条（后台可自定义） |
+| 🍀 **今日运势** | 宜 / 忌 / 小贴士，按 IP + 日期确定性生成 |
 
-### 📦 静态内容（每天更新）
+### 🎯 每次刷新都变
+
+| 功能 | 说明 |
+|---|---|
+| 🥚 **彩蛋** | 50 个 Minecraft 主题小彩蛋随机抽取 |
+| ⚔ **随机挑战** | 100 条挑战随机抽取，按难度带不同配色 |
+| 🌱 **今日种子** | 从 97 个种子中随机，另有 8 个备选种子弹窗 |
+| ❓ **MC 知识题** | 123 道题，按 IP + 日期抽取，附答案解析 |
+
+### 📦 静态内容（每天由 CI 更新）
 
 | 功能 | 说明 |
 |---|---|
 | 🆕 **最新版本** | 从 Mojang 官方 API 抓取，显示快照 + 正式版 |
 | 🖼 **版本封面图** | 从 Minecraft Wiki 抓取对应版本的封面 |
-| 📖 **更新日志** | 一键跳转到对应版本的 Wiki 页面 |
-| 🔧 **实用工具** | 内存优化、清理垃圾 |
+| 📖 **更新总结** | 抓取各正式版的中文更新日志，点击弹窗查看 |
+| 🔧 **实用工具** | 常用指令一键复制、内存优化、清理垃圾 |
 
 ### 🔗 常用链接
 
@@ -64,7 +67,11 @@
 
 ### 日期不更新？
 
-Cloudflare Functions 可能没生效，跑一次 `python check.py` 诊断。
+Cloudflare Functions 可能没生效，跑一次 `python scripts/doctor.py` 体检：它会先检查本地仓库一致性，再探测线上接口。
+
+### 主页显示 `__XXX__` 之类的原始文本？
+
+说明模板里的占位符没有被中间件替换。运行 `python scripts/check_placeholders.py` 定位是哪一个。
 
 ### 版本图是旧的？
 
@@ -73,6 +80,65 @@ Cloudflare 缓存没刷新，去控制台清除缓存。
 ### 人品分数和别人的一样？
 
 同一 WiFi 下共享 IP，属于正常现象。
+
+---
+
+## 🛠 本地开发
+
+```bash
+pip install -r requirements.txt
+
+python scripts/doctor.py            # 完整体检（本地 + 线上探测）
+python scripts/doctor.py --offline  # 只做本地检查
+python scripts/generate.py          # 重新生成 Custom.xaml / panel.xaml / panel.json
+```
+
+仓库自带的校验脚本（CI 每次运行都会执行）：
+
+| 脚本 | 作用 |
+|---|---|
+| `scripts/check_placeholders.py` | 校验模板 / 中间件 / 生成器三方占位符一致，防止占位符泄漏到页面 |
+| `scripts/check_templates.py` | 校验模板 token 都有取值、生成物无残留 token |
+| `scripts/check_imports.py` | 校验 `functions/` 下的 ES 模块导入都能解析到真实导出 |
+| `scripts/doctor.py` | 综合体检：文件完整性、JSON、JS 语法、图片引用、线上接口 |
+
+### 改页面结构请改 `templates/`
+
+页面的静态结构（卡片、样式、按钮）全部放在 `templates/*.tpl`，`generate.py` 只负责
+抓取版本信息并填入生成期数据。**要调整布局或样式，直接编辑模板文件即可，不必再动 Python。**
+
+```
+templates/Custom.xaml.tpl   主页结构
+templates/panel.xaml.tpl    “更多功能”面板结构
+templates/release_item.tpl  “最近正式版”单条列表项
+templates/server_item.tpl   服务器推荐单条
+```
+
+模板里有两类占位符，不要混淆：
+
+| 形式 | 何时替换 | 示例 |
+|---|---|---|
+| `{{TOKEN}}` | 生成期，由 `generate.py` 填入 | `{{MAIN_VERSION}}`、`{{WALLPAPER_URL}}`、`{{RELEASE_ITEMS}}` |
+| `__TOKEN__` | 请求时，由 `functions/_middleware.js` 按访问者填入 | `__USER_IP__`、`__QUOTE__`、`__WEATHER_BODY__` |
+
+新增生成期 token 时，记得在 `scripts/generate.py` 的 `render_template(...)` 调用里补上取值，
+否则 `scripts/check_templates.py` 会让 CI 失败。
+
+### 项目结构
+
+```
+templates/              页面结构模板（唯一来源，编辑这里）
+Custom.xaml            生成物：主页（勿手工修改）
+panel.xaml             生成物：“更多功能”面板（勿手工修改）
+panel.json             生成物：面板元数据
+_headers               Cloudflare Pages 缓存与安全响应头
+scripts/generate.py    抓取版本/封面，渲染模板
+functions/_middleware.js  请求时替换占位符（天气、运势、题目、公告等）
+functions/admin.js     访问统计后台，通用工具已拆到 functions/_lib/admin-*.js
+functions/_lib/        共享模块（不会被当成路由）
+```
+
+> ⚠️ `Custom.xaml`、`panel.xaml`、`panel.json` 都是**生成物**，由 `.github/workflows/generate.yml` 每 12 小时覆盖一次，请改 `templates/` 而不是直接编辑它们。
 
 ---
 

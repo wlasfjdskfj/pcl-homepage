@@ -10,5 +10,14 @@
 /music/*.mp3
   Cache-Control: public, max-age=604800, s-maxage=604800
 
-/images/hero/*.jpg
+/images/quiz/*.jpg
   Cache-Control: public, max-age=2592000, s-maxage=2592000
+
+/images/icons/*.png
+  Cache-Control: public, max-age=2592000, s-maxage=2592000
+
+/images/version.png
+  Cache-Control: public, max-age=3600, s-maxage=3600
+
+/favicon.png
+  Cache-Control: public, max-age=604800, s-maxage=604800

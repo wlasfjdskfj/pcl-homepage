@@ -1,1 +1,3 @@
-requests
+# scripts/generate.py 依赖（其余均为 Python 标准库）
+# 固定版本范围，避免上游大版本变更导致 CI 生成失败
+requests>=2.31.0,<3.0.0
