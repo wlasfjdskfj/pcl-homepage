@@ -205,7 +205,7 @@ export async function onRequest(context) {
         kvGet(env, "banners", null),
         kvGetJson(env, "homepage_banner", null),
       ]),
-      fetchWeather(env, ip),
+      fetchWeather(env, ip, url.origin),
     ]);
     const weatherBody = (weather && weather.body) || "";
 
@@ -354,7 +354,7 @@ export async function onRequest(context) {
         console.error('[Middleware] 获取面板静态资源失败：', e);
         return null;
       }),
-      fetchWeather(env, ip),
+      fetchWeather(env, ip, url.origin),
     ]);
     const weatherKind = (weather && weather.kind) || null;
 

@@ -61,7 +61,7 @@ def check_files():
         "Custom.xaml", "panel.xaml", "panel.json", "_headers",
         "requirements.txt", ".gitignore",
         "templates/Custom.xaml.tpl", "templates/panel.xaml.tpl",
-        "templates/release_item.tpl", "templates/server_item.tpl",
+        "templates/server_item.tpl",
         "scripts/generate.py", "scripts/check_placeholders.py",
         "scripts/check_templates.py", "scripts/check_imports.py",
         "functions/_middleware.js", "functions/admin.js",

@@ -691,9 +691,16 @@ RELEASE_ITEM_INDENT = 12
 
 
 def build_release_items(recent_releases, version_changelogs):
-    """渲染“最近正式版”列表项（含更新总结弹窗）。"""
+    """渲染“最近正式版”列表项（含更新总结弹窗）。
+
+    注意：主页的版本卡已移除，本函数与 templates/release_item.tpl 现均未被调用。
+    此处保留以备恢复版本卡；模板缺失时直接返回空串，避免误调用时抛异常。
+    """
     if not recent_releases:
         return '            <local:MyHint Theme="Yellow" Text="暂时无法获取版本列表。" />'
+
+    if not (TEMPLATES_DIR / "release_item.tpl").exists():
+        return ""
 
     tpl = load_template("release_item.tpl")
     out = []
