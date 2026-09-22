@@ -1,5 +1,10 @@
-// D1 访问统计：异步写入 visits 表，每天清理 7 天前数据（从 _middleware.js 抽离）
+// D1 访问统计：异步写入 visits 表，每天清理过期数据（从 _middleware.js 抽离）
 // 清理时间戳优先用模块级内存缓存，Worker 实例存活期间不再每次访问都读 KV。
+//
+// 保留期由 7 天延长到 30 天：主页的「每日签到」需要足够长的历史来算连续天数
+// 与累计天数，7 天会把连续签到截断在 7。
+
+import { VISIT_RETENTION_DAYS } from './daily.js';
 
 let d1TableReady = false;
 let lastCleanupTs = 0;      // 模块级内存缓存（毫秒），0 表示本实例尚未确认
@@ -8,9 +13,15 @@ const CLEANUP_INTERVAL = 86400000; // 24 小时
 async function ensureD1Table(env) {
   if (d1TableReady || !env.STATS_DB) return;
   try {
-    await env.STATS_DB.prepare(
-      "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"
-    ).run();
+    await env.STATS_DB.batch([
+      env.STATS_DB.prepare(
+        "CREATE TABLE IF NOT EXISTS visits (id INTEGER PRIMARY KEY AUTOINCREMENT, ip TEXT NOT NULL, country TEXT, ts INTEGER NOT NULL)"
+      ),
+      // 按 IP 查历史（签到统计用）走索引，避免全表扫描
+      env.STATS_DB.prepare(
+        "CREATE INDEX IF NOT EXISTS idx_visits_ip_ts ON visits (ip, ts)"
+      ),
+    ]);
     d1TableReady = true;
   } catch (e) { /* 建表失败忽略，下次重试 */ }
 }
@@ -36,7 +47,7 @@ async function recordVisit(env, ip, country) {
     const ref = Math.max(lastCleanupTs, kvTs);
     if (now - ref >= CLEANUP_INTERVAL) {
       await env.STATS_DB.prepare(
-        "DELETE FROM visits WHERE ts < (unixepoch('now','-7 days') * 1000)"
+        "DELETE FROM visits WHERE ts < (unixepoch('now','-" + VISIT_RETENTION_DAYS + " days') * 1000)"
       ).run();
       lastCleanupTs = now;
       if (env.HOMEPAGE_KV) {
