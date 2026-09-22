@@ -9,9 +9,9 @@
                     <Border>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                <GradientStop Color="#26000000" Offset="0" />
-                                <GradientStop Color="#59000000" Offset="0.55" />
-                                <GradientStop Color="#8C000000" Offset="1" />
+                                <GradientStop Color="#33000000" Offset="0" />
+                                <GradientStop Color="#88000000" Offset="0.55" />
+                                <GradientStop Color="#CC000000" Offset="1" />
                             </LinearGradientBrush>
                         </Border.Background>
                     </Border>
@@ -21,14 +21,19 @@
                                 <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center">
                                     <local:MyImage Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                                 </Border>
-                                <TextBlock Text="__GREETING__" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
-                                <TextBlock Text="{user}" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" Margin="6,0,0,0" />
+                                <TextBlock Text="__GREETING__，{user}！" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                             </StackPanel>
-                            <TextBlock Text="__GREETING_SUB__" FontSize="12" Foreground="#D9FFFFFF" Margin="0,4,0,0" MaxWidth="250" TextWrapping="Wrap" />
+                            <TextBlock Text="__GREETING_SUB__" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />
+                            <TextBlock Text="未显示玩家名？刷新页面即可" FontSize="11" Foreground="#99FFFFFF" Margin="0,3,0,0" />
                         </StackPanel>
                     </Border>
                     <!-- __COUNTDOWN_BODY__ -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
+                            <TextBlock Text="  T O D A Y  " FontSize="11" FontWeight="Bold" Foreground="#AAFFFFFF" VerticalAlignment="Center" />
+                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#66FFFFFF" VerticalAlignment="Center" />
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
                             <TextBlock Text=" 月 " FontSize="15" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#CCFFFFFF" />
@@ -37,16 +42,16 @@
                         </StackPanel>
                         <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" FontWeight="Bold" Foreground="#EEFFFFFF" Margin="0,10,0,0" />
                     </StackPanel>
+                    <!-- 每日一言（叠加在横幅底部，按 IP 下发） -->
+                    <StackPanel VerticalAlignment="Bottom" Margin="20,0,16,12" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
+                            <Border Width="3" Height="10" CornerRadius="1.5" Background="#FFFFFF" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="#D9FFFFFF" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" />
+                    </StackPanel>
                 </Grid>
             </Border>
-            <!-- 每日一言（按 IP 下发；放在照片外，浅色/深色主题下都清晰） -->
-            <StackPanel Margin="0,0,0,16">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                    <Border Width="3" Height="12" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                </StackPanel>
-                <TextBlock Text="__QUOTE__" FontSize="12" Foreground="{DynamicResource ColorBrush3}" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="560" LineHeight="20" />
-            </StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
