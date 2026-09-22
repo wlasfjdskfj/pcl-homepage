@@ -29,10 +29,16 @@
                                     <CubicEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                From="8" To="0" Duration="0:0:0.90" BeginTime="0:0:0.30" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </StackPanel.Triggers>
+            <StackPanel.Effect>
+                <BlurEffect Radius="0" />
+            </StackPanel.Effect>
             <!-- __FESTIVAL_BANNER__ -->
             <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True" Style="{StaticResource HoverLift}">
                 <Grid>
@@ -122,15 +128,21 @@
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                              From="0" To="1" Duration="0:0:0.90"
-                                 BeginTime="0:0:0.55">
+                                             BeginTime="0:0:0.55">
                                 <DoubleAnimation.EasingFunction>
                                     <CubicEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                From="8" To="0" Duration="0:0:0.90" BeginTime="0:0:0.55" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </StackPanel.Triggers>
+            <StackPanel.Effect>
+                <BlurEffect Radius="0" />
+            </StackPanel.Effect>
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
@@ -181,15 +193,21 @@
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                              From="0" To="1" Duration="0:0:0.90"
-                                 BeginTime="0:0:0.80">
+                                             BeginTime="0:0:0.80">
                                 <DoubleAnimation.EasingFunction>
                                     <CubicEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                From="8" To="0" Duration="0:0:0.90" BeginTime="0:0:0.80" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </StackPanel.Triggers>
+            <StackPanel.Effect>
+                <BlurEffect Radius="0" />
+            </StackPanel.Effect>
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" ToolTip="依据 IP 与当日日期计算，同一天同一 IP 分数固定。&#xA;评级：95+ SSR / 80+ SR / 60+ R / 40+ N" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="__SCORE__" FontSize="60" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
@@ -275,15 +293,21 @@
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                              From="0" To="1" Duration="0:0:0.90"
-                                 BeginTime="0:0:1.05">
+                                             BeginTime="0:0:1.05">
                                 <DoubleAnimation.EasingFunction>
                                     <CubicEase EasingMode="EaseOut" />
                                 </DoubleAnimation.EasingFunction>
                             </DoubleAnimation>
+                            <DoubleAnimation
+                                Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
+                                From="8" To="0" Duration="0:0:0.90" BeginTime="0:0:1.05" />
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </StackPanel.Triggers>
+            <StackPanel.Effect>
+                <BlurEffect Radius="0" />
+            </StackPanel.Effect>
             <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="{{BASE_URL}}/panel.json" />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
