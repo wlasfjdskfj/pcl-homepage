@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>未解之谜 · Minecraft</title>
+<meta name="description" content="一份不该被看到的档案：Minecraft 的彩蛋、巧合与都市传说。">
+<meta name="theme-color" content="#0d0f12">
+<link rel="icon" href="/favicon.png">
+<style>
+  :root{
+    --bg:#0d0f12; --bg2:#14171c; --card:#171b21; --line:#252b34;
+    --ink:#e8eaed; --ink2:#9aa4b2; --ink3:#5f6b7a;
+    --accent:#7bd88f; --accent2:#4fa3ff; --warn:#e5a13a; --danger:#e5544d;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1100px 600px at 50% -200px, #1b2230 0%, transparent 70%),
+      linear-gradient(#0d0f12,#0b0d10 60%,#090b0d);
+    color:var(--ink);
+    font:16px/1.75 -apple-system,"Segoe UI Variable","Segoe UI",system-ui,"Microsoft YaHei",sans-serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  /* 极细噪点，避免大面积纯色发死 */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.028;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:0 22px}
+
+  /* ---------- 顶部警示条 ---------- */
+  .tape{
+    background:repeating-linear-gradient(45deg,#1a1d22 0 14px,#15181c 14px 28px);
+    border-bottom:1px solid var(--line);
+    font-size:12.5px;letter-spacing:.16em;color:var(--warn);text-align:center;
+    padding:9px 12px;font-weight:700;text-transform:uppercase;
+  }
+
+  /* ---------- 首屏 ---------- */
+  header{padding:76px 0 54px;text-align:center}
+  .kicker{
+    display:inline-block;font-size:12px;letter-spacing:.32em;color:var(--ink3);
+    border:1px solid var(--line);border-radius:999px;padding:6px 16px;margin-bottom:26px;
+    text-transform:uppercase;
+  }
+  h1{
+    font-size:clamp(30px,6.2vw,52px);line-height:1.2;margin:0 0 18px;font-weight:800;
+    letter-spacing:-.02em;
+    background:linear-gradient(180deg,#ffffff,#9fb0c4);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .lede{color:var(--ink2);max-width:56ch;margin:0 auto;font-size:16.5px}
+  .counter{
+    margin-top:30px;font-size:13px;color:var(--ink3);letter-spacing:.05em;
+  }
+  .counter b{color:var(--accent);font-variant-numeric:tabular-nums}
+
+  /* ---------- 通用区块 ---------- */
+  section{padding:14px 0 46px}
+  h2{
+    font-size:13px;letter-spacing:.2em;color:var(--ink3);text-transform:uppercase;
+    margin:0 0 20px;padding-bottom:12px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;gap:11px;font-weight:700;
+  }
+  h2::before{content:"";width:4px;height:13px;border-radius:2px;background:var(--accent);flex:none}
+
+  /* ---------- 卡片 ---------- */
+  .grid{display:grid;gap:14px}
+  @media(min-width:680px){.grid.two{grid-template-columns:1fr 1fr}}
+  .card{
+    background:linear-gradient(180deg,var(--card),#14171b);
+    border:1px solid var(--line);border-radius:var(--radius);padding:20px 20px 18px;
+    transition:border-color .22s,transform .22s,box-shadow .22s;
+  }
+  .card:hover{border-color:#37404d;transform:translateY(-2px);box-shadow:0 10px 30px -14px #000}
+  .card h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:9px}
+  .tag{
+    font-size:10.5px;letter-spacing:.08em;padding:3px 8px;border-radius:6px;
+    border:1px solid var(--line);color:var(--ink3);font-weight:700;text-transform:uppercase;
+  }
+  .tag.real{color:var(--accent);border-color:#2c4a35}
+  .tag.math{color:var(--accent2);border-color:#263c56}
+  .tag.legend{color:var(--warn);border-color:#4a3a1e}
+  .card p{margin:0;color:var(--ink2);font-size:14.5px}
+  code{
+    background:#0f1216;border:1px solid var(--line);border-radius:6px;
+    padding:2px 7px;font-size:13px;color:#cfe3ff;
+    font-family:ui-monospace,"Cascadia Code",Consolas,monospace;
+  }
+
+  /* ---------- 互动：彩蛋 ---------- */
+  .eggbox{
+    border:1px dashed #33404f;border-radius:var(--radius);padding:26px 20px;text-align:center;
+    background:radial-gradient(420px 130px at 50% 0%,#16202b,transparent 72%);
+  }
+  .eggbtn{
+    appearance:none;border:1px solid #2f3a47;background:#11161c;color:var(--ink);
+    font:inherit;font-size:15px;font-weight:700;padding:13px 28px;border-radius:11px;
+    cursor:pointer;transition:.2s;
+  }
+  .eggbtn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+  .eggbtn:active{transform:translateY(0)}
+  .reveal{
+    margin-top:20px;font-size:15px;color:var(--ink);opacity:0;transform:translateY(6px);
+    transition:opacity .45s,transform .45s;min-height:1px;
+  }
+  .reveal.on{opacity:1;transform:none}
+  .reveal .big{display:block;font-size:22px;font-weight:800;margin-bottom:6px;color:var(--accent)}
+
+  /* ---------- 时间锁 ---------- */
+  .tlock{text-align:center;color:var(--ink2);font-size:14.5px}
+  .tlock .num{
+    font-size:38px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;
+    display:block;margin:6px 0 2px;letter-spacing:.02em;
+  }
+
+  /* ---------- 页脚 ---------- */
+  footer{
+    border-top:1px solid var(--line);margin-top:26px;padding:34px 0 60px;
+    color:var(--ink3);font-size:13.5px;text-align:center;
+  }
+  footer a{color:var(--ink2);text-decoration:none;border-bottom:1px solid #2b333d}
+  footer a:hover{color:var(--accent);border-color:var(--accent)}
+  .hint{color:#3f4956;font-size:12px;margin-top:18px}
+
+  /* ---------- 隐藏彩蛋 ---------- */
+  #void{
+    position:fixed;inset:0;z-index:99;display:none;
+    background:#000;color:#7bd88f;
+    font-family:ui-monospace,Consolas,monospace;font-size:14px;
+    padding:34px;white-space:pre-wrap;line-height:1.9;
+  }
+  #void.on{display:block;animation:fade .5s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .dot{
+    position:fixed;right:20px;bottom:20px;width:11px;height:11px;border-radius:50%;
+    background:#2a323c;cursor:pointer;z-index:50;transition:.3s;
+  }
+  .dot:hover{background:var(--accent);box-shadow:0 0 14px var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="tape">⚠ 本页内容未经验证 · 请勿轻信</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="kicker">档案 · 编号 001</div>
+    <h1>未解之谜</h1>
+    <p class="lede">
+      你在 Minecraft 里待过的每一分钟，都被记录了下来。<br>
+      只是没人告诉你，记录去了哪里。
+    </p>
+    <div class="counter">本页已被你打开 <b id="views">—</b> 次</div>
+  </header>
+
+  <section>
+    <h2>档案 · 真实存在</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>苦力怕的来历 <span class="tag real">真实</span></h3>
+        <p>苦力怕源自一次<strong>建模失误</strong>：做猪的模型时，长宽高比例被写反，
+        得到一只瘦长的怪东西。Notch 觉得它"挺有意思"，于是留下了它，
+        改成了会悄悄靠近你、然后爆炸的怪物。</p>
+      </div>
+      <div class="card">
+        <h3>末影人在说什么 <span class="tag real">真实</span></h3>
+        <p>它们的叫声不是乱码，而是<strong>倒放的英语单词</strong>。
+        已知的有 <code>HERE</code>（这里）、<code>FOREVER</code>（永远）、
+        <code>what's up?</code>（怎么了）等。也就是说——它们一直在对你说话，只是反着说。</p>
+      </div>
+      <div class="card">
+        <h3>第 11 号唱片 <span class="tag real">真实</span></h3>
+        <p>唱片 <code>11</code> 是游戏里最诡异的一张：满载脚步声、喘息、方块破坏声，
+        以及一段倒放的人声。它也是<strong>唯一无法从苦力怕身上掉落</strong>的一张。
+        编号里恰好没有 12——11 之后直接跳到 13。</p>
+      </div>
+      <div class="card">
+        <h3>命名牌上的彩蛋 <span class="tag real">真实</span></h3>
+        <p>给生物命名 <code>Dinnerbone</code> 或 <code>Grumm</code>（两位 Mojang 员工），它会<strong>上下颠倒</strong>。
+        命名 <code>jeb_</code> 的羊，羊毛颜色会不停流动。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>档案 · 巧合</h2>
+    <div class="grid two">
+      <div class="card">
+        <h3>下界的 1 : 8 <span class="tag math">巧合</span></h3>
+        <p>在下界走 1 格，等于在主世界走 8 格。这个比例让下界成了最快的通道——
+        也意味着<strong>你在下界盖的每一段路，都在主世界投下 8 倍的影子</strong>。</p>
+      </div>
+      <div class="card">
+        <h3>玩家身高与末影人 <span class="tag math">巧合</span></h3>
+        <p>玩家身高 1.8 格、视高 1.62 格；末影人身高 2.9 格、视高 2.55 格。
+        这些奇怪的小数并非随意取得——<strong>它们是一个反复出现的数字家族</strong>，
+        玩家社区为此争论了很多年。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>档案 · 测试</h2>
+    <div class="eggbox">
+      <p style="margin:0 0 18px;color:var(--ink2);font-size:14.5px">
+        你身上是否带着某个<strong>只属于今天</strong>的东西？<br>
+        如果你是从启动器主页过来的，答案已经写在你屏幕上了。
+      </p>
+      <button class="eggbtn" id="egg">抽取你的彩蛋</button>
+      <div class="reveal" id="out"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>档案 · 时间锁</h2>
+    <div class="tlock">
+      距离下一次「异常」发生还有
+      <span class="num" id="clock">--:--:--</span>
+      <span style="color:var(--ink3);font-size:12.5px">（每日 00:00 重置）</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>档案 · 已知入口</h2>
+    <div class="card">
+      <p style="margin-bottom:12px">以下指令可以直接在游戏内触发一些"不该存在"的东西：</p>
+      <p style="line-height:2.1">
+        <code>/summon minecraft:giant</code> —— 召唤被移除的巨人<br>
+        <code>/give @s command_block</code> —— 拿到命令方块<br>
+        <code>/setblock ~ ~ ~ minecraft:barrier</code> —— 放置屏障方块<br>
+        <code>/tp @s ~ ~256 ~</code> —— 去世界之上看一眼
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    由 <a href="https://github.com/wlasfjdskfj/pcl-homepage">PCL2 个性化主页</a> 的彩蛋页<br>
+    <span class="hint">本页不收集任何信息。笑一下就好。</span>
+  </footer>
+</div>
+
+<div class="dot" id="dot" title="…"></div>
+<div id="void"></div>
+
+<script>
+(function(){
+  /* 访问计数：仅本地累加，不上报 */
+  var v = parseInt(localStorage.getItem('mystery_views') || '0', 10) + 1;
+  localStorage.setItem('mystery_views', String(v));
+  document.getElementById('views').textContent = v;
+
+  /* 抽彩蛋（本地随机，与服务端无关） */
+  var EGGS = [
+    ['第 0 天', '世界生成的那一刻，你其实已经"出生"过一次，只是没有记忆。'],
+    ['不该看见的坐标', '有人在 Y=-64 处听到过不属于任何方块的声音。'],
+    ['薛定谔的箱子', '未打开的箱子，内容物在代码里同时是空的和满的。'],
+    ['重力的例外', '末地的重力来自方块本身，而不是世界规则。'],
+    ['第 11 张', '唱片的编号从 13 跳到 cat，唯独没有 11 之前的那张。'],
+    ['假方块', '屏障方块看不见，但它挡住了你每一次错误的跳跃。'],
+    ['沉默的村民', '村民的交易列表在你开口前就已经定好了。'],
+    ['世界的边界', '世界边界外仍然有坐标，只是没有方块。'],
+    ['被删除的配方', '有些合成表存在于代码中，却永远不会显示在配方书里。'],
+    ['第一只羊', '你大概还记得自己驯服的第一只动物，但游戏不记得。']
+  ];
+  var btn = document.getElementById('egg'), out = document.getElementById('out');
+  var used = [];
+  btn.addEventListener('click', function(){
+    if (used.length >= EGGS.length) { used = []; }
+    var i;
+    do { i = Math.floor(Math.random() * EGGS.length); } while (used.indexOf(i) >= 0);
+    used.push(i);
+    var e = EGGS[i];
+    out.innerHTML = '<span class="big">' + e[0] + '</span>' + e[1];
+    out.classList.remove('on');
+    void out.offsetWidth;   /* 重放过渡 */
+    out.classList.add('on');
+  });
+
+  /* 每日倒计时（本地时间，00:00 重置） */
+  var clock = document.getElementById('clock');
+  function tick(){
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1, 0, 0, 0);
+    var s = Math.floor((t - n) / 1000);
+    var h = String(Math.floor(s / 3600)).padStart(2, '0');
+    var m = String(Math.floor(s % 3600 / 60)).padStart(2, '0');
+    var q = String(s % 60).padStart(2, '0');
+    clock.textContent = h + ':' + m + ':' + q;
+  }
+  tick(); setInterval(tick, 1000);
+
+  /* 隐藏彩蛋：右下角小点 */
+  var KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+  var seq = [];
+  var VOID_TEXT =
+    '> 正在读取未公开的存档…\n\n' +
+    '  检测到 1 个无法解释的实体。\n' +
+    '  坐标:   ∞ ,  ∞ ,  ∞\n' +
+    '  状态:   仍在运行\n\n' +
+    '> 这就是全部了。\n' +
+    '  如果还想往下看，你得自己去游戏里找。\n\n' +
+    '  [ 按任意键返回 ]';
+
+  function openVoid(){
+    var el = document.getElementById('void');
+    el.textContent = '';
+    el.classList.add('on');
+    var i = 0;
+    (function type(){
+      if (i >= VOID_TEXT.length) return;
+      el.textContent += VOID_TEXT[i++];
+      setTimeout(type, 22);
+    })();
+    var close = function(){ el.classList.remove('on'); window.removeEventListener('keydown', close); };
+    window.addEventListener('keydown', close);
+    el.addEventListener('click', close);
+  }
+
+  document.getElementById('dot').addEventListener('click', openVoid);
+  window.addEventListener('keydown', function(e){
+    seq.push(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+    if (seq.length > KONAMI.length) seq.shift();
+    if (seq.join(',') === KONAMI.join(',')) { seq = []; openVoid(); }
+  });
+})();
+</script>
+</body>
+</html>
