@@ -133,40 +133,6 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="当前最新版本 · {{MAIN_VERSION}}" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,16">
-            <Border CornerRadius="12" Height="200" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}" ClipToBounds="True">
-                <Grid>
-                    <local:MyImage Source="{{VERSION_IMAGE_SOURCE}}" HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="UniformToFill" />
-                    <Border HorizontalAlignment="Center" VerticalAlignment="Bottom" Background="#CC1A1A1A" CornerRadius="12" Padding="18,6,18,6" Margin="0,0,0,16" BorderBrush="#33FFFFFF" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="6" Height="6" CornerRadius="3" Background="#FFFFFF" VerticalAlignment="Center" Margin="0,0,8,0" />
-                            <TextBlock Text="{{SNAP_VERSION}}" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
-                </Grid>
-            </Border>
-            <TextBlock Text="最后更新 {{MAIN_DATE}}" FontSize="11" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
-            <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
-            <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
-                <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <TextBlock Text="最近正式版" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
-            </StackPanel>
-{{RELEASE_ITEMS}}
-            <Grid Margin="0,4,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <local:MyIconTextButton Grid.Column="0" Text="下载" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download" />
-                <local:MyIconTextButton Grid.Column="1" Text="服务端" LogoScale="0.9" Logo="M128 192h768v256H128V192z M128 576h768v256H128V576z M192 256h128v128H192V256z M192 640h128v128H192V640z" EventType="打开网页" EventData="https://www.minecraft.net/zh-hans/download/server" />
-                <local:MyIconTextButton Grid.Column="2" Text="WIKI" LogoScale="0.9" Logo="M224 96h448c35 0 64 29 64 64v704c0 35-29 64-64 64H224c-35 0-64-29-64-64V160c0-35 29-64 64-64z M224 160v704h448V160H224z M288 224h320v64H288z M288 352h320v64H288z M288 480h320v64H288z M288 608h192v64H288z" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
-                <local:MyIconTextButton Grid.Column="3" Text="更新日志" LogoScale="0.9" ColorType="Highlight" Logo="M192 64h384l256 256v576c0 35-29 64-64 64H192c-35 0-64-29-64-64V128c0-35 29-64 64-64z M576 64v256h256z" EventType="打开网页" EventData="{{WIKI_VERSION_URL}}" />
-            </Grid>
-        </StackPanel>
-    </local:MyCard>
     <local:MyCard Title="今日运势" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />

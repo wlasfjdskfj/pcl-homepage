@@ -733,43 +733,14 @@ def resolve_version_image(main_version):
 
 
 def build_xaml():
-    now = datetime.now()
+    """生成主页与面板。
 
+    主页不再展示「当前最新版本」卡片，因此不再抓取版本清单、
+    版本封面与各版本更新日志（原先每次要发多次外部请求）。
+    """
     clean_old_images()
 
     wallpaper_url = fetch_bing_wallpaper()
-
-    manifest = fetch_version_manifest()
-    ver = fetch_latest_version(manifest)
-    release = ver["release"]
-    snapshot = ver["snapshot"]
-    release_date = ver["release_date"] if ver["release_date"] else now.strftime("%Y-%m-%d")
-    snapshot_date = ver["snapshot_date"] if ver["snapshot_date"] else now.strftime("%Y-%m-%d")
-
-    if snapshot:
-        main_version = snapshot
-        main_date = snapshot_date
-    else:
-        main_version = release
-        main_date = release_date
-
-    version_image_source = resolve_version_image(main_version)
-
-    recent_releases = fetch_recent_releases(5, manifest)
-
-    changelog_versions = []
-    for _rel in (recent_releases or []):
-        _ver = _rel["version"]
-        if _ver not in changelog_versions:
-            changelog_versions.append(_ver)
-    if main_version not in changelog_versions:
-        changelog_versions.append(main_version)
-    version_changelogs = {}
-    if changelog_versions:
-        from concurrent.futures import ThreadPoolExecutor
-        with ThreadPoolExecutor(max_workers=min(6, len(changelog_versions))) as _ex:
-            _results = list(_ex.map(fetch_wiki_changelog, changelog_versions))
-        version_changelogs = dict(zip(changelog_versions, _results))
 
     server_list = fetch_server_list()
     panel_xaml = build_panel_xaml(server_list)
@@ -777,12 +748,6 @@ def build_xaml():
     xaml = render_template(load_template("Custom.xaml.tpl"), {
         "BASE_URL": BASE_URL,
         "WALLPAPER_URL": wallpaper_url,
-        "VERSION_IMAGE_SOURCE": version_image_source,
-        "MAIN_VERSION": main_version,
-        "SNAP_VERSION": snapshot if snapshot else release,
-        "MAIN_DATE": main_date,
-        "WIKI_VERSION_URL": WIKI_PAGE_BASE + "Java版" + main_version,
-        "RELEASE_ITEMS": build_release_items(recent_releases, version_changelogs),
     })
 
     return xaml, panel_xaml
