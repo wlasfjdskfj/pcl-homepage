@@ -105,7 +105,7 @@
                             <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
                         </StackPanel>
                     </Grid>
-                    <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+                    <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -147,7 +147,7 @@
                 </Grid>
             </Border>
             <TextBlock Text="最后更新 2026-09-15" FontSize="11" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
-            <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
                 <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
                 <TextBlock Text="最近正式版" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
@@ -215,7 +215,7 @@
             </Grid>
             <local:MyHint Theme="Blue" Margin="0,0,0,8" Text="__COMMENT__" />
             <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
-            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="16,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel Orientation="Horizontal">
                     <local:MyImage Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
@@ -236,7 +236,7 @@
                 <local:MyIconTextButton Grid.Column="1" Margin="4,0,4,0" Height="38" Text="换一个" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
                 <local:MyIconTextButton Grid.Column="2" Margin="4,0,0,0" Height="38" Text="更多" LogoScale="0.9" Logo="M256 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M512 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M768 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z" EventType="弹出窗口" EventData="__SEED_PICKER__" />
             </Grid>
-            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="12" Height="150" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <Grid Margin="18,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,16,0,0">

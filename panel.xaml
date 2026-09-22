@@ -62,7 +62,7 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
-            <Border Height="1" Margin="0,18,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,18,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <Grid Margin="18,15">
                     <Grid.ColumnDefinitions>
@@ -96,7 +96,7 @@
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
             <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
-            <Border Height="1" Margin="0,14,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
+            <Border Height="1" Margin="0,14,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="12,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
