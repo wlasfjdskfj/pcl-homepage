@@ -101,7 +101,7 @@
             <InkCanvas EditingMode="Ink" MinHeight="380" Margin="0"
                        Background="{DynamicResource ColorBrush7}">
                 <InkCanvas.DefaultDrawingAttributes>
-                    <DrawingAttributes Color="#E5544D" Width="3" Height="3" FitToCurve="true" />
+                    <DrawingAttributes Color="#1A1A1A" Width="3" Height="3" FitToCurve="true" />
                 </InkCanvas.DefaultDrawingAttributes>
             </InkCanvas>
             <local:MyHint Theme="Yellow" Margin="0,12,0,0"
