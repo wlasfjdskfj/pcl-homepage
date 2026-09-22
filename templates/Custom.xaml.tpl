@@ -146,7 +146,6 @@
                     </Border>
                 </Grid>
             </Border>
-            <TextBlock Text="最新快照：{{SNAP_VERSION}}" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,12" />
             <TextBlock Text="最后更新 {{MAIN_DATE}}" FontSize="11" Foreground="{DynamicResource ColorBrush3}" HorizontalAlignment="Right" Margin="0,0,0,12" />
             <Border Height="1" Margin="0,0,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
@@ -154,8 +153,7 @@
                 <TextBlock Text="最近正式版" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
             </StackPanel>
 {{RELEASE_ITEMS}}
-            <local:MyHint Theme="Blue" Margin="0,6,0,12" Text="数据来源：Mojang 官方版本清单，只显示正式版。点击任意版本查看该版本的更新总结。" />
-            <Grid>
+            <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
@@ -248,16 +246,10 @@
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="更多功能" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="更多" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="{{BASE_URL}}/panel.json" />
-            <local:MyHint Theme="Blue" Text="点击上面这一行，在独立窗口中打开：每日一题与彩蛋、常用网站与指令速查、推荐服务器。" />
-        </StackPanel>
-    </local:MyCard>
-    <local:MyCard Title="反馈" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,16">
-            <TextBlock TextWrapping="Wrap" Margin="0,0,0,12" FontSize="12" LineHeight="20" Foreground="{DynamicResource ColorBrush1}" Text="如果主页有问题、想加新功能，或想提建议，欢迎在 GitHub 留言。也可以直接查看源代码。" />
-            <Grid>
+            <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="1*" />
