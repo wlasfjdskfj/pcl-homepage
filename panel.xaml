@@ -78,13 +78,20 @@
                     </Grid>
                 </Grid>
             </Border>
-            <local:MyIconTextButton HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyIconTextButton>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+                <local:MyIconTextButton Grid.Column="0" Margin="0,0,4,0" HorizontalAlignment="Stretch" Height="42" Text="打开彩蛋" ColorType="Highlight" LogoScale="0.9" Logo="M320 128h384c35 0 64 29 64 64v640c0 35-29 64-64 64H320c-35 0-64-29-64-64V192c0-35 29-64 64-64z M320 192v640h384V192H320z M384 256h256v64H384z M384 384h256v64H384z M384 512h256v64H384z">
+                    <local:CustomEventService.Events>
+                        <local:CustomEventCollection>
+                            <local:CustomEvent Type="弹出窗口" Data="__EGG_DATA__" />
+                        </local:CustomEventCollection>
+                    </local:CustomEventService.Events>
+                </local:MyIconTextButton>
+                <local:MyIconTextButton Grid.Column="1" Margin="4,0,0,0" HorizontalAlignment="Stretch" Height="42" Text="彩蛋网站" ColorType="Highlight" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="打开网页" EventData="https://www.mkejga.de5.net/site/" ToolTip="点一下看看" />
+            </Grid>
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="实用工具" CanSwap="True" Margin="0,0,0,12">
