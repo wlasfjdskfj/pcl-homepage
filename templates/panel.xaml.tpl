@@ -97,7 +97,7 @@
     <local:MyCard Title="画板" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <local:MyHint Theme="Blue" Margin="0,0,0,12"
-                          Text="按住左键即可作画。" />
+                          Text="按住左键作画，按住右键可擦掉笔画。" />
             <InkCanvas EditingMode="Ink" MinHeight="380" Margin="0"
                        Background="{DynamicResource ColorBrush7}">
                 <InkCanvas.DefaultDrawingAttributes>
