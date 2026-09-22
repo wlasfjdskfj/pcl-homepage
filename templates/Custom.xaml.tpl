@@ -61,16 +61,10 @@
                                 <TextBlock Text="__GREETING__，{user}！" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                             </StackPanel>
                             <TextBlock Text="__GREETING_SUB__" FontSize="11" Foreground="#D9FFFFFF" Margin="0,3,0,0" />
-                            <TextBlock Text="未显示玩家名？刷新页面即可" FontSize="11" Foreground="#B3FFFFFF" Margin="0,3,0,0" />
                         </StackPanel>
                     </Border>
                     <!-- __COUNTDOWN_BODY__ -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#8CFFFFFF" VerticalAlignment="Center" />
-                            <TextBlock Text="  T O D A Y  " FontSize="11" FontWeight="Bold" Foreground="#B3FFFFFF" VerticalAlignment="Center" />
-                            <Border Width="36" Height="1" CornerRadius="0.5" Background="#8CFFFFFF" VerticalAlignment="Center" />
-                        </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
                             <TextBlock Text=" 月 " FontSize="15" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#D9FFFFFF" />
