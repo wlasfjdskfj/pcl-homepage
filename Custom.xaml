@@ -4,12 +4,38 @@
         <Style TargetType="TextBlock">
             <Setter Property="FontFamily" Value="MiSans, Microsoft YaHei UI, Segoe UI" />
         </Style>
+
+        <!-- 入场淡入：一份 Storyboard 复用，各元素用自己的 Loaded 触发器引用。
+             用共享资源是为了避免给每个元素起 x:Name（易写错）。 -->
+        <Storyboard x:Key="FadeInOnce">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                             From="0" To="1" Duration="0:0:0.5">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+
+        <!-- 首屏横幅悬停：轻微淡化，给出可交互的反馈。
+             注意 PCL 的 MyButton 自带悬停动画，故此处只作用于照片横幅。 -->
+        <Style x:Key="HoverLift" TargetType="Border">
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.92" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </StackPanel.Resources>
     <!-- __BANNER__ -->
     <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource FadeInOnce}" />
+                </EventTrigger>
+            </StackPanel.Triggers>
             <!-- __FESTIVAL_BANNER__ -->
-            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
+            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True" Style="{StaticResource HoverLift}">
                 <Grid>
                     <local:MyImage Source="https://www.bing.com/th?id=OHR.FallAspens_ZH-CN7235054933_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
@@ -91,6 +117,11 @@
     </local:MyCard>
     <local:MyCard Title="你的信息" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource FadeInOnce}" BeginTime="0:0:0.1" />
+                </EventTrigger>
+            </StackPanel.Triggers>
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
@@ -135,6 +166,11 @@
     </local:MyCard>
     <local:MyCard Title="今日运势" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource FadeInOnce}" BeginTime="0:0:0.2" />
+                </EventTrigger>
+            </StackPanel.Triggers>
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" ToolTip="依据 IP 与当日日期计算，同一天同一 IP 分数固定。&#xA;评级：95+ SSR / 80+ SR / 60+ R / 40+ N" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="__SCORE__" FontSize="60" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
@@ -214,6 +250,11 @@
     </local:MyCard>
     <local:MyCard Title="更多" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard Storyboard="{StaticResource FadeInOnce}" BeginTime="0:0:0.3" />
+                </EventTrigger>
+            </StackPanel.Triggers>
             <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.json" />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
