@@ -44,16 +44,9 @@ function buildWeatherUnavailable() {
   return '<local:MyHint Theme="Yellow" Margin="0,0,0,0" Text="天气获取失败，请稍后刷新重试。" />';
 }
 
-// 按标准化天气类别选图标（原本一律用 Grass.png，与天气无关）
-const WEATHER_ICON = {
-  clear: "weather-clear", cloudy: "weather-cloudy", rain: "weather-rain",
-  snow: "weather-snow", thunder: "weather-thunder", fog: "weather-fog",
-};
-
-function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind, baseUrl) {
-  const stem = WEATHER_ICON[kind]
-    || (isDay ? "weather-clear" : "weather-cloudy");
-  const icon = (baseUrl || "") + "/images/icons/" + stem + ".png";
+// 居中版式，不用图标：天气信息本就三件事（温度/天气/城市），
+// 加图标反而带来跳色与左右对齐问题，靠字号与留白建立层级即可。
+function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind) {
   const _pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   let tip;
   if (temp >= 30) tip = _pick(["注意防暑，别中暑了", "天太热，记得多补水", "高温下挖矿，记得带水桶", "大热天适合在家吹风扇"]);
@@ -70,34 +63,28 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind, baseUrl) 
   }
   return '<Border CornerRadius="10" Padding="16,16" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">'
     + '<StackPanel>'
-    // 主区：天气图标 + 温度/天气/城市，左侧图标给卡片一个视觉锚点
-    + '<StackPanel Orientation="Horizontal">'
-    + '<local:MyImage Width="36" Height="36" Margin="0,0,16,0" VerticalAlignment="Center" Source="' + icon + '" />'
-    + '<StackPanel VerticalAlignment="Center">'
-    + '<StackPanel Orientation="Horizontal">'
+    // 温度为主角，天气与城市次之
+    + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
     + '<TextBlock Text="' + temp + '°" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
     + '<TextBlock Text="' + escapeXaml(desc) + '" FontSize="15" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,8" />'
     + '</StackPanel>'
-    + '<TextBlock Text="' + escapeXaml(city) + '" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />'
-    + '</StackPanel>'
-    + '</StackPanel>'
-    // 细分隔线（字面色值，避免 GradientStop 的类型问题）
+    + '<TextBlock Text="' + escapeXaml(city) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />'
+    // 分隔线：风力是「数据」，建议是「文案」，用一条线分开
     + '<Border Height="1" Margin="0,12,0,12">'
     + '<Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0">'
     + '<GradientStop Color="#00000000" Offset="0" />'
     + '<GradientStop Color="#33808080" Offset="0.5" />'
     + '<GradientStop Color="#00000000" Offset="1" />'
     + '</LinearGradientBrush></Border.Background></Border>'
-    // 风力与建议分两行，不再挤在一起
-    + '<TextBlock Text="风力 ' + wind + ' km/h" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />'
-    + '<TextBlock Text="' + escapeXaml(tip) + '" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" TextWrapping="Wrap" />'
+    + '<TextBlock Text="风力 ' + wind + ' km/h" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" />'
+    + '<TextBlock Text="' + escapeXaml(tip) + '" FontSize="12" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" TextWrapping="Wrap" TextAlignment="Center" />'
     + '</StackPanel>'
     + '</Border>'
     + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="' + (source || "天气数据来自中国气象局") + '" />';
 }
 
 // 接口盒子 IP 天气 API：按访问者 IP 一步完成定位+天气，凭据从环境变量 APIHZ_ID/APIHZ_KEY 读取
-async function fetchApihzWeather(env, ip, baseUrl) {
+async function fetchApihzWeather(env, ip) {
   try {
     const clean = String(ip || "").replace(/:\d+$/, "");
     if (!clean || clean === "unknown") return null;
@@ -105,7 +92,7 @@ async function fetchApihzWeather(env, ip, baseUrl) {
     const key = (env && env.APIHZ_KEY) || "";
     if (!id || !key || !env.HOMEPAGE_KV) return null; // 未配置环境变量 → 走 Open-Meteo 兜底
     // 按 IP + 天气版本号缓存 1 小时（KV 到点自动过期；版本号用于在线"重置天气缓存"）
-    // 缓存结构加入 kind/isDay 供渲染选图标；结构变更时递增 :v2 前缀使其失效
+    // 缓存结构含 kind（中间件用它选面板横幅图）；结构变更时递增 :v2 前缀使其失效
     let weatherVer = "0";
     try { weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0"; } catch (e) {}
     const cacheKey = "weather:v2:" + weatherVer + ":" + clean;
@@ -114,7 +101,7 @@ async function fetchApihzWeather(env, ip, baseUrl) {
       try {
         const d = JSON.parse(cached);
         const k = d.kind || classifyWeather(null, d.desc);
-        return { body: buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。", k, baseUrl), kind: k };
+        return { body: buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。", k), kind: k };
       } catch (e) { /* 缓存解析失败 → 走 API */ }
     }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
@@ -136,9 +123,9 @@ async function fetchApihzWeather(env, ip, baseUrl) {
     const source = "天气数据来自中国气象局。";
     const k = classifyWeather(null, desc);
     try {
-      await env.HOMEPAGE_KV.put(cacheKey, JSON.stringify({ city, temp, desc, wind, source, kind: k, isDay: true }), { expirationTtl: 3600 });
+      await env.HOMEPAGE_KV.put(cacheKey, JSON.stringify({ city, temp, desc, wind, source, kind: k }), { expirationTtl: 3600 });
     } catch (e) { /* 缓存失败忽略 */ }
-    return { body: buildWeatherXaml(city, temp, desc, wind, true, source, k, baseUrl), kind: k };
+    return { body: buildWeatherXaml(city, temp, desc, wind, true, source, k), kind: k };
   } catch (e) {
     console.error("[Weather] 接口盒子失败：", e);
     return null;
@@ -172,10 +159,9 @@ async function fetchGeo(ip) {
   return null;
 }
 
-// baseUrl：用于拼天气图标的绝对 URL（PCL 的自定义主页不接受相对路径）
-async function fetchWeather(env, ip, baseUrl) {
+async function fetchWeather(env, ip) {
   // 优先：接口盒子 IP 天气
-  const apihz = await fetchApihzWeather(env, ip, baseUrl);
+  const apihz = await fetchApihzWeather(env, ip);
   if (apihz) return apihz;
   // 降级：Open-Meteo（定位 + 天气，全部带超时）
   try {
@@ -191,7 +177,7 @@ async function fetchWeather(env, ip, baseUrl) {
     const wind = Math.round(cw.wind_speed_10m);
     const desc = WCODE[cw.weather_code] || "未知";
     const kind = classifyWeather(cw.weather_code, desc);
-    return { body: buildWeatherXaml(geo.city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。", kind, baseUrl), kind: kind };
+    return { body: buildWeatherXaml(geo.city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。", kind), kind: kind };
   } catch (e) {
     console.error("[Weather] 获取天气失败：", e);
     return { body: buildWeatherUnavailable(), kind: null };
