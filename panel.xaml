@@ -94,6 +94,14 @@
             </Grid>
         </StackPanel>
     </local:MyCard>
+    <local:MyCard Title="画板" CanSwap="True" Margin="0,0,0,12">
+        <StackPanel Margin="25,40,23,16">
+            <local:MyHint Theme="Blue" Margin="0,0,0,12"
+                          Text="按住左键即可作画。笔画不支持保存，刷新后清空。" />
+            <InkCanvas EditingMode="Ink" MinHeight="220" Margin="0"
+                       Background="{DynamicResource ColorBrush7}" />
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="实用工具" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
