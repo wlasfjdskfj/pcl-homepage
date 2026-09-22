@@ -75,7 +75,7 @@
                     <!-- 彩蛋入口：右上角小标记（点开跳转 /site/） -->
                     <local:MyButton HorizontalAlignment="Right" VerticalAlignment="Bottom"
                                     Margin="0,0,16,14" Height="30" Padding="14,0,14,0"
-                                    Text="彩蛋" FontSize="12"
+                                    Text="彩蛋"
                                     EventType="打开网页" EventData="https://www.mkejga.de5.net/site/"
                                     ToolTip="点一下看看" />
                 </Grid>
