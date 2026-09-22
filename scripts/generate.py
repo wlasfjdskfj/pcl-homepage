@@ -682,6 +682,8 @@ def build_panel_xaml(server_list):
         # 模板里占位符所在行自带换行，故此处不带尾换行，避免多出空行
         "SERVER_ITEMS": server_items,
         "COPY_LOGO": copy_logo,
+        # 面板里的图标需绝对 URL：MyListItem.Logo 不接受相对路径
+        "BASE_URL": BASE_URL,
     })
 
 

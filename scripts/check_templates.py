@@ -41,12 +41,27 @@ def main() -> int:
     gen_text = GEN.read_text(encoding="utf-8")
     provided = set(re.findall(r'"([A-Z][A-Z0-9_]*)":', gen_text))
 
-    # 1 + 2：模板 token 必须有取值
+    # 每个 render_template(load_template("X.tpl"), {...}) 调用各自提供的取值。
+    # 必须按调用分别核对：某个 token 在别处提供了、但本调用没给，运行时会 KeyError。
+    per_call = {}
+    for m in re.finditer(
+        r'render_template\(\s*load_template\(\s*"([^"]+\.tpl)"\s*\)\s*,\s*\{(.*?)\}\s*\)',
+        gen_text, re.S,
+    ):
+        per_call[m.group(1)] = set(re.findall(r'"([A-Z][A-Z0-9_]*)":', m.group(2)))
+
+    # 1 + 2：模板 token 必须有取值（优先按所属调用精确核对）
     for tpl in tpl_files:
         tokens = set(TOKEN_RE.findall(tpl.read_text(encoding="utf-8")))
-        missing = sorted(tokens - provided - INJECTED)
+        supplied = per_call.get(tpl.name)
+        if supplied is not None:
+            missing = sorted(tokens - supplied - INJECTED)
+            where = "该 render_template 调用"
+        else:
+            missing = sorted(tokens - provided - INJECTED)
+            where = "generator"
         if missing:
-            problems.append(f"templates/{tpl.name}: generator 未提供取值 {missing}")
+            problems.append(f"templates/{tpl.name}: {where}未提供取值 {missing}")
 
     # 3：生成物不得残留 {{...}}
     for name in ("Custom.xaml", "panel.xaml"):
