@@ -30,3 +30,6 @@ desktop.ini
 
 # 注意：Custom.xaml、panel.xaml、panel.json 由 scripts/generate.py 生成，
 # 但线上直接由 Cloudflare Pages 托管，必须入库，因此不在此忽略。
+
+# �ο��õ��ⲿ�ֿ� clone�������ز鿴��
+_ref/

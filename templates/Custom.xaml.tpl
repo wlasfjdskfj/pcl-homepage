@@ -1,4 +1,10 @@
 <StackPanel>
+    <StackPanel.Resources>
+        <!-- 全局字体：幼圆。带回退，避免字体缺失时影响加载 -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="YouYuan, Microsoft YaHei UI, Segoe UI" />
+        </Style>
+    </StackPanel.Resources>
     <!-- __BANNER__ -->
     <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
