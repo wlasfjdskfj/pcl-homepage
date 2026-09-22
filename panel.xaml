@@ -44,7 +44,7 @@
                     <Grid Margin="18,14,16,0" VerticalAlignment="Top">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
                             <Border Width="4" Height="22" CornerRadius="2" Background="__QUIZ_ACCENT__" Margin="0,0,8,0" />
-                            <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
+                            <local:MyImage Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" Source="/images/icons/map.png" />
                             <TextBlock Text="每日一题" FontSize="15" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
                         <!-- __QUIZ_TAG__ -->
@@ -74,7 +74,7 @@
                         <TextBlock Text="今天属于你的彩蛋，明天自动换新" FontSize="11" Foreground="{DynamicResource ColorBrush3}" Margin="0,4,0,0" />
                     </StackPanel>
                     <Grid Grid.Column="1" Width="46" Height="46" VerticalAlignment="Center">
-                        <local:MyImage Width="36" Height="36" Source="pack://application:,,,/images/Blocks/Egg.png" />
+                        <local:MyImage Width="36" Height="36" Source="/images/icons/egg.png" />
                     </Grid>
                 </Grid>
             </Border>
@@ -251,7 +251,7 @@
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                        <local:MyImage Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
+                        <local:MyImage Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" Source="/images/icons/server.png" />
                         <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock Text="__SERVER_ADDR__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
