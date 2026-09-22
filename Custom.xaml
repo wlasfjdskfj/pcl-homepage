@@ -133,39 +133,6 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="启动环境" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,16">
-            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="以下信息由 PCL 按当前选中版本填入；未启动过游戏或未登录时可能为空。" />
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="当前版本" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="MC 版本的友好名称，如 1.20.1；取不到时为空" />
-                <TextBlock Text="{version}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="版本文件夹" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="versions 下的文件夹名，如 Forge-1.20.1" />
-                <TextBlock Text="{name}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="加载器" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="已安装的加载器版本；未安装则为空" />
-                <TextBlock Text="Forge {forge} / Fabric {fabric} / NeoForge {neoforge}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="本次 Java" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="本次启动将使用的 java.exe 所在文件夹；排查 Java 版本不匹配时看这里" />
-                <TextBlock Text="{java}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="游戏目录" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="当前 MC 文件夹路径" />
-                <TextBlock Text="{minecraft}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="PCL 目录" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="PCL 程序所在文件夹" />
-                <TextBlock Text="{path}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-            <StackPanel Margin="0,0,0,12">
-                <TextBlock Text="登录方式" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="正版 / 离线 / 统一通行证 / Authlib-Injector；未登录时为空" />
-                <TextBlock Text="{login}" FontSize="12" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" TextWrapping="Wrap" />
-            </StackPanel>
-        </StackPanel>
-    </local:MyCard>
     <local:MyCard Title="今日运势" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" ToolTip="依据 IP 与当日日期计算，同一天同一 IP 分数固定。&#xA;评级：95+ SSR / 80+ SR / 60+ R / 40+ N" />
