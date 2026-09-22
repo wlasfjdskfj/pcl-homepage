@@ -72,9 +72,10 @@
                         </StackPanel>
                         <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" ToolTip="每天每人一句，同一天同一 IP 固定" />
                     </StackPanel>
-                    <!-- 整张照片可点：透明覆盖层，点击跳转彩蛋页 -->
-                    <local:MyButton Background="Transparent" BorderThickness="0" Padding="0"
-                                    Text="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                    <!-- 彩蛋入口：右上角小标记（点开跳转 /site/） -->
+                    <local:MyButton HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Margin="0,0,16,14" Height="30" Padding="14,0,14,0"
+                                    Text="彩蛋" FontSize="12"
                                     EventType="打开网页" EventData="{{BASE_URL}}/site/"
                                     ToolTip="点一下看看" />
                 </Grid>
