@@ -27,7 +27,7 @@
             </EventTrigger>
         </TextBlock.Triggers>
     </TextBlock>
-    <local:MyCard Title="MC 知识" Margin="0,0,0,12">
+    <local:MyCard Title="MC 知识" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <Border CornerRadius="12" Margin="0,0,0,12" ClipToBounds="True">
                 <Grid Height="260" ClipToBounds="True">
@@ -62,7 +62,7 @@
                     </local:CustomEventCollection>
                 </local:CustomEventService.Events>
             </local:MyIconTextButton>
-            <Border Height="1" Margin="0,18,0,12" Background="{DynamicResource ColorBrush4}" />
+            <Border Height="1" Margin="0,18,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <Grid Margin="18,15">
                     <Grid.ColumnDefinitions>
@@ -87,7 +87,7 @@
             </local:MyIconTextButton>
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="实用工具" Margin="0,0,0,12">
+    <local:MyCard Title="实用工具" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="pack://application:,,,/images/Blocks/Grass.png" Title="Minecraft Wiki" Info="查阅方块、生物与游戏机制" EventType="打开网页" EventData="https://zh.minecraft.wiki/" />
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneBlock.png" Title="苦力怕论坛" Info="Minecraft 中文资源与交流社区" EventType="打开网页" EventData="https://klpbbs.com/" />
@@ -96,7 +96,7 @@
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="https://www.mcmod.cn/images/favicon.ico" Title="MC百科" Info="最大的 Minecraft 中文 MOD 百科" EventType="打开网页" EventData="https://www.mcmod.cn/" />
             <local:MyListItem Margin="-5,0,-5,4" Type="Clickable" Logo="pack://application:,,,/images/Blocks/CommandBlock.png" Title="MCDoctor" Info="AI 崩溃日志分析，自动诊断崩溃原因" EventType="打开网页" EventData="https://mcdoctor.ai/" />
             <local:MyListItem Margin="-5,0,-5,0" Type="Clickable" Logo="https://s.namemc.com/img/favicon-128.png" Title="NameMC" Info="查询 Minecraft 皮肤与用户名" EventType="打开网页" EventData="https://namemc.com/" />
-            <Border Height="1" Margin="0,14,0,12" Background="{DynamicResource ColorBrush4}" />
+            <Border Height="1" Margin="0,14,0,12"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="{DynamicResource ColorBrush4}" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
             <Border CornerRadius="10" Padding="12,12" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
@@ -245,7 +245,7 @@
             <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="服务器推荐" Margin="0,0,0,12">
+    <local:MyCard Title="服务器推荐" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="推荐服务器。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
             <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
