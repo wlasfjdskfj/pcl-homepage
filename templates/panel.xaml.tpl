@@ -97,9 +97,15 @@
     <local:MyCard Title="画板" CanSwap="True" Margin="0,0,0,12">
         <StackPanel Margin="25,40,23,16">
             <local:MyHint Theme="Blue" Margin="0,0,0,12"
-                          Text="按住左键即可作画。笔画不支持保存，刷新后清空。" />
-            <InkCanvas EditingMode="Ink" MinHeight="220" Margin="0"
-                       Background="{DynamicResource ColorBrush7}" />
+                          Text="按住左键即可作画。" />
+            <InkCanvas EditingMode="Ink" MinHeight="380" Margin="0"
+                       Background="{DynamicResource ColorBrush7}">
+                <InkCanvas.DefaultDrawingAttributes>
+                    <DrawingAttributes Color="#E5544D" Width="3" Height="3" FitToCurve="true" />
+                </InkCanvas.DefaultDrawingAttributes>
+            </InkCanvas>
+            <local:MyHint Theme="Yellow" Margin="0,12,0,0"
+                          Text="PCL 不支持把画作导出为文件。想保存请按 Win+Shift+S 截图，或直接对画板拍照。" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="实用工具" CanSwap="True" Margin="0,0,0,12">
