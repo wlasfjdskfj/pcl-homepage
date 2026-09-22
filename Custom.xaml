@@ -1,8 +1,8 @@
 <StackPanel>
     <StackPanel.Resources>
-        <!-- 全局字体：幼圆。带回退，避免字体缺失时影响加载 -->
+        <!-- 全局字体：MiSans（现代 UI 字体）。带回退，缺失时退回雅黑 -->
         <Style TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="YouYuan, Microsoft YaHei UI, Segoe UI" />
+            <Setter Property="FontFamily" Value="MiSans, Microsoft YaHei UI, Segoe UI" />
         </Style>
     </StackPanel.Resources>
     <!-- __BANNER__ -->
