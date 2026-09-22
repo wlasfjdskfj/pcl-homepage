@@ -54,7 +54,7 @@
                             <Border Width="3" Height="10" CornerRadius="1.5" Background="#FFFFFF" Margin="0,0,8,0" VerticalAlignment="Center" />
                             <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="#D9FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
-                        <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" />
+                        <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" ToolTip="每天每人一句，同一天同一 IP 固定" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -100,7 +100,7 @@
                         </Grid.ColumnDefinitions>
                         <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
+                            <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" ToolTip="由 PCL 提供的 {user} 替换标记填入；未登录时为空，刷新页面即可" />
                             <TextBlock Text="{user}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
                             <TextBlock Text="{user}" FontSize="1" Foreground="Transparent" />
                         </StackPanel>
@@ -114,7 +114,7 @@
                         <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                            <TextBlock Text="__USER_IP__" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
+                            <TextBlock Text="__USER_IP__" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" ToolTip="由 Cloudflare 请求头 CF-Connecting-IP 读取" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -135,7 +135,7 @@
     </local:MyCard>
     <local:MyCard Title="今日运势" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
-            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" />
+            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" ToolTip="依据 IP 与当日日期计算，同一天同一 IP 分数固定。&#xA;评级：95+ SSR / 80+ SR / 60+ R / 40+ N" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
                 <TextBlock Text="__SCORE__" FontSize="60" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
                 <TextBlock Text="分" FontSize="15" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,12" />
@@ -183,7 +183,7 @@
                     <local:MyImage Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="今日种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
+                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" ToolTip="点击「更多」可从备选种子中挑选" />
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -206,7 +206,7 @@
                         <TextBlock Text="本次挑战" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,0,0" Text="__CHALLENGE_DIFF__" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />
-                    <TextBlock Text="__CHALLENGE__" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="24,20" TextAlignment="Center" />
+                    <TextBlock Text="__CHALLENGE__" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="24,20" TextAlignment="Center" ToolTip="难度决定卡片配色；点「换一个挑战」刷新" />
                 </Grid>
             </Border>
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
