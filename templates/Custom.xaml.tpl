@@ -7,13 +7,7 @@
 
     </StackPanel.Resources>
     <!-- __BANNER__ -->
-    <local:MyCard Title="欢迎" Margin="0,0,0,12" CanSwap="True" IsSwapped="False"
-                  Tag="{variable:welcome}">
-        <local:MyCard.Triggers>
-            <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="0">
-                <Setter Property="Visibility" Value="Collapsed" />
-            </DataTrigger>
-        </local:MyCard.Triggers>
+    <local:MyCard Title="欢迎" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
                 <EventTrigger RoutedEvent="StackPanel.Loaded">
@@ -32,16 +26,6 @@
             <TextBlock Text="主页内容按 IP 与日期生成，每人每天一份。想要更多功能，点最下方的「打开更多功能」。"
                        FontSize="12" TextWrapping="Wrap" LineHeight="20"
                        Foreground="{DynamicResource ColorBrush3}" />
-            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,12,0,0" Height="34"
-                                    Padding="18,0,18,0" Text="知道了" ColorType="Highlight">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="修改变量" Data="welcome|0|-" />
-                        <local:CustomEvent Type="刷新页面" Data="-" />
-                        <local:CustomEvent Type="弹出提示" Data="欢迎卡已收起，下次打开不再显示|Green" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyIconTextButton>
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
