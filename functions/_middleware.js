@@ -19,7 +19,6 @@ import { quizImageFor } from './_lib/quizimage.js';
 import { escapeXaml, buildScoreBar, buildFallbackXaml, buildQuizTag, quizAccent } from './_lib/xaml.js';
 import { buildMultiBanner, buildSingleBanner } from './_lib/banner.js';
 import { recordVisit } from './_lib/stats.js';
-import { recordDailyVisit, buildDailyXaml } from './_lib/daily.js';
 import { kvGet, kvGetJson } from './_lib/kv.js';
 
 // ============ 纯工具函数 ============
@@ -191,11 +190,6 @@ export async function onRequest(context) {
     // 2.2 访问统计异步写 D1（不阻塞响应）
     context.waitUntil(recordVisit(env, ip, (request.cf && request.cf.country) || "XX"));
 
-    // 2.2b 签到统计：与下面的资源读取并行发起，等渲染完再取结果，
-    //      因此不会让主页多等一次网络往返。失败时 daily promise 为 null，不显示签到区。
-    const dailyPromise = recordDailyVisit(env, ip, (request.cf && request.cf.country) || "XX")
-      .catch((e) => { console.error('[Middleware] 签到统计失败：', e); return null; });
-
     // 2.3 第二批：静态资源 + 全部配置 KV + 天气，三类 IO 并行
     const assetUrl = new URL('/Custom.xaml', url.origin);
     const [assetResp, cfg, weather] = await Promise.all([
@@ -308,9 +302,6 @@ export async function onRequest(context) {
       let bannerBody = buildMultiBanner(multiBannersRaw);
       if (!bannerBody) bannerBody = buildSingleBanner(singleBanner);
 
-      // 签到统计：与资源读取并行发起，此处取结果；无 D1 或失败时为空串
-      const dailyBody = buildDailyXaml(await dailyPromise);
-
       xaml = xaml
         .replace(/__DATE_MONTH__/g, date.month)
         .replace(/__DATE_DAY__/g, date.day)
@@ -339,8 +330,7 @@ export async function onRequest(context) {
         .replace(/<!--\s*__FESTIVAL_BANNER__\s*-->|__FESTIVAL_BANNER__/g, festivalBanner)
         .replace(/<!--\s*__WEATHER_BODY__\s*-->|__WEATHER_BODY__/g, weatherBody)
         .replace(/<!--\s*__COUNTDOWN_BODY__\s*-->|__COUNTDOWN_BODY__/g, countdownBody)
-        .replace(/<!--\s*__BANNER__\s*-->|__BANNER__/g, bannerBody)
-        .replace(/<!--\s*__DAILY_CARD__\s*-->|__DAILY_CARD__/g, dailyBody);
+        .replace(/<!--\s*__BANNER__\s*-->|__BANNER__/g, bannerBody);
 
       return new Response(xaml, {
         headers: Object.assign({}, XAML_HEADERS_NO_STORE, { 'Vary': 'CF-Connecting-IP' }),
