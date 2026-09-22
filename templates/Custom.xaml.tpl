@@ -19,7 +19,7 @@
                         <StackPanel>
                             <StackPanel Orientation="Horizontal">
                                 <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource ColorBrush1}" Margin="0,0,8,0" VerticalAlignment="Center">
-                                    <local:MyImage Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/player.png" />
+                                    <local:MyImage Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                                 </Border>
                                 <TextBlock Text="__GREETING__，{user}！" FontSize="15" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                             </StackPanel>
@@ -45,7 +45,6 @@
                     <!-- 每日一言（叠加在横幅底部，按 IP 下发） -->
                     <StackPanel VerticalAlignment="Bottom" Margin="20,0,16,12" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <local:MyImage Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/book.png" />
                             <Border Width="3" Height="10" CornerRadius="1.5" Background="#FFFFFF" Margin="0,0,8,0" VerticalAlignment="Center" />
                             <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="#D9FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
@@ -62,7 +61,7 @@
                     <Grid>
                         <StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/gold.png" />
+                                <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
                                 <TextBlock Text="幸运数字" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                             </StackPanel>
                             <TextBlock Text="__LUCKY_NUMBER__" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
@@ -72,7 +71,7 @@
                 <Border Grid.Column="1" CornerRadius="10" Padding="16,16" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                            <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/palette.png" />
+                            <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneLampOn.png" />
                             <TextBlock Text="幸运颜色" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -93,7 +92,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/player.png" />
+                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="玩家 ID" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
                             <TextBlock Text="{user}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
@@ -106,7 +105,7 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/globe.png" />
+                        <local:MyImage Grid.Column="0" Width="22" Height="22" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/RedstoneBlock.png" />
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="公网 IP" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
                             <TextBlock Text="__USER_IP__" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,2,0,0" />
@@ -211,7 +210,7 @@
             <Border Height="1" Margin="0,0,0,16" Background="{DynamicResource ColorBrush4}" />
             <Border CornerRadius="10" Padding="16,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/clover.png" />
+                    <local:MyImage Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="今日种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
                         <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" />
@@ -233,7 +232,7 @@
             <Border CornerRadius="12" Height="150" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
                 <Grid Margin="18,0">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,16,0,0">
-                        <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="{{BASE_URL}}/images/icons/compass.png" />
+                        <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
                         <TextBlock Text="本次挑战" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                     </StackPanel>
                     <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,0,0" Text="__CHALLENGE_DIFF__" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />
@@ -245,7 +244,7 @@
     </local:MyCard>
     <local:MyCard Title="更多功能" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="{{BASE_URL}}/images/icons/compass.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="{{BASE_URL}}/panel.json" />
+            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="{{BASE_URL}}/panel.json" />
             <local:MyHint Theme="Blue" Text="点击上面这一行，在独立窗口中打开：每日一题与彩蛋、常用网站与指令速查、推荐服务器。" />
         </StackPanel>
     </local:MyCard>
