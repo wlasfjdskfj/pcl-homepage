@@ -7,6 +7,27 @@
 
     </StackPanel.Resources>
     <!-- __BANNER__ -->
+    <local:MyCard Title="欢迎" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,16">
+            <StackPanel.Triggers>
+                <EventTrigger RoutedEvent="StackPanel.Loaded">
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             From="0" To="1" Duration="0:0:0.90" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </EventTrigger>
+            </StackPanel.Triggers>
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                <TextBlock Text="欢迎使用本主页" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="主页内容按 IP 与日期生成，每人每天一份。想要更多功能，点最下方的「打开更多功能」。"
+                       FontSize="12" TextWrapping="Wrap" LineHeight="20"
+                       Foreground="{DynamicResource ColorBrush3}" />
+        </StackPanel>
+    </local:MyCard>
     <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
