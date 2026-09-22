@@ -5,15 +5,6 @@
             <Setter Property="FontFamily" Value="MiSans, Microsoft YaHei UI, Segoe UI" />
         </Style>
 
-        <!-- 首屏横幅悬停：轻微淡化，给出可交互的反馈。
-             注意 PCL 的 MyButton 自带悬停动画，故此处只作用于照片横幅。 -->
-        <Style x:Key="HoverLift" TargetType="Border">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.92" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
     </StackPanel.Resources>
     <!-- __BANNER__ -->
     <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
@@ -40,7 +31,7 @@
                 <BlurEffect Radius="0" />
             </StackPanel.Effect>
             <!-- __FESTIVAL_BANNER__ -->
-            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True" Style="{StaticResource HoverLift}">
+            <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
                     <local:MyImage Source="{{WALLPAPER_URL}}" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
@@ -81,6 +72,11 @@
                         </StackPanel>
                         <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" ToolTip="每天每人一句，同一天同一 IP 固定" />
                     </StackPanel>
+                    <!-- 整张照片可点：透明覆盖层，点击跳转彩蛋页 -->
+                    <local:MyButton Background="Transparent" BorderThickness="0" Padding="0"
+                                    Text="" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                    EventType="打开网页" EventData="{{BASE_URL}}/site/"
+                                    ToolTip="点一下看看" />
                 </Grid>
             </Border>
             <Grid>
