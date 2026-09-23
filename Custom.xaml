@@ -33,7 +33,7 @@
             <!-- __FESTIVAL_BANNER__ -->
             <Border CornerRadius="12" Height="280" Margin="0,0,0,16" ClipToBounds="True">
                 <Grid>
-                    <local:MyImage Source="https://www.bing.com/th?id=OHR.AutumnEquinoxY26_ZH-CN7957453091_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
+                    <local:MyImage Source="https://www.bing.com/th?id=OHR.ElGolfo_ZH-CN8329995759_1920x1080.jpg&amp;rf=LaDigue_1920x1080.jpg&amp;pid=hp" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="UniformToFill" />
                     <Border>
                         <Border.Background>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
