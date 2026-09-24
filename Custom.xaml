@@ -103,7 +103,11 @@
                     </StackPanel>
                 </Border>
             </Grid>
-            <Calendar HorizontalAlignment="Center" Margin="0,16,0,0" />
+        </StackPanel>
+    </local:MyCard>
+    <local:MyCard Title="我的日历" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
+        <StackPanel Margin="25,40,23,16">
+            <Calendar HorizontalAlignment="Center" Width="300" Margin="0,0,0,16" />
         </StackPanel>
     </local:MyCard>
     <local:MyCard Title="你的信息" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
