@@ -7,7 +7,7 @@
 
     </StackPanel.Resources>
     <!-- __BANNER__ -->
-    <local:MyCard Title="今日概览" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="今日概览" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
                 <EventTrigger RoutedEvent="StackPanel.Loaded">
@@ -105,7 +105,7 @@
             </Grid>
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="你的信息" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="你的信息" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
                 <EventTrigger RoutedEvent="StackPanel.Loaded">
@@ -170,7 +170,7 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="今日运势" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="今日运势" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
                 <EventTrigger RoutedEvent="StackPanel.Loaded">
@@ -270,7 +270,7 @@
             <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="更多" Margin="0,0,0,12" CanSwap="True" IsSwapped="False">
+    <local:MyCard Title="更多" Margin="0,0,0,16" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
                 <EventTrigger RoutedEvent="StackPanel.Loaded">

@@ -1,10 +1,11 @@
-// 实时天气：接口盒子（IP 定位+天气，中国气象局源）→ Open-Meteo 兜底（从 _middleware.js 抽离）
+// 实时天气：按访问者 IP 动态定位（apihz tqybip.php，中国气象局）
+// 主源 apihz 按 CF-Connecting-IP 直接定位城市；失败时用 ipwho.is 拿经纬度 → Open-Meteo 兜底。
+// 缓存按 IP 分桶（同一人当天命中自己的缓存）。
 import { escapeXaml } from './xaml.js';
 
-// 带超时的 fetch，任何外部接口挂起都不会拖慢主页
 function fetchWithTimeout(url, opts, ms) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ms || 4000);
+  const timer = setTimeout(() => controller.abort(), ms || 5000);
   return fetch(url, Object.assign({ signal: controller.signal }, opts || {}))
     .then((r) => { clearTimeout(timer); return r; })
     .catch((e) => { clearTimeout(timer); throw e; });
@@ -17,7 +18,6 @@ const WCODE = {
   95: "雷雨", 96: "雷雨伴冰雹", 99: "雷暴冰雹",
 };
 
-// 标准化天气类别（用于每日一题横幅选图）：thunder 雷雨 > snow 雪 > rain 雨 > fog 雾 > cloudy 多云 > clear 晴；无法判断返回 null
 function classifyWeather(code, desc) {
   if (code !== null && code !== undefined && code !== "") {
     const c = Number(code);
@@ -44,8 +44,7 @@ function buildWeatherUnavailable() {
   return '<local:MyHint Theme="Yellow" Margin="0,0,0,0" Text="天气获取失败，请稍后刷新重试。" />';
 }
 
-// 居中版式，不用图标：天气信息本就三件事（温度/天气/城市），
-// 加图标反而带来跳色与左右对齐问题，靠字号与留白建立层级即可。
+// 居中无图标版式：温度为主，天气/城市次之，分隔线，风力，建议。
 function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind) {
   const _pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
   let tip;
@@ -63,13 +62,11 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind) {
   }
   return '<Border CornerRadius="10" Padding="16,16" Margin="0,0,0,8" Background="{DynamicResource ColorBrush7}">'
     + '<StackPanel>'
-    // 温度为主角，天气与城市次之
     + '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">'
     + '<TextBlock Text="' + temp + '°" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />'
     + '<TextBlock Text="' + escapeXaml(desc) + '" FontSize="15" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="8,0,0,8" />'
     + '</StackPanel>'
     + '<TextBlock Text="' + escapeXaml(city) + '" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,2,0,0" />'
-    // 分隔线：风力是「数据」，建议是「文案」，用一条线分开
     + '<Border Height="1" Margin="0,12,0,12">'
     + '<Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0">'
     + '<GradientStop Color="#00000000" Offset="0" />'
@@ -83,35 +80,31 @@ function buildWeatherXaml(city, temp, desc, wind, isDay, source, kind) {
     + '<local:MyHint Theme="Blue" Margin="0,0,0,0" Text="' + (source || "天气数据来自中国气象局") + '" />';
 }
 
-// 接口盒子 IP 天气 API：按访问者 IP 一步完成定位+天气，凭据从环境变量 APIHZ_ID/APIHZ_KEY 读取
-async function fetchApihzWeather(env, ip) {
+// apihz 按 IP 实时天气：tqybip.php
+async function fetchApihzByIp(env, ip) {
   try {
-    const clean = String(ip || "").replace(/:\d+$/, "");
-    if (!clean || clean === "unknown") return null;
     const id = (env && env.APIHZ_ID) || "";
     const key = (env && env.APIHZ_KEY) || "";
-    if (!id || !key || !env.HOMEPAGE_KV) return null; // 未配置环境变量 → 走 Open-Meteo 兜底
-    // 按 IP + 天气版本号缓存 1 小时（KV 到点自动过期；版本号用于在线"重置天气缓存"）
-    // 缓存结构含 kind（中间件用它选面板横幅图）；结构变更时递增 :v2 前缀使其失效
+    if (!id || !key || !env.HOMEPAGE_KV || !ip || ip === "unknown") return null;
+
     let weatherVer = "0";
     try { weatherVer = (await env.HOMEPAGE_KV.get('weather_version')) || "0"; } catch (e) {}
-    const cacheKey = "weather:v2:" + weatherVer + ":" + clean;
+    const cacheKey = "weather:v4:" + weatherVer + ":" + ip; // 按访问者 IP 分桶
     const cached = await env.HOMEPAGE_KV.get(cacheKey).catch(() => null);
     if (cached) {
       try {
         const d = JSON.parse(cached);
         const k = d.kind || classifyWeather(null, d.desc);
         return { body: buildWeatherXaml(d.city, d.temp, d.desc, d.wind, true, d.source || "天气数据来自中国气象局。", k), kind: k };
-      } catch (e) { /* 缓存解析失败 → 走 API */ }
+      } catch (e) {}
     }
     const url = "https://cn.apihz.cn/api/tianqi/tqybip.php?id=" + encodeURIComponent(id)
-      + "&key=" + encodeURIComponent(key) + "&ip=" + encodeURIComponent(clean);
+      + "&key=" + encodeURIComponent(key)
+      + "&ip=" + encodeURIComponent(ip);
     let r;
     try {
-      r = await fetchWithTimeout(url, { headers: { "User-Agent": "PCL-Homepage" } }, 4000);
-    } catch (e) {
-      return null;
-    }
+      r = await fetchWithTimeout(url, { headers: { "User-Agent": "PCL-Homepage" } }, 5000);
+    } catch (e) { return null; }
     if (!r.ok) return null;
     const j = await r.json();
     if (!j || j.code !== 200 || !j.nowinfo) return null;
@@ -119,69 +112,59 @@ async function fetchApihzWeather(env, ip) {
     const wind = Math.round((j.nowinfo.windSpeed || 0) * 3.6); // m/s → km/h
     const desc = (j.weather1 && j.weather2 && j.weather1 !== j.weather2)
       ? (j.weather1 + "转" + j.weather2) : (j.weather1 || "未知");
-    const city = j.name || j.shi || "未知地区";
+    const city = j.name || j.shi || "未知";
     const source = "天气数据来自中国气象局。";
     const k = classifyWeather(null, desc);
     try {
       await env.HOMEPAGE_KV.put(cacheKey, JSON.stringify({ city, temp, desc, wind, source, kind: k }), { expirationTtl: 3600 });
-    } catch (e) { /* 缓存失败忽略 */ }
+    } catch (e) {}
     return { body: buildWeatherXaml(city, temp, desc, wind, true, source, k), kind: k };
   } catch (e) {
-    console.error("[Weather] 接口盒子失败：", e);
+    console.error("[Weather] apihz 按 IP 失败：", e);
     return null;
   }
 }
 
-// 定位：优先 ipwho.is，失败降级 ip-api.com（均带超时，避免拖慢主页）
+// 兜底：按 IP 查经纬度（ipwho.is）
 async function fetchGeo(ip) {
-  const clean = String(ip || "").replace(/:\d+$/, "");
-  const q = (clean && clean !== "unknown") ? "/" + encodeURIComponent(clean) : "";
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const r = await fetchWithTimeout("https://ipwho.is/" + q, { headers: { "User-Agent": "PCL-Homepage" } }, 3000);
-      if (r.ok) {
-        const j = await r.json();
-        if (j && j.success !== false && j.latitude != null) {
-          return { city: j.city || j.region || "未知地区", lat: j.latitude, lon: j.longitude };
-        }
-      }
-    } catch (e) { /* 重试一次 */ }
-  }
   try {
-    const r = await fetchWithTimeout("http://ip-api.com/json/" + encodeURIComponent(clean) + "?lang=zh-CN", { headers: { "User-Agent": "PCL-Homepage" } }, 3000);
-    if (r.ok) {
-      const j = await r.json();
-      if (j && j.status === "success") {
-        return { city: j.city || j.regionName || "未知地区", lat: j.lat, lon: j.lon };
-      }
-    }
-  } catch (e) { /* 忽略 */ }
-  return null;
+    const r = await fetchWithTimeout("https://ipwho.is/" + encodeURIComponent(ip), { headers: { "User-Agent": "PCL-Homepage" } }, 4000);
+    if (!r.ok) return null;
+    const j = await r.json();
+    if (!j || j.success === false) return null;
+    return { lat: j.latitude, lon: j.longitude, city: j.city || "未知" };
+  } catch (e) { return null; }
 }
 
-async function fetchWeather(env, ip) {
-  // 优先：接口盒子 IP 天气
-  const apihz = await fetchApihzWeather(env, ip);
-  if (apihz) return apihz;
-  // 降级：Open-Meteo（定位 + 天气，全部带超时）
+// Open-Meteo 兜底（用上面拿到的经纬度）
+async function fetchGeoOpenMeteo(lat, lon, city) {
   try {
-    const geo = await fetchGeo(ip);
-    if (!geo) return { body: buildWeatherUnavailable(), kind: null };
-    const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + geo.lat + "&longitude=" + geo.lon
+    const wUrl = "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon
       + "&current=temperature_2m,weather_code,wind_speed_10m,is_day&timezone=auto";
-    const wRes = await fetchWithTimeout(wUrl, { headers: { "User-Agent": "PCL-Homepage" } }, 4000);
-    if (!wRes.ok) return { body: buildWeatherUnavailable(), kind: null };
+    const wRes = await fetchWithTimeout(wUrl, { headers: { "User-Agent": "PCL-Homepage" } }, 5000);
+    if (!wRes.ok) return null;
     const w = await wRes.json();
     const cw = (w && w.current) || {};
     const temp = Math.round(cw.temperature_2m);
     const wind = Math.round(cw.wind_speed_10m);
     const desc = WCODE[cw.weather_code] || "未知";
     const kind = classifyWeather(cw.weather_code, desc);
-    return { body: buildWeatherXaml(geo.city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。", kind), kind: kind };
+    return { body: buildWeatherXaml(city, temp, desc, wind, cw.is_day, "天气数据来自 Open-Meteo。", kind), kind: kind };
   } catch (e) {
-    console.error("[Weather] 获取天气失败：", e);
-    return { body: buildWeatherUnavailable(), kind: null };
+    console.error("[Weather] Open-Meteo 兜底失败：", e);
+    return null;
   }
+}
+
+async function fetchWeather(env, ip) {
+  const apihz = await fetchApihzByIp(env, ip);
+  if (apihz) return apihz;
+  const geo = await fetchGeo(ip);
+  if (geo) {
+    const om = await fetchGeoOpenMeteo(geo.lat, geo.lon, geo.city);
+    if (om) return om;
+  }
+  return { body: buildWeatherUnavailable(), kind: null };
 }
 
 export { fetchWeather, buildWeatherXaml, buildWeatherUnavailable, classifyWeather };
