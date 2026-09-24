@@ -57,12 +57,12 @@
                     <!-- __COUNTDOWN_BODY__ -->
                     <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="__DATE_MONTH__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text="__DATE_MONTH__" FontSize="52" FontWeight="Bold" Foreground="White" />
                             <TextBlock Text=" 月 " FontSize="15" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#D9FFFFFF" />
-                            <TextBlock Text="__DATE_DAY__" FontSize="60" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text="__DATE_DAY__" FontSize="52" FontWeight="Bold" Foreground="White" />
                             <TextBlock Text=" 日" FontSize="15" VerticalAlignment="Bottom" Margin="0,0,4,16" Foreground="#D9FFFFFF" />
                         </StackPanel>
-                        <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="12" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,10,0,0" />
+                        <TextBlock Text="星期__DATE_WEEKDAY__" HorizontalAlignment="Center" FontSize="13" FontWeight="Bold" Foreground="#FFFFFF" Margin="0,10,0,0" />
                     </StackPanel>
                     <!-- 每日一言（叠加在横幅底部，按 IP 下发） -->
                     <StackPanel VerticalAlignment="Bottom" Margin="20,0,16,12" HorizontalAlignment="Center">
@@ -70,7 +70,7 @@
                             <Border Width="3" Height="10" CornerRadius="1.5" Background="#FFFFFF" Margin="0,0,8,0" VerticalAlignment="Center" />
                             <TextBlock Text="每日一言" FontSize="11" FontWeight="Bold" Foreground="#D9FFFFFF" VerticalAlignment="Center" />
                         </StackPanel>
-                        <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="20" ToolTip="每天每人一句，同一天同一 IP 固定" />
+                        <TextBlock Text="__QUOTE__" FontSize="12" Foreground="#D9FFFFFF" TextWrapping="Wrap" TextAlignment="Center" HorizontalAlignment="Center" MaxWidth="540" LineHeight="22" ToolTip="每天每人一句，同一天同一 IP 固定" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -86,7 +86,7 @@
                                 <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/GoldBlock.png" />
                                 <TextBlock Text="幸运数字" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
                             </StackPanel>
-                            <TextBlock Text="__LUCKY_NUMBER__" FontSize="36" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
+                            <TextBlock Text="__LUCKY_NUMBER__" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" />
                         </StackPanel>
                     </Grid>
                 </Border>
