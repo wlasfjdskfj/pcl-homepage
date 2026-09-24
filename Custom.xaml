@@ -179,106 +179,6 @@
             <local:MyHint Theme="Blue" Margin="0,14,0,0" Text="内存优化会释放 PCL 占用内存，清理垃圾会删除临时文件，刷新可重新加载今日内容。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="今日运势" Margin="0,0,0,16" CanSwap="True" IsSwapped="False">
-        <StackPanel Margin="25,40,23,16">
-            <StackPanel.Triggers>
-                <EventTrigger RoutedEvent="StackPanel.Loaded">
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                             From="0" To="1" Duration="0:0:0.90"
-                                             BeginTime="0:0:0.80">
-                                <DoubleAnimation.EasingFunction>
-                                    <CubicEase EasingMode="EaseOut" />
-                                </DoubleAnimation.EasingFunction>
-                            </DoubleAnimation>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="(UIElement.Effect).(BlurEffect.Radius)"
-                                From="8" To="0" Duration="0:0:0.90" BeginTime="0:0:0.80" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </EventTrigger>
-            </StackPanel.Triggers>
-            <StackPanel.Effect>
-                <BlurEffect Radius="0" />
-            </StackPanel.Effect>
-            <TextBlock Text="今日得分" FontSize="11" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush3}" Margin="0,0,0,4" ToolTip="依据 IP 与当日日期计算，同一天同一 IP 分数固定。&#xA;评级：95+ SSR / 80+ SR / 60+ R / 40+ N" />
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="__SCORE__" FontSize="60" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-                <TextBlock Text="分" FontSize="15" VerticalAlignment="Bottom" Foreground="{DynamicResource ColorBrush3}" Margin="6,0,0,12" />
-            </StackPanel>
-            <!-- __SCORE_BAR__ -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="评级 " FontSize="12" Foreground="{DynamicResource ColorBrush3}" />
-                <TextBlock Text="__GRADE__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" />
-            </StackPanel>
-            <Grid Margin="0,0,0,12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <Border Grid.Column="0" CornerRadius="10" Padding="12,12" Margin="0,0,4,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <Grid Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
-                                <Ellipse Fill="#2E9E5B" />
-                                <Path Data="M382 732L160 510l-72 72 294 294 576-576-72-72z" Fill="White" Stretch="Uniform" Margin="4" />
-                            </Grid>
-                            <TextBlock Text="宜" FontSize="12" FontWeight="Bold" Foreground="#2E9E5B" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="__FORTUNE_GOOD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#2E9E5B" />
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="1" CornerRadius="10" Padding="12,12" Margin="6,0,0,0" Background="{DynamicResource ColorBrush7}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,4">
-                            <Grid Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center">
-                                <Ellipse Fill="#D9534F" />
-                                <Path Data="M712 256L512 456 312 256l-56 56 200 200-200 200 56 56 200-200 200 200 56-56-200-200 200-200z" Fill="White" Stretch="Uniform" Margin="4" />
-                            </Grid>
-                            <TextBlock Text="忌" FontSize="12" FontWeight="Bold" Foreground="#D9534F" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <TextBlock Text="__FORTUNE_BAD__" FontSize="15" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#D9534F" />
-                    </StackPanel>
-                </Border>
-            </Grid>
-            <local:MyHint Theme="Blue" Margin="0,0,0,8" Text="__COMMENT__" />
-            <local:MyHint Theme="Yellow" Text="小贴士：__FORTUNE_TIP__" />
-            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
-            <Border CornerRadius="10" Padding="16,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
-                <StackPanel Orientation="Horizontal">
-                    <local:MyImage Width="36" Height="36" Margin="0,0,12,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="今日种子" FontSize="11" Foreground="{DynamicResource ColorBrush3}" />
-                        <TextBlock Text="__SEED__" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" Margin="0,4,0,0" ToolTip="点击「更多」可从备选种子中挑选" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="__SEED_DESC__" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="1*" />
-                </Grid.ColumnDefinitions>
-                <local:MyIconTextButton Grid.Column="0" Margin="0,0,4,0" Height="38" Text="复制种子" ColorType="Highlight" LogoScale="0.9" Logo="M448 128h128v384h128l-192 192-192-192h128V128z M256 832h512v64H256z" EventType="复制文本" EventData="__SEED__" />
-                <local:MyIconTextButton Grid.Column="1" Margin="4,0,4,0" Height="38" Text="换一个" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
-                <local:MyIconTextButton Grid.Column="2" Margin="4,0,0,0" Height="38" Text="更多" LogoScale="0.9" Logo="M256 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M512 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z M768 384a128 128 0 1 1 0 256 128 128 0 0 1 0-256z" EventType="弹出窗口" EventData="__SEED_PICKER__" />
-            </Grid>
-            <Border Height="1" Margin="0,0,0,16"><Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,0"><GradientStop Color="#00000000" Offset="0" /><GradientStop Color="#33808080" Offset="0.5" /><GradientStop Color="#00000000" Offset="1" /></LinearGradientBrush></Border.Background></Border>
-            <Border CornerRadius="12" Height="150" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
-                <Grid Margin="18,0">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,16,0,0">
-                        <local:MyImage Width="16" Height="16" Margin="0,0,4,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/CommandBlock.png" />
-                        <TextBlock Text="本次挑战" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,16,0,0" Text="__CHALLENGE_DIFF__" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource ColorBrush3}" />
-                    <TextBlock Text="__CHALLENGE__" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrush1}" Margin="24,20" TextAlignment="Center" ToolTip="难度决定卡片配色；点「换一个挑战」刷新" />
-                </Grid>
-            </Border>
-            <local:MyIconTextButton HorizontalAlignment="Center" Height="40" Padding="24,0,24,0" Text="换一个挑战" ColorType="Highlight" LogoScale="0.9" Logo="M512 128a384 384 0 1 1 0 768 384 384 0 0 1 0-768z M512 192a320 320 0 1 0 0 640 320 320 0 0 0 0-640z M480 288h64v208l144 88-32 56-176-104V288z" EventType="刷新页面" EventData="-" />
-        </StackPanel>
-    </local:MyCard>
     <local:MyCard Title="更多" Margin="0,0,0,16" CanSwap="True" IsSwapped="True">
         <StackPanel Margin="25,40,23,16">
             <StackPanel.Triggers>
@@ -302,7 +202,7 @@
             <StackPanel.Effect>
                 <BlurEffect Radius="0" />
             </StackPanel.Effect>
-            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具 · 服务器推荐" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.json" />
+            <local:MyListItem Margin="-5,0,-5,8" Type="Clickable" Logo="pack://application:,,,/images/Blocks/RedstoneLampOn.png" Title="打开更多功能" Info="MC 知识 · 实用工具" EventType="打开帮助" EventData="https://www.mkejga.de5.net/panel.json" />
             <Grid Margin="0,4,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1*" />

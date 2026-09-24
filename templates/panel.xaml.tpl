@@ -266,32 +266,4 @@
             <local:MyHint Theme="Blue" Text="需要开启作弊或创造模式。复制后进游戏按 T，Ctrl+V 粘贴即可。" />
         </StackPanel>
     </local:MyCard>
-    <local:MyCard Title="服务器推荐" CanSwap="True" Margin="0,0,0,12">
-        <StackPanel Margin="25,40,23,16">
-            <local:MyHint Theme="Blue" Margin="0,0,0,12" Text="推荐服务器。复制下方地址，在游戏内「多人游戏 → 添加服务器」中粘贴即可。" />
-            <Border CornerRadius="10" Padding="18,16" Margin="0,0,0,12" Background="{DynamicResource ColorBrush7}">
-                <StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                        <local:MyImage Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" Source="pack://application:,,,/images/Blocks/Grass.png" />
-                        <TextBlock Text="推荐服务器地址" FontSize="11" Foreground="{DynamicResource ColorBrush3}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    <TextBlock Text="__SERVER_ADDR__" FontSize="22" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource ColorBrush1}" Margin="0,0,0,12" />
-                    <local:MyButton Height="38" Text="复制服务器地址" EventType="复制文本" EventData="__SERVER_ADDR__" />
-                </StackPanel>
-            </Border>
-            <StackPanel Orientation="Horizontal" Margin="2,0,0,8">
-                <Border Width="3" Height="11" CornerRadius="1.5" Background="{DynamicResource ColorBrush3}" Margin="0,0,8,0" VerticalAlignment="Center" />
-                <TextBlock Text="其他服务器" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource ColorBrush1}" VerticalAlignment="Center" />
-            </StackPanel>
-{{SERVER_ITEMS}}
-            <local:MyIconTextButton HorizontalAlignment="Center" Margin="0,8,0,0" Height="40" Padding="24,0,24,0" Text="推荐服务器" ColorType="Highlight" LogoScale="0.9" Logo="M128 256l384 256 384-256v512H128V256z M512 576L128 320V192h768v128z M128 128h768v64H128z">
-                <local:CustomEventService.Events>
-                    <local:CustomEventCollection>
-                        <local:CustomEvent Type="弹出窗口" Data="推荐服务器|请发送邮件到：&#xA;&#xA;__SERVER_EMAIL__&#xA;&#xA;邮件标题请注明「服务器推荐」。" />
-                    </local:CustomEventCollection>
-                </local:CustomEventService.Events>
-            </local:MyIconTextButton>
-            <local:MyHint Theme="Yellow" Margin="0,14,0,0" Text="想推荐自己的服务器？点上方按钮查看投稿邮箱。" />
-        </StackPanel>
-    </local:MyCard>
 </StackPanel>
