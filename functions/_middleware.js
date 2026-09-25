@@ -214,9 +214,9 @@ export async function onRequest(context) {
     try {
       const [quoteRaw, , efRaw, customCountdown, multiBannersRaw, singleBanner] = cfg;
 
-      const num = deterministicIndex(ip, today, "lucky_number", 99) + 1;
       const date = getBeijingDate();
       const today = date.dateStr;
+      const num = deterministicIndex(ip, today, "lucky_number", 99) + 1;
 
       // 欢迎语副标题（时段 + IP + 日期确定性，每天每时段自动换一句）
       const subPool = GREETING_SUBS[date.period] || GREETING_SUBS.morning;
