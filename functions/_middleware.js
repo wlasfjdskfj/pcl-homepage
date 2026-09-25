@@ -229,7 +229,7 @@ export async function onRequest(context) {
     try {
       const [quoteRaw, serverCfg, efRaw, customCountdown, multiBannersRaw, singleBanner] = cfg;
 
-      const num = Math.floor(Math.random() * 99) + 1;
+      const num = deterministicIndex(ip, today, "lucky_number", 99) + 1;
       const egg = pickRandom(EGGS);
       const date = getBeijingDate();
       const today = date.dateStr;
