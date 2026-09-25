@@ -135,7 +135,7 @@ function buildCountdownXaml(date, custom, extra) {
     if (Date.UTC(y, f.month - 1, f.day) < today) y += 1;
     events.push({ name: f.name, year: y, month: f.month, day: f.day });
   }
-  for (const y of [date.year, date.year + 1]) {
+  for (const y of [date.year - 1, date.year, date.year + 1]) {
     for (const f of LUNAR_FESTIVALS) {
       const s = lunarToSolar(y, f.lm, f.ld);
       if (s.y >= date.year && s.y <= date.year + 1) {
