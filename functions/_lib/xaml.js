@@ -8,44 +8,6 @@ function escapeXaml(str) {
     .replace(/>/g, "&gt;");
 }
 
-// 挑战卡已改为 PCL 主题纯色（generate.py 中 ColorBrush7 背景），不再注入渐变；
-// 保留函数返回空，避免旧占位符残留时出现彩色底。
-function buildChallengeBg() {
-  return '';
-}
-
-// 人品分数配色（SSR 金 / SR 绿 / R 蓝 / N 琥珀 / N-- 红），进度条、分数、评级统一用
-function scoreColor(score) {
-  if (score >= 95) return '#FFD34D';
-  if (score >= 80) return '#17DD62';
-  if (score >= 60) return '#4C8DFF';
-  if (score >= 40) return '#FFB020';
-  return '#FF5555';
-}
-
-// 人品分数条（10 格，单色克制：填充用主前景色，空格用卡片次级面，避免按等级堆砌高饱和色）
-function buildScoreBar(score) {
-  const blocks = 10;
-  const filled = Math.floor(score / 10);
-  let bar = '<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">';
-  for (let i = 0; i < blocks; i++) {
-    const bg = i >= filled ? '{DynamicResource ColorBrush7}' : '{DynamicResource ColorBrush1}';
-    bar += '<Border Width="24" Height="9" CornerRadius="4.5" Margin="1.5,0" Background="' + bg + '" />';
-  }
-  bar += '</StackPanel>';
-  return bar;
-}
-
-// 每日一题分类徽章（按分类配色，返回 PCL 可渲染的 XAML pill）
-const QUIZ_CAT_COLORS = {
-  "战斗": "#FF5555",
-  "生存": "#17DD62",
-  "红石": "#FF6B52",
-  "机制": "#4C8DFF",
-  "生物": "#A78BFA",
-  "版本": "#22D3EE",
-};
-
 // 每日一题分类徽章（横幅压在图片上，统一白色，不随分类用高饱和彩色）
 function quizAccent() {
   return '#FFFFFF';
@@ -56,12 +18,6 @@ function buildQuizTag(cat) {
   return '<Border CornerRadius="9" Padding="11,3,11,3" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#99000000">'
     + '<TextBlock Text="' + label + '" FontSize="11" FontWeight="Bold" Foreground="#FFFFFF" VerticalAlignment="Center"/>'
     + '</Border>';
-}
-
-// 每日一题整卡背景：分类色淡彩 SolidColorBrush（约 7% 透明度，浅/深主题都协调）
-function buildQuizBg(cat) {
-  const hex = quizAccent(cat);
-  return '<SolidColorBrush Color="#12' + hex.slice(1) + '"/>';
 }
 
 // 刷新按钮（兜底页复用）
@@ -130,4 +86,4 @@ function buildFallbackXaml(title, message, eta, reason) {
     '</StackPanel>';
 }
 
-export { escapeXaml, buildChallengeBg, buildScoreBar, scoreColor, buildFallbackXaml, buildQuizTag, buildQuizBg, quizAccent, QUIZ_CAT_COLORS };
+export { escapeXaml, buildFallbackXaml, buildQuizTag, quizAccent };
