@@ -129,19 +129,25 @@ function buildCountdownXaml(date, custom, extra) {
     }
   }
   const allF = (extra && extra.length) ? FESTIVALS.concat(extra) : FESTIVALS;
-  const events = allF.map((f) => ({ name: f.name, month: f.month, day: f.day }));
+  const events = [];
+  for (const f of allF) {
+    let y = date.year;
+    if (Date.UTC(y, f.month - 1, f.day) < today) y += 1;
+    events.push({ name: f.name, year: y, month: f.month, day: f.day });
+  }
   for (const y of [date.year, date.year + 1]) {
     for (const f of LUNAR_FESTIVALS) {
       const s = lunarToSolar(y, f.lm, f.ld);
-      if (s.y >= date.year && s.y <= date.year + 1) events.push({ name: f.name, month: s.m, day: s.d });
+      if (s.y >= date.year && s.y <= date.year + 1) {
+        events.push({ name: f.name, year: s.y, month: s.m, day: s.d });
+      }
     }
   }
   let best = null;
   for (const e of events) {
-    let y = date.year;
-    if (Date.UTC(y, e.month - 1, e.day) < today) y += 1;
-    const diff = Math.round((Date.UTC(y, e.month - 1, e.day) - today) / 86400000);
-    if (!best || diff < best.diff) best = { name: e.name, diff, month: e.month, day: e.day };
+    const diff = Math.round((Date.UTC(e.year, e.month - 1, e.day) - today) / 86400000);
+    if (diff < 0) continue;
+    if (!best || diff < best.diff) best = { name: e.name, diff };
   }
   if (!best) return "";
   const line = best.diff === 0
