@@ -1,0 +1,1 @@
+﻿doubao = "C:\Users\fahyh\AppData\Local\Doubao\Application\Doubao.exe" --launch_from=auto_run

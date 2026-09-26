@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>MFn233 简单主页 · 布局预览</title>
+<style>
+  body {
+    margin: 0; padding: 24px; background: #e8dcdc;
+    font-family: "MiSans","Microsoft YaHei UI","Segoe UI",sans-serif;
+    color: #333;
+  }
+  .hint { max-width: 680px; margin: 0 auto 16px; font-size: 12px; color: #888; }
+  .col { max-width: 680px; margin: 0 auto; }
+  .card {
+    background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  }
+  .card-title { font-size: 13px; color: #b08a8a; margin-bottom: 12px; font-weight: 600; }
+  .welcome-title { text-align: center; font-size: 20px; color: #444; margin: 14px 0 18px; }
+  /* 日历 */
+  .cal { width: 240px; margin: 0 auto 16px; border: 1px solid #eee; border-radius: 8px; overflow: hidden; }
+  .cal-head { background: #faf0f2; color: #c2185b; font-size: 12px; text-align: center; padding: 6px; font-weight: 600; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; padding: 6px; }
+  .cal-grid span { text-align: center; font-size: 11px; color: #999; padding: 3px 0; }
+  .cal-grid span.hl { background: #e91e63; color: #fff; border-radius: 4px; }
+  .cave { text-align: center; font-size: 12px; color: #e91e63; margin: 4px 20px 8px; }
+  /* 双按钮 */
+  .two-btns { display: flex; gap: 10px; margin: 4px 0 12px; }
+  .btn {
+    flex: 1; background: #fce4ec; color: #c2185b; border: none; border-radius: 8px;
+    padding: 9px 0; font-size: 13px; text-align: center; font-weight: 600;
+  }
+  /* 列表项 */
+  .item { display: flex; align-items: center; padding: 10px 4px; border-top: 1px solid #f3f3f3; }
+  .sq { width: 26px; height: 26px; border-radius: 6px; margin-right: 12px; flex-shrink: 0;
+        background: linear-gradient(135deg,#7cb342,#558b2f); }
+  .sq.gold { background: linear-gradient(135deg,#ffd54f,#f9a825); }
+  .sq.cmd { background: linear-gradient(135deg,#546e7a,#37474f); }
+  .item .t { font-size: 14px; font-weight: 600; }
+  .item .d { font-size: 11px; color: #999; margin-top: 2px; }
+  /* 分区线 */
+  .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0 14px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #ddd; }
+  .divider span { font-size: 13px; color: #aaa; }
+  /* 折叠卡（收起态） */
+  .fold {
+    background: #fff; border-radius: 12px; padding: 14px 20px; margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06); display: flex; justify-content: space-between; align-items: center;
+  }
+  .fold .l { font-size: 13px; color: #b08a8a; font-weight: 600; }
+  .fold .arrow { color: #ccc; font-size: 12px; }
+  .note { max-width:680px; margin:18px auto 0; font-size:12px; color:#999; line-height:1.7; }
+</style>
+</head>
+<body>
+  <div class="hint">↑ 这是 MFn233「简单主页」在 PCL 浅色主题下的样子（按它源码还原的布局预览，非真实渲染）</div>
+  <div class="col">
+
+    <div class="card">
+      <div class="card-title">欢迎</div>
+      <div class="welcome-title">欢迎使用 Simple Mainpage!</div>
+      <div class="cal">
+        <div class="cal-head">2026年9月</div>
+        <div class="cal-grid">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+          <span>21</span><span>22</span><span>23</span><span>24</span><span class="hl">25</span><span>26</span><span>27</span>
+        </div>
+      </div>
+      <div class="cave">你知道吗？下界石英其实和钻石一样稀有。</div>
+    </div>
+
+    <div class="card">
+      <div class="two-btns">
+        <div class="btn">关于本页</div>
+        <div class="btn">刷新主页</div>
+      </div>
+      <div class="item"><div class="sq gold"></div><div><div class="t">今日人品</div><div class="d">试试手气！</div></div></div>
+      <div class="item"><div class="sq"></div><div><div class="t">启动基岩版</div><div class="d">以 URL Scheme 启动 MC 基岩版</div></div></div>
+      <div class="item"><div class="sq cmd"></div><div><div class="t">网页捷径</div><div class="d">打开网页捷径页面</div></div></div>
+    </div>
+
+    <div class="divider"><span>工 具</span></div>
+
+    <div class="fold"><div class="l">启动器工具</div><div class="arrow">▼</div></div>
+    <div class="fold"><div class="l">下载器</div><div class="arrow">▼</div></div>
+
+    <div class="divider"><span>其 它</span></div>
+
+    <div class="fold"><div class="l">其它页面</div><div class="arrow">▼</div></div>
+    <div class="fold"><div class="l">关于</div><div class="arrow">▼</div></div>
+
+  </div>
+  <div class="note">
+    它的全部内容就这些——一屏装完。<br>
+    特点：白卡片 + 灰分区线 + 大片留白，下面三张工具/下载器/关于卡默认是收起的（点一下才展开），所以首屏特别干净。<br>
+    你的主页功能比它多（天气/运势/种子/挑战），但"留白 + 折叠次要卡"这两点是一样的思路。
+  </div>
+</body>
+</html>
